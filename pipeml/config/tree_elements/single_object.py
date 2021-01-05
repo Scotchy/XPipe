@@ -5,11 +5,7 @@ from .node import Node
 __all__ = ["SingleObject"]
 
 class SingleObject(Node):
-    """ An object 
-    """
-
-    def __init__(self, name, config_dict):
-        """Allow the instantiation of an object defined in a yaml configuration file.
+    """Allow the instantiation of an object defined in a yaml configuration file.
 
         Args:
             name (str): Name of the object
@@ -18,7 +14,9 @@ class SingleObject(Node):
                 'obj:class_name': {'param1': value, ...},
                 'module': 'a.b.c'
             }
-        """
+    """
+
+    def __init__(self, name, config_dict):
         super(SingleObject, self).__init__(name, config_dict)
 
     def _check_valid(self, name, config_dict):
