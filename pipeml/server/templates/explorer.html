@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %} Index {% endblock %}
+
+{% block stylesheets %}
+<link  rel="stylesheet" type="text/css" href="/static/css/components/sidebar.css" />
+{% endblock %}
+
+{% block body %}
+
+<div class="d-flex flex-nowrap">
+    {% include "components/sidebar.html" %}
+
+    <main role="main" class="m-2 flex-grow-1">
+        {% include "components/experiments_explorer.html" %}
+    </main>
+
+</div>
+
+<script>    
+
+</script>
+
+{{ script | safe }}
+{{ plot | safe }}
+{% endblock %}

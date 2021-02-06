@@ -4,9 +4,11 @@ __pycache__
 build
 *.egg-info
 dist
-doc
 make.bat
 .empty
 template.yaml
 template2.yaml
 test.py
+nohup.out
+.vscode
+new_exp.py

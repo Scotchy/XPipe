@@ -1,6 +1,6 @@
 
 class Node():
-
+    
     def __init__(self, name, config_dict):
         self.name = name 
         self.config_dict = config_dict
