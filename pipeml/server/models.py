@@ -2,17 +2,18 @@ import mongoengine
 from mongoengine import Document, DictField, StringField, IntField, FloatField, ListField, EmbeddedDocument, EmbeddedDocumentField, EmbeddedDocumentListField, ReferenceField
 import re
 
-class TimeSerie(EmbeddedDocument):
+class TimeSerie(Document):
     name = StringField()
     # x = ListField(FloatField())
     y = ListField(FloatField())
-    timestamp = ListField(IntField())
+    # timestamp = ListField(IntField())
 
 class Experiment(Document): 
     name = StringField()
     duration = IntField()
     configuration = DictField()
-    timeseries = EmbeddedDocumentListField("TimeSerie")
+    timeseries = ListField(ReferenceField("TimeSerie"))
+    # timeseries = EmbeddedDocumentListField("TimeSerie")
     parent_folder = ReferenceField("Folder")
     
     @staticmethod
@@ -23,11 +24,14 @@ class Experiment(Document):
     
     @staticmethod
     def new(folder, name):
-        exp = Experiment()
-        exp.name = name
-        exp.parent_folder = Folder.get_folder(folder)
-        exp.save()
-        return exp
+        if (Folder.exists(folder)):
+            exp = Experiment()
+            exp.name = name
+            exp.parent_folder = Folder.get_folder(folder)
+            exp.save()
+            return exp
+        else:
+            raise ValueError("Folder does not exist")
 
     @staticmethod
     def get(id):
@@ -46,10 +50,12 @@ class Experiment(Document):
         if timeserie is not None:
             timeserie.update(push__y=value)
         else:
+            print("new")
             timeserie = TimeSerie()
             timeserie.name = name
             timeserie.y = [value]
-            self.update(push__timeseries=timeserie)
+            timeserie.save()
+            self.update(push__timeseries=timeserie.pk)
     
     def get_param(self, param):
         """Return the parameter value of the experiment specified in 'param'.

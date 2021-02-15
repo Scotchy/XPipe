@@ -39,10 +39,10 @@ def run(host, port):
             , Dumper=yaml.Dumper
         )
         metric = exp.get_timeserie("test")
-        metric = [m.y for m in metric]
-        x = [i for i in range(len(metric))]
-        p = figure(plot_width=400, plot_height=400, title="Test")
-        p.line(x, metric)
+        y = metric.y
+        x = [i for i in range(len(y))]
+        p = figure(plot_width=400, plot_height=400, title=metric.name)
+        p.line(x, y)
         s, p = components(p)
 
         return render_template(
@@ -100,8 +100,8 @@ def run(host, port):
     def rename_folder():
         pass
 
-    @app.route("/api/folder/remove", methods=["POST"])
-    def remove_folder():
+    @app.route("/api/folder/delete", methods=["POST"])
+    def delete_folder():
         pass
 
     @app.route("/api/folder/list", methods=["POST"])
@@ -140,25 +140,36 @@ def run(host, port):
 
     @app.route("/api/run/new", methods=["GET", "POST"])
     def new_run():
-        data = request.json
-        name = data["name"]
-        folder = data["folder"]
-        exp = Experiment.new(folder, name)
-        return APISuccess({"id": str(exp.pk)}).json()
+        try:
+            data = request.json
+            name = data["name"]
+            folder = data["folder"]
+            exp = Experiment.new(folder, name)
+            return APISuccess({"id": str(exp.pk)}).json()
+        except Exception as e:
+            return APIError(str(e)).json()
 
-    @app.route("/api/run/remove", methods=["GET", "POST"])
-    def remove_run():
+    @app.route("/api/run/delete", methods=["GET", "POST"])
+    def delete_run():
         data = request.json
+        try:
+            Experiment.get(data["id"]).delete()
+            return APISuccess().json()
+        except Exception as e:
+            return APIError(str(e)).json()
 
     @app.route("/api/run/get", methods=["GET", "POST"])
     def get_run():
         data = request.json
-        exp = Experiment.get(data.id).to_mongo()
+        try:
+            exp = Experiment.get(data["id"]).to_mongo()
 
-        return APISuccess({
-            "name": exp["name"],
-            "configuration": exp["configuration"]
-        }).json()
+            return APISuccess({
+                "name": exp["name"],
+                "configuration": exp["configuration"]
+            }).json()
+        except Exception as e:
+            return APIError(str(e)).json()
 
     @app.route("/api/run/log_param", methods=["GET", "POST"])
     def log_param():
@@ -176,11 +187,14 @@ def run(host, port):
 
     @app.route("/api/run/log_metric", methods=["GET", "POST"])
     def log_metric():
-        data = request.json
-        exp_id = data["id"]
-        exp = Experiment.get(exp_id)
-        name, value = data["metric_name"], data["metric_value"]
-        exp.log_metric(name, value)
-        return APISuccess().json()
+        try:
+            data = request.json
+            exp_id = data["id"]
+            exp = Experiment.get(exp_id)
+            name, value = data["metric_name"], data["metric_value"]
+            exp.log_metric(name, value)
+            return APISuccess().json()
+        except Exception as e:
+            return APIError(str(e)).json()
         
     app.run(debug=True)

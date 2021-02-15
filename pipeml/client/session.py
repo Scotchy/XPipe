@@ -22,23 +22,53 @@ class Session():
         url = self.api_calls[func_name]
         url = self.get_url(url)
         if file is None:
-            return requests.post(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+            return requests.post(url, data=json.dumps(data), headers={'Content-Type': 'application/json'}).json()
 
         with open(file, "r") as f:
             file = { 
                 "file": (basename(file), f, "application/octet-stream"), 
                 "json": ("data", json.dumps(data), "application/json")
             }
-            return requests.post(url, files=file)
+            return requests.post(url, files=file).json()
             
     def _check_connection(self):
         try:
-            return self.api_call("check").json()["success"] == True
+            return self.api_call("check")["success"] == True
         except:
             return False
 
+    # Handle runs
     def start_run(self, path, name):
         return Experiment(self, path=path, name=name)
 
-    def get_experiment(self, id):
-        return Experiment(self, id=id)
+    def get_run(self, id_exp):
+        return Experiment(self, id_exp=id_exp)
+    
+    def delete_run(self, id_exp):
+        exp = self.get_run(id_exp)
+        if exp is not None:
+            return exp.delete()
+        return False
+    
+    # Handle folders
+    def new_folder(self, path):
+        return self.api_call(
+            "new_folder", 
+            data={
+                "path": path
+            })
+    
+    def delete_folder(self, path):
+        return self.api_call(
+            "delete_folder",
+            data={
+                "path": path
+            })
+    
+    def rename_folder(self, path, new_name):
+        return self.api_call(
+            "rename_folder", 
+            data={
+                "path": path,
+                "new_name": new_name
+            })

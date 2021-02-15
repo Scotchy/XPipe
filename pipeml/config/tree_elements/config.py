@@ -48,16 +48,16 @@ class Config(Node):
             )
         elif is_objects_list(sub_config):
             sub_configs = []
-            for sc in sub_config:
-                sub_name, sub_sc = list(sc.items())[0]
-                sub_configs.append(Config(sub_sc, sub_name))
+            # for sc in sub_config:
+            #     sub_name, sub_sc = list(sc.items())[0]
+            #     sub_configs.append(Config(sub_sc, sub_name))
                 
             setattr(
                 self, 
                 name, 
                 ObjectsList(
-                    sub_name, 
-                    sub_configs
+                    name, 
+                    sub_config
                 )
             )
         elif isinstance(sub_config, dict):
@@ -70,14 +70,13 @@ class Config(Node):
     def __str__(self):
         raise NotImplementedError()
 
-    @staticmethod
-    def from_yaml(config_file : str, template=None):
-        """Load a configuration file and return an ObjectLoader which can instantiate the wanted objects.
+def load_config(config_file : str, template=None):
+    """Load a configuration file and return an ObjectLoader which can instantiate the wanted objects.
 
-        Args:
-            config_file (str): The path of the yaml config file
-            template (Template): A template containing information of how to load objects defined in the configuration file
-        """
-        with open(config_file, "r") as stream:
-            yaml_dict = yaml.load(stream, Loader=Loader)
-        return Config(yaml_dict)
+    Args:
+        config_file (str): The path of the yaml config file
+        template (Template): A template containing information of how to load objects defined in the configuration file
+    """
+    with open(config_file, "r") as stream:
+        yaml_dict = yaml.load(stream, Loader=Loader)
+    return Config(yaml_dict)

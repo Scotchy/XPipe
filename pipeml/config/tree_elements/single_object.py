@@ -11,8 +11,7 @@ class SingleObject(Node):
             name (str): Name of the object
             config_dict (dict): A dictionary defining the object (class name and parameters). Its format is
             {
-                'obj:class_name': {'param1': value, ...},
-                'module': 'a.b.c'
+                'obj:module.class_name': {'param1': value, ...},
             }
     """
 
@@ -24,9 +23,10 @@ class SingleObject(Node):
 
     def _construct(self, name, config_dict):
         self.name = name
-        self.module = config_dict.get("module", None)
         self.class_name, self.params = list(config_dict.items())[0]
         self.class_name = self.class_name.replace("obj:", "")
+        split_index = len(self.class_name) - self.class_name[::-1].index(".") # Get index of the last point
+        self.module, self.class_name = self.class_name[:split_index-1], self.class_name[split_index:]
         self.params = Parameters(self.class_name, self.params)
 
     def __call__(self, **args):

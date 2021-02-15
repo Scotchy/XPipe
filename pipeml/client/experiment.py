@@ -2,16 +2,16 @@ from os.path import basename
 
 class Experiment():
 
-    def __init__(self, session, id=None, path=None, name=None):
+    def __init__(self, session, id_exp=None, path=None, name=None):
         self.session = session
-        
-        if id is None and (path is None or name is None):
-            raise ValueError("Please specify one of 'id' or 'name' and 'path' for this experiment.")
 
-        if id is None:
+        if id_exp is None and (path is None or name is None):
+            raise ValueError("Please specify one of 'id_exp' or 'name' and 'path' for this experiment.")
+
+        if id_exp is None:
             self.id = self.create(path, name)
         else:
-            self.load(id)
+            self.load(id_exp)
         
     def create(self, path, name):
         r = self.session.api_call(
@@ -19,27 +19,38 @@ class Experiment():
             data={
                 "folder": path,
                 "name": name
-            }).json()
+            })
 
         if not r["success"]:
-            raise ValueError("Can't create new experiment")
+            raise ValueError(f"Can't create new run ({r['message']})")
         return r["id"]
+
+    def delete(self):
+        r = self.session.api_call(
+            "delete_run",
+            data={
+                "id": self.id
+            })
+        
+        if not r["success"]:
+            raise ValueError(f"Can't delete run {id} ({r['message']})")
     
-    def load(self, id):
+    def load(self, id_exp):
         r = self.session.api_call(
             "get_run",
             data={
-                "id": id
+                "id": id_exp
             })
-        if not r["success"]:
-            raise ValueError(f"Can't load experiment {id}")
 
-        self.id = id
+        if not r["success"]:
+            raise ValueError(f"Can't load experiment {id_exp} ({r['message']})")
+
+        self.id = id_exp
         self.name = r["name"]
-        
+    
     def log_param_file(self, file):
         
-        self.session.api_call(
+        return self.session.api_call(
             "log_param",
             data={
                 "id": self.id
@@ -55,6 +66,3 @@ class Experiment():
                 "metric_name": metric_name,
                 "metric_value": metric_value
             })
-
-    def close(self):
-        pass

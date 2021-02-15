@@ -33,4 +33,7 @@ class TestConfiguration(TestCase):
         )
 
     def test_instantiate_list_objects(self):
-        pass
+        objects_list = self.conf.data.transforms()
+        self.assertListEqual(list(objects_list[0]), [1, 2])
+        self.assertListEqual(list(objects_list[1]), [2, 3])
+        self.assertEqual(len(objects_list), 4)

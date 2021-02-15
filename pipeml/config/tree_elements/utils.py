@@ -14,7 +14,6 @@ def is_object(config_dict):
     if not isinstance(config_dict, dict):
         return False
     config_dict_cp = config_dict.copy()
-    config_dict_cp.pop("module", None)
 
     return len(config_dict_cp) == 1 and list(config_dict_cp.items())[0][0][0:4] == "obj:"
     

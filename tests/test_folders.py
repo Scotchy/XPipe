@@ -1,9 +1,12 @@
 from unittest import TestCase
 
+from pipeml.client import connect
+
 class TestFolders(TestCase):
 
     def setUp(self):
-        pass
+        self.sess = connect("http://localhost:5000")
+        self.folder = "unittest_rg56b46rg6rtb6554"
 
     def test_new_folder(self):
         pass

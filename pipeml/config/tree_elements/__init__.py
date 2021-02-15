@@ -1,7 +1,7 @@
 from .objects_list import ObjectsList
 from .single_object import SingleObject
 from .variable import Variable
-from .config import Config
+from .config import Config, load_config
 from .parameters import Parameters
 from .node import Node
 

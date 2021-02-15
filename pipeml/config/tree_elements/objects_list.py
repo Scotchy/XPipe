@@ -21,7 +21,10 @@ class ObjectsList(Node):
 
     def _construct(self, name, config_dict):
         self.name = name
-        self.objects = [SingleObject(name, config_dict) for config_dict in config_dict]
+        self.objects = [SingleObject(name, obj_dict) for obj_dict in config_dict]
         
+    def __getitem__(self, i):
+        return self.objects[i]
+
     def __call__(self, **args):
         return [obj(**args) for obj in self.objects]
