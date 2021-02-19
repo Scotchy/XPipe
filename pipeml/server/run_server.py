@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request
+from flask_cors import CORS
+
 from bokeh.embed import components
 from bokeh.plotting import figure 
 import numpy as np
@@ -22,7 +24,8 @@ def run(host, port):
     dir_path = dirname(realpath(__file__))
     print(dir_path)
     app = Flask(__name__, static_url_path="/static", template_folder=join(dir_path, "templates"), static_folder=join(dir_path, "static"))
-
+    CORS(app)
+    
     @app.route("/index")
     @app.route("/")
     def index():
