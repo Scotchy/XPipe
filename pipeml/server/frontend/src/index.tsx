@@ -4,7 +4,7 @@ import { HeaderMenu } from './components/HeaderMenu';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { Link, BrowserRouter, Route } from "react-router-dom";
-import { Index, Folders } from "./pages";
+import { Index, Explorer, ExperimentPage } from "./pages";
 import "bootstrap/dist/js/bootstrap";
 
 ReactDOM.render(
@@ -12,7 +12,8 @@ ReactDOM.render(
 		<BrowserRouter>
 			<HeaderMenu />
 			<Route exact path="/" component={Index} />
-			<Route path="/explorer" component={Folders} />
+			<Route path="/explorer" component={Explorer} />
+			<Route path="/experiment" component={ExperimentPage} />
 		</BrowserRouter>
 		
 	</React.StrictMode>,

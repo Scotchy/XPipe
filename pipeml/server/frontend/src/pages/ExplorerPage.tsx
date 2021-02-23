@@ -1,0 +1,52 @@
+
+import React from "react";
+import { PageWithSideMenu, ListFolders } from "../components";
+import { ListExperiments } from "../components/ListExperiments";
+
+interface ExplorerProps {
+
+}
+interface ExplorerState {
+    current_folder: string
+} 
+export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
+
+    constructor(props : ExplorerProps) {
+        super(props);
+        this.state = {
+            current_folder: this.currentFolder()
+        }
+    }
+
+    componentDidMount() {
+        window.addEventListener("popstate", () => this.setState({current_folder: this.currentFolder()}));
+    }
+
+    currentFolder() : string {
+        let route = window.location.pathname;
+        let splitted_route = route.split("/");
+        splitted_route.shift();
+        splitted_route.shift();
+        splitted_route = splitted_route.filter(e=>e!="");
+        if (splitted_route.length > 0) {
+            return "/" + splitted_route.join("/");
+        }
+        return "";
+    }
+
+    handleOnOpenFolder = (folder : string) => {
+        window.history.pushState(null, "", "/explorer"+folder);
+        this.setState({current_folder: folder});
+    }
+    
+    render() {
+        return (
+            <PageWithSideMenu sidemenu={
+                <ListFolders onOpenFolder={this.handleOnOpenFolder} folder={this.state.current_folder} />
+            }>
+                <ListExperiments folder={this.state.current_folder}/>
+            </PageWithSideMenu>
+        );
+    }
+    
+}

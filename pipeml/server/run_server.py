@@ -101,11 +101,20 @@ def run(host, port):
 
     @app.route("/api/folder/rename", methods=["POST"])
     def rename_folder():
-        pass
+        try:
+            data = request.json
+            folder = Folder.get_folder(data["folder"])
+            folder.rename(data["new_name"])
+            return APISuccess().json()
+        except Exception as e:
+            return APIError(f"Can't rename folder ({str(e)})").json()
 
     @app.route("/api/folder/delete", methods=["POST"])
     def delete_folder():
-        pass
+        data = request.json
+        folder = Folder.get_folder(data["folder"]).delete()
+        return APISuccess().json()
+
 
     @app.route("/api/folder/list", methods=["POST"])
     def list_folders():
@@ -201,3 +210,5 @@ def run(host, port):
             return APIError(str(e)).json()
         
     app.run(debug=True)
+
+run()

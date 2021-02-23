@@ -33,6 +33,9 @@ class Experiment(Document):
         else:
             raise ValueError("Folder does not exist")
 
+    def rename(new_name):
+        this.update(set__name=new_name)
+
     @staticmethod
     def get(id):
         return Experiment.objects.get(id=id)
@@ -92,6 +95,20 @@ class Folder(Document):
     children_folders = ListField(ReferenceField("Folder"))
     parent_folder = ReferenceField("Folder")
     description = StringField()
+
+    def rename(self, new_name):
+        if not new_name in [f.name for f in self.parent_folder.children_folders]:
+            self.update(set__name=new_name)
+        else:
+            raise ValueError("Folder already exists")
+    
+    def delete(self):
+        for f in self.children_folders:
+            if hasattr(f, "delete"):
+                Experiment.objects(parent_dir=f).delete()
+                f.delete()
+        self.parent_folder.update(pull__children_folders=self.pk)
+        super(Folder, self).delete()
 
     @staticmethod
     def get_folder(path):
