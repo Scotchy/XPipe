@@ -1,7 +1,9 @@
 import { Index } from "./IndexPage";
-import { Folders } from "./FoldersPage";
+import { Explorer } from "./ExplorerPage";
+import { ExperimentPage } from "./ExperimentPage";
 
 export {
     Index,
-    Folders
+    Explorer,
+    ExperimentPage
 };

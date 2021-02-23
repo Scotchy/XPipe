@@ -1,11 +1,10 @@
-import { propTypes } from "react-bootstrap/esm/Image";
 import React from "react";
-import { NewFolderWindow } from "./NewFolderWindow";
 
 interface SideMenuProps {
-
+    title: string,
+    width: string
 }
-export class SideMenu extends React.Component {
+export class SideMenu extends React.Component<SideMenuProps> {
     
     constructor(props: SideMenuProps) {
         super(props)
@@ -14,20 +13,11 @@ export class SideMenu extends React.Component {
     render() {
         return (
             <div>
-                <div style={{width: "200px"}}></div>
-                <div className="sidebar-sticky bg-light border-right" style={{position: "fixed", height: "100%", width: "200px"}}>
-                    <div className="sidebar-heading p-2"><h3>Folders</h3></div>
-                    
-                    <button type="button" className="btn btn-primary m-2" data-toggle="modal" data-target="#newFolderWindow">
-                        New folder
-                    </button>
-
-                    <div className="list-group list-group-flush" id="explorer">
-                        {/* Display folders here */}
-                        {this.props.children}
-                    </div>
+                <div style={{width: this.props.width}}></div>
+                <div className="sidebar-sticky bg-light border-right" style={{position: "fixed", height: "100%", width: this.props.width}}>
+                    <div className="sidebar-heading p-2"><h3>{this.props.title}</h3></div>
+                    { this.props.children }
                 </div>
-                <NewFolderWindow onCreateFolder={() => alert("ok")} />
             </div>
         );
     }
