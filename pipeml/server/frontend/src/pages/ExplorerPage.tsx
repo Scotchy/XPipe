@@ -2,6 +2,7 @@
 import React from "react";
 import { PageWithSideMenu, ListFolders } from "../components";
 import { ListExperiments } from "../components/ListExperiments";
+import { ParamsMetricsSelector } from "../components";
 
 interface ExplorerProps {
 
@@ -38,12 +39,17 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         window.history.pushState(null, "", "/explorer"+folder);
         this.setState({current_folder: folder});
     }
+
+    handleOnUpdateParams = (selectedParams : Array<string>) => {
+        alert(selectedParams);
+    }
     
     render() {
         return (
             <PageWithSideMenu sidemenu={
                 <ListFolders onOpenFolder={this.handleOnOpenFolder} folder={this.state.current_folder} />
             }>
+                <ParamsMetricsSelector onUpdateParams={this.handleOnUpdateParams} folder={this.state.current_folder} />
                 <ListExperiments folder={this.state.current_folder}/>
             </PageWithSideMenu>
         );

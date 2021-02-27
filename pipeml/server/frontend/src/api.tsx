@@ -47,6 +47,20 @@ interface ListExperimentsResponse extends APIResponse {
     experiments: Array<Experiment>
 }
 
+interface GetParamsQuery extends APIQuery {
+    folder : string
+}
+interface GetParamsResponse extends APIResponse {
+    params : any
+}
+
+interface GetMetricsQuery extends APIQuery {
+    folder : string
+}
+interface GetMetricsResponse extends APIResponse {
+    metrics : Array<string>
+}
+
 class APIInstance {
     api : AxiosInstance;
 
@@ -107,11 +121,22 @@ class APIInstance {
         };
         return await this.apiCall<ListExperimentsQuery, ListExperimentsResponse>(url, query);
     }
-}
 
-export interface APIListFoldersResponse {
-    name: string,
-    description: string
+    async getParams(folder : string) {
+        let url = "/api/folder/params";
+        let query = {
+            folder: folder
+        };
+        return await this.apiCall<GetParamsQuery, GetParamsResponse>(url, query);
+    }
+
+    async getMetrics(folder : string) {
+        let url = "/api/folder/metrics";
+        let query = {
+            folder: folder
+        };
+        return await this.apiCall<GetMetricsQuery, GetMetricsResponse>(url, query);
+    }
 }
 
 export const API = new APIInstance();

@@ -92,11 +92,13 @@ def run(host, port):
         folder = Folder.get_folder(data["folder"])
         exps = Experiment.objects(parent_folder=folder.pk)
         confs = [exp.to_mongo()["configuration"] for exp in exps]
+        if len(confs) == 0:
+            return APISuccess({"params": {}}).json()
         conf = confs[0]
         for c in confs[1:]:
             conf = update(conf, c)
         return APISuccess({
-            "conf": conf
+            "params": conf
         }).json()
 
     @app.route("/api/folder/rename", methods=["POST"])

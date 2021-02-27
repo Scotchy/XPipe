@@ -105,8 +105,9 @@ class Folder(Document):
     def delete(self):
         for f in self.children_folders:
             if hasattr(f, "delete"):
-                Experiment.objects(parent_dir=f).delete()
+                Experiment.objects(parent_folder=f.pk).delete()
                 f.delete()
+        Experiment.objects(parent_folder=self.pk).delete()
         self.parent_folder.update(pull__children_folders=self.pk)
         super(Folder, self).delete()
 

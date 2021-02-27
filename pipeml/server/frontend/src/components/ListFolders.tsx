@@ -2,7 +2,6 @@ import React from "react";
 import { API } from "../api";
 import { JsonObjectExpression } from "typescript";
 import { BrowserRouter, Link } from "react-router-dom";
-import { APIListFoldersResponse } from "../api";
 import { SideMenu } from "./SideMenu";
 import { NewFolderWindow } from "./NewFolderWindow";
 import { AxiosResponse } from "axios";
