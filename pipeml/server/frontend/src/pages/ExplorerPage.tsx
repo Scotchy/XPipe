@@ -8,14 +8,16 @@ interface ExplorerProps {
 
 }
 interface ExplorerState {
-    current_folder: string
+    current_folder: string,
+    selectedParams: Array<string>
 } 
 export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
 
     constructor(props : ExplorerProps) {
         super(props);
         this.state = {
-            current_folder: this.currentFolder()
+            current_folder: this.currentFolder(),
+            selectedParams: []
         }
     }
 
@@ -41,7 +43,9 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     }
 
     handleOnUpdateParams = (selectedParams : Array<string>) => {
-        alert(selectedParams);
+        this.setState({
+            selectedParams: selectedParams
+        })
     }
     
     render() {
@@ -50,7 +54,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
                 <ListFolders onOpenFolder={this.handleOnOpenFolder} folder={this.state.current_folder} />
             }>
                 <ParamsMetricsSelector onUpdateParams={this.handleOnUpdateParams} folder={this.state.current_folder} />
-                <ListExperiments folder={this.state.current_folder}/>
+                <ListExperiments folder={this.state.current_folder} params={this.state.selectedParams} />
             </PageWithSideMenu>
         );
     }

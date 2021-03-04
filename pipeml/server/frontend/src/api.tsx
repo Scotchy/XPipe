@@ -61,6 +61,36 @@ interface GetMetricsResponse extends APIResponse {
     metrics : Array<string>
 }
 
+interface AddLabelQuery extends APIQuery {
+    id : string
+}
+interface AddLabelResponse extends APIResponse {
+
+}
+
+interface DeleteLabelQuery extends APIQuery {
+    id : string,
+    label: string
+}
+interface DeleteLabelResponse extends APIResponse {
+
+}
+
+interface GetExpNotesQuery extends APIQuery {
+    id : string
+}
+interface GetExpNotesResponse extends APIResponse {
+    notes : string
+}
+
+interface SetExpNotesQuery extends APIQuery {
+    id : string,
+    notes : string
+}
+interface SetExpNotesResponse extends APIResponse {
+
+}
+
 class APIInstance {
     api : AxiosInstance;
 
@@ -112,11 +142,11 @@ class APIInstance {
         return await this.apiCall<DeleteFolderQuery, DeleteFolderResponse>(url, query);
     }
 
-    async listExperiments(folder: string) {
+    async listExperiments(folder: string, params: Array<string> = []) {
         let url = "/api/run/list";
         let query = {
             folder: folder,
-            params: ["training.batch_size"],
+            params: params,
             metrics: []
         };
         return await this.apiCall<ListExperimentsQuery, ListExperimentsResponse>(url, query);
@@ -137,6 +167,42 @@ class APIInstance {
         };
         return await this.apiCall<GetMetricsQuery, GetMetricsResponse>(url, query);
     }
+
+    async addLabel(exp_id : string, label : string) {
+        let url = "/api/run/label/add";
+        let query = {
+            "id": exp_id
+        };
+        return await this.apiCall<AddLabelQuery, AddLabelResponse>(url, query);
+    }
+
+    async deleteLabel(exp_id : string, label : string) {
+        let url = "/api/run/label/delete";
+        let query = {
+            "id": exp_id,
+            "label": label
+        };
+        return await this.apiCall<DeleteLabelQuery, DeleteLabelResponse>(url, query);
+    }
+
+    async getExpNotes(exp_id : string) {
+        let url = "/api/run/notes/get";
+        let query = {
+            "id": exp_id
+        };
+        return await this.apiCall<GetExpNotesQuery, GetExpNotesResponse>(url, query);
+    }  
+
+    async setExpNotes(exp_id : string, notes : string) {
+        let url = "/api/run/notes/set";
+        let query = {
+            "id": exp_id,
+            "notes": notes
+        };
+        return await this.apiCall<SetExpNotesQuery, SetExpNotesResponse>(url, query);
+    }
+
+
 }
 
 export const API = new APIInstance();

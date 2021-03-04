@@ -15,6 +15,8 @@ class Experiment(Document):
     timeseries = ListField(ReferenceField("TimeSerie"))
     # timeseries = EmbeddedDocumentListField("TimeSerie")
     parent_folder = ReferenceField("Folder")
+    notes = StringField()
+    labels = ListField(StringField())
     
     @staticmethod
     def list(folder):
@@ -35,7 +37,13 @@ class Experiment(Document):
 
     def rename(new_name):
         this.update(set__name=new_name)
+    
+    def add_label(label):
+        this.update(push__labels=label)
 
+    def delete_label(label):
+        this.update(pull__labels=label)
+        
     @staticmethod
     def get(id):
         return Experiment.objects.get(id=id)

@@ -35,8 +35,8 @@ def run(host, port):
         return render_template("index.html", script=s, plot=p)
 
     @app.route("/experiment/<id>")
-    def show_exp(id=""):
-        exp = Experiment.get(id)
+    def show_exp(exp_id=""):
+        exp = Experiment.get(exp_id)
         configuration = yaml.dump(
             yaml.dump(exp.to_mongo()["configuration"], Dumper=yaml.Dumper).replace("\n", "<br />")
             , Dumper=yaml.Dumper
@@ -58,7 +58,7 @@ def run(host, port):
             graph_html=p,
             graph_js=s
             )
-
+    
     @app.route("/explorer/<path:path>")
     @app.route("/explorer")
     @app.route("/explorer/")
@@ -146,6 +146,68 @@ def run(host, port):
         return APISuccess({
             "experiments": experiments
         }).json()
+
+    
+    # Handle experiment labels
+    # ----------------------------------------
+    @app.route("/api/run/label/add", methods=["GET", "POST"])
+    def add_label_to_exp():
+        try:
+            data = request.json
+            exp = Experiment.get(data["id"])
+            exp.add_label(data["label"])
+            return APISuccess().json()
+        except Exception as e:
+            return APIError(str(e)).json()
+
+    @app.route("/api/run/label/delete", methods=["GET", "POST"])
+    def delete_label_of_exp():
+        try:
+            data = request.json
+            exp = Experiment.get(data["id"])
+            exp.delete_label(data["label"])
+            return APISuccess().json()
+        except Exception as e:
+            return APIError(str(e)).json()
+    
+    @app.route("/api/run/label/list", methods=["GET", "POST"])
+    def list_labels_of_exp():
+        try:
+            data = request.json
+            exp = Experiment.get(data["id"])
+            return APISuccess({
+                "labels": exp.labels
+            }).json()
+        except Exception as e:
+            return APIError(str(e)).json()
+    # ----------------------------------------
+    # Handle experiment notes
+    # ----------------------------------------
+    @app.route("/api/run/notes/get", methods=["GET", "POST"])
+    def get_exp_notes():
+        try:
+            data = request.json
+            exp = Experiment.get(data["id"])
+            return APISuccess({"notes": exp.notes}).json()
+        except Exception as e: 
+            return APIError(str(e)).json()
+
+    @app.route("/api/run/notes/set", methods=["GET", "POST"])
+    def set_exp_notes():
+        try:
+            data = request.json
+            exp = Experiment.get(data["id"])
+            exp.update(set__notes=data["notes"])
+            return APISuccess().json()
+        except Exception as e:
+            return APIError(str(e)).json()
+    # ----------------------------------------
+    # Draw metric
+    # ----------------------------------------
+    @app.route("/api/run/graph")
+    def draw_graph(exp_id, metric_name):
+        pass
+    # ----------------------------------------
 
     # Backend API for python library
     @app.route("/api/check", methods=["GET", "POST"])

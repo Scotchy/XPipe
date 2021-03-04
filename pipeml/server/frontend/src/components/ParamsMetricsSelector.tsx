@@ -39,17 +39,25 @@ const ParameterAccordion : React.FunctionComponent<ParameterAccordionProps> = (p
 interface ParametersSetProps {
     params: any,
     name: string,
-    onUpdateParam? : (param : string, selected : boolean, selectedParams? : Array<string>) => void
+    path: string,
+    onUpdateParam? : (param : string, selected : boolean) => void,
+    checked: { [param_name : string] : boolean }
 }
 interface ParametersSetState {
-    selectedParams : Array<string>
+    checked: { [param_name : string] : boolean }
 }
 class ParametersSet extends React.Component<ParametersSetProps, ParametersSetState> {
     constructor(props : ParametersSetProps) {
         super(props);
         this.state = {
-            selectedParams: []
+            checked: props.checked
         };
+    }
+
+    componentWillReceiveProps(props : ParametersSetProps) {
+        this.setState({
+            checked: props.checked
+        });
     }
 
     isObject(key : string, params : any) : boolean {
@@ -75,37 +83,42 @@ class ParametersSet extends React.Component<ParametersSetProps, ParametersSetSta
     }
 
     handleOnUpdateParam = (name : string, selected: boolean) => {
-        const param_name = this.props.name + ((this.props.name != "") ? "." : "") + name;
-        if (selected && !(param_name in this.state.selectedParams)) {
-            const newSelectedParams = [...this.state.selectedParams, param_name];
-            this.setState({selectedParams: newSelectedParams});
-            if (this.props.onUpdateParam)
-                this.props.onUpdateParam(param_name, true, newSelectedParams);
-        }
-        if (!selected && this.state.selectedParams.indexOf(param_name) >= 0) {
-            const ind = this.state.selectedParams.indexOf(param_name);
-            const newSelectedParams = [...this.state.selectedParams];
-            newSelectedParams.splice(ind, 1);
-            this.setState({selectedParams: newSelectedParams});
-            if (this.props.onUpdateParam)
-                this.props.onUpdateParam(param_name, false, newSelectedParams);
-        }
+        if (this.props.onUpdateParam)
+            this.props.onUpdateParam(name, selected);
     }
 
     render() {
         return (
             <div>
             {Object.keys(this.props.params).map((param : string) => {
+                const path = this.props.path + ((this.props.path != "") ? "." : "") + param;
                 if (this.isObject(param, this.props.params)) {
-                    return (<ParameterItem onToggle={this.handleOnUpdateParam} name={param} id={param} isObj />);
+                    return (
+                        <ParameterItem 
+                            onToggle={this.handleOnUpdateParam} 
+                            name={param} 
+                            path={path}
+                            isObj 
+                            checked={this.state.checked[path]} />);
                 }
                 else if (this.isParam(param, this.props.params)) {
-                    return (<ParameterItem onToggle={this.handleOnUpdateParam} name={param} id={param} isVal />);
+                    return (
+                        <ParameterItem 
+                            onToggle={this.handleOnUpdateParam} 
+                            name={param} 
+                            path={path}
+                            isVal 
+                            checked={this.state.checked[path]} />);
                 } 
                 else {
                     return (
                         <ParameterAccordion name={param}>
-                            <ParametersSet name={param} onUpdateParam={this.handleOnUpdateParam} params={this.props.params[param]} />
+                            <ParametersSet 
+                                name={param} 
+                                path={this.props.path + ((this.props.path != "") ? "." : "") + param}
+                                onUpdateParam={this.handleOnUpdateParam} 
+                                params={this.props.params[param]} 
+                                checked={this.state.checked} />
                         </ParameterAccordion>
                     );
                 }
@@ -118,10 +131,11 @@ class ParametersSet extends React.Component<ParametersSetProps, ParametersSetSta
 
 interface ParameterItemProps {
     name : string,
-    id : string,
+    path : string,
     onToggle? : (name : string, checked : boolean) => void,
     isObj? : boolean,
-    isVal? : boolean
+    isVal? : boolean,
+    checked : boolean
 }
 interface ParameterItemState {
     checked: boolean
@@ -132,19 +146,25 @@ class ParameterItem extends React.Component<ParameterItemProps, ParameterItemSta
         this.state = {
             checked: false
         }
+        if (this.props.checked && this.props.onToggle) 
+            this.props.onToggle(this.props.path, true);
+    }
+    
+    componentWillReceiveProps(props : ParameterItemProps) {
+        this.setState({checked: props.checked});
     }
 
     handleOnChange = (e : React.ChangeEvent<HTMLInputElement>) => {
-        this.setState({checked: e.target.checked});
+        // this.setState({checked: e.target.checked});
         if (this.props.onToggle)
-            this.props.onToggle(this.props.name, e.target.checked);
+            this.props.onToggle(this.props.path, e.target.checked);
     }
 
     render() {
         return (
             <div className="form-check form-switch">
-                <input className="form-check-input param_checkbox" onChange={this.handleOnChange} checked={this.state.checked} type="checkbox" id={this.props.id} />
-                <label className="form-check-label" htmlFor={this.props.id}>
+                <input className="form-check-input param_checkbox" onChange={this.handleOnChange} checked={this.state.checked} type="checkbox" id={this.props.path} />
+                <label className="form-check-label" htmlFor={this.props.path}>
                     {this.props.isObj && <span>(obj) </span>}
                     {this.props.name}
                 </label>
@@ -160,7 +180,8 @@ interface ParamsMetricsSelectorProps {
 interface ParamsMetricsSelectorState {
     displaySelector: boolean,
     params: any,
-    selectedParams: Array<string>
+    selectedParams: Array<string>,
+    checked: { [param : string] : boolean }
 }
 export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelectorProps, ParamsMetricsSelectorState> {
     dropdownEl : React.RefObject<HTMLDivElement>;
@@ -171,7 +192,8 @@ export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelector
         this.state = {
             displaySelector: false,
             params: {},
-            selectedParams: []
+            selectedParams: [],
+            checked: {}
         }
     }
 
@@ -180,11 +202,22 @@ export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelector
     }
 
     componentWillReceiveProps(props : ParamsMetricsSelectorProps) {
-        API.getParams(props.folder).then((resp) => {
-            this.setState({
-                params: resp.params
+        if (this.props.folder != props.folder) {
+            API.getParams(props.folder).then((resp) => {
+                this.setState({
+                    params: resp.params
+                });
+                this.loadDefaultParams(props.folder);
             });
+        }
+    }
+
+    loadDefaultParams(folder : string) {
+        this.setState({
+            selectedParams: [],
+            checked: {}
         });
+        this.props.onUpdateParams([]);
     }
     
     componentDidMount() {
@@ -193,12 +226,18 @@ export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelector
         });
     }
 
-    handleOnUpdateParam = (name : string, selected : boolean, selectedParams? : Array<string>) => {
-        if (selectedParams) {
-            this.setState({selectedParams: selectedParams});
-            if (this.props.onUpdateParams)
-                this.props.onUpdateParams(selectedParams);
+    handleOnUpdateParam = (name : string, selected : boolean) => {
+        const checked = this.state.checked;
+        checked[name] = selected;
+        this.setState({checked : checked});
+
+        const selectedParams : Array<string> = []
+        for (let param_name in checked) {
+            if (checked[param_name]) {
+                selectedParams.push(param_name);
+            }
         }
+        this.props.onUpdateParams(selectedParams);
     }
             
 
@@ -217,7 +256,12 @@ export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelector
                     </ul>
                     <div className="tab-content" id="myTabContent">
                         <div className="tab-pane fade show m-2 active" id="parameters_tab" role="tabpanel" aria-labelledby="parameters_tab">
-                            <ParametersSet name="" onUpdateParam={this.handleOnUpdateParam} params={this.state.params} />
+                            <ParametersSet 
+                                name="" 
+                                path=""
+                                onUpdateParam={this.handleOnUpdateParam} 
+                                params={this.state.params} 
+                                checked={this.state.checked} />
                         </div>
                         <div className="tab-pane fade m-2 " id="metrics_tab" role="tabpanel" aria-labelledby="metrics_tab">
 

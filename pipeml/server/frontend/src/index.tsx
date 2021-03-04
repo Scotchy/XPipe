@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { HeaderMenu } from './components/HeaderMenu';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import { Link, BrowserRouter, Route } from "react-router-dom";
+import { Link, BrowserRouter, Route, Switch } from "react-router-dom";
 import { Index, Explorer, ExperimentPage } from "./pages";
 import "bootstrap/dist/js/bootstrap";
 
@@ -13,7 +13,9 @@ ReactDOM.render(
 			<HeaderMenu />
 			<Route exact path="/" component={Index} />
 			<Route path="/explorer" component={Explorer} />
-			<Route path="/experiment" component={ExperimentPage} />
+			<Switch>
+				<Route path="/experiment/:exp_id" component={ExperimentPage} />
+			</Switch>
 		</BrowserRouter>
 		
 	</React.StrictMode>,
