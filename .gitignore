@@ -6,7 +6,6 @@ build
 dist
 make.bat
 .empty
-template.yaml
 template2.yaml
 test.py
 nohup.out
