@@ -91,6 +91,22 @@ interface SetExpNotesResponse extends APIResponse {
 
 }
 
+interface GetExpInfosQuery extends APIQuery {
+    id: string
+}
+interface GetExpInfosResponse extends APIResponse {
+    name: string,
+    commit_hash: string
+}
+
+interface GetExpMetricQuery extends APIQuery {
+    id: string,
+    metric: string
+}
+interface GetExpMetricResponse extends APIResponse {
+    graph: any
+}
+
 class APIInstance {
     api : AxiosInstance;
 
@@ -202,7 +218,22 @@ class APIInstance {
         return await this.apiCall<SetExpNotesQuery, SetExpNotesResponse>(url, query);
     }
 
+    async getExpInfos(exp_id : string) {
+        let url = "/api/run/get";
+        let query = {
+            "id": exp_id
+        }
+        return await this.apiCall<GetExpInfosQuery, GetExpInfosResponse>(url, query);
+    }
 
+    async getExpMetric(exp_id : string, metric_name : string) {
+        let url = "/api/run/graph";
+        let query = {
+            "id": exp_id,
+            "metric": metric_name
+        }
+        return await this.apiCall<GetExpMetricQuery, GetExpMetricResponse>(url, query);
+    }
 }
 
 export const API = new APIInstance();

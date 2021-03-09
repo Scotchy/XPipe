@@ -11,3 +11,5 @@ test.py
 nohup.out
 .vscode
 new_exp.py
+node_modules
+

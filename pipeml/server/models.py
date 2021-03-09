@@ -12,6 +12,7 @@ class Experiment(Document):
     name = StringField()
     duration = IntField()
     configuration = DictField()
+    commit_hash = StringField()
     timeseries = ListField(ReferenceField("TimeSerie"))
     # timeseries = EmbeddedDocumentListField("TimeSerie")
     parent_folder = ReferenceField("Folder")
@@ -25,10 +26,11 @@ class Experiment(Document):
         return experiments
     
     @staticmethod
-    def new(folder, name):
+    def new(folder, name, commit_hash=""):
         if (Folder.exists(folder)):
             exp = Experiment()
             exp.name = name
+            exp.commit_hash = commit_hash
             exp.parent_folder = Folder.get_folder(folder)
             exp.save()
             return exp
@@ -61,7 +63,6 @@ class Experiment(Document):
         if timeserie is not None:
             timeserie.update(push__y=value)
         else:
-            print("new")
             timeserie = TimeSerie()
             timeserie.name = name
             timeserie.y = [value]

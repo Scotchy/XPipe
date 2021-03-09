@@ -3,6 +3,7 @@ import React from "react";
 import { Accordion, Button, Card, Container } from "react-bootstrap";
 import { RouteComponentProps } from "react-router-dom";
 import { API } from "../api";
+import { MdTexRenderer, Graph } from "../components";
 
 interface ExperimentNotesProps {
     exp_id: string
@@ -38,7 +39,12 @@ export class ExperimentNotes extends React.Component<ExperimentNotesProps, Exper
     }
 
     handleSendModif = (e : React.MouseEvent) => {
-        
+        API.setExpNotes(this.props.exp_id, this.state.notes).then((resp) => {
+            this.setState({
+                showModButton: "block",
+                showSendButton: "none"
+            })
+        });
     }
 
     handleCancel = (e : React.MouseEvent) => {
@@ -46,18 +52,33 @@ export class ExperimentNotes extends React.Component<ExperimentNotesProps, Exper
             showModButton: "block",
             showSendButton: "none"
         })
+        API.getExpNotes(this.props.exp_id).then((resp) => {
+            this.setState({
+                notes: resp.notes
+            })
+        });
+    }
+
+    handleChangeDesc = (e : React.ChangeEvent<HTMLTextAreaElement>) => {
+        this.setState({
+            notes: e.target.value
+        });
     }
 
     render() {
         return (
             <div>
-                {(this.state.showModButton == "block") ? <div>{this.state.notes}</div> : <p>Ok !</p>}
+                <div style={{display: "flex"}}>
+                    { (this.state.showSendButton == "block") && <textarea style={{width: "50%", height: "200px", marginRight: "20px"}} onChange={this.handleChangeDesc} value={this.state.notes}></textarea>}
+                    <div style={{display: "block"}}><MdTexRenderer source={this.state.notes}/></div>
+                </div>
+
                 <div style={{display: this.state.showModButton}}>
-                    <Button variant="primary" onClick={this.handleModify}>Modify</Button>
+                    <Button variant="secondary" onClick={this.handleModify}>Modify</Button>
                 </div>
                 <div style={{display: this.state.showSendButton}}>
                     <Button variant="primary" onClick={this.handleSendModif}>Submit</Button>
-                    <Button variant="secondary" onClick={this.handleCancel}>Cancel</Button>
+                    <Button className="m-2" variant="secondary" onClick={this.handleCancel}>Cancel</Button>
                 </div>
             </div> 
         );
@@ -68,24 +89,35 @@ interface ExperimentInfosProps {
     exp_id: string
 }
 interface ExperimentInfosState {
-
+    run_name: string,
+    commit_hash: string
 }
 export class ExperimentInfos extends React.Component<ExperimentInfosProps, ExperimentInfosState> {
     
     constructor(props : ExperimentInfosProps) {
         super(props);
+        this.state = {
+            run_name: "",
+            commit_hash: ""
+        }
     }
 
     componentDidMount() {
-        
+        API.getExpInfos(this.props.exp_id).then((resp) => {
+            this.setState({
+                run_name: resp.name,
+                commit_hash: resp.commit_hash
+            });
+        }); 
     }
 
     render() {
         return(
             <div>
                 <table style={{margin: "10px 0px 10px 0px"}}>
-                    <tr><td><b>run id</b></td><td>{this.props.exp_id}</td></tr>
-                    <tr><td><b>version</b></td><td>-</td></tr>
+                    <tr><td><b>Run id</b></td><td>{this.props.exp_id}</td></tr>
+                    <tr><td><b>Commit hash</b></td><td>{this.state.commit_hash}</td></tr>
+                    <tr><td><b>Run name</b></td><td>{this.state.run_name}</td></tr>
                 </table>
                 <h3>Notes</h3>
                 <ExperimentNotes exp_id={this.props.exp_id} />
@@ -118,33 +150,33 @@ export class ExperimentParams extends React.Component<ExperimentParamsProps, Exp
 }
 
 interface ExperimentMetricProps {
-    experiment_id: string,
+    exp_id: string,
     metric_name: string
 }
 interface ExperimentMetricState {
 
 }
-export class ExperimentMetric extends React.Component {
-    constructor(props : ExperimentParamsProps) {
+export class ExperimentMetric extends React.Component<ExperimentMetricProps, ExperimentMetricState> {
+    constructor(props : ExperimentMetricProps) {
         super(props);
     }
 
     componentDidMount() {
-
+        
     }
 
     render() {
         return (
-            <Accordion>
-                <Accordion.Toggle eventKey="0">
-
-                </Accordion.Toggle>
-                <Accordion.Collapse eventKey="0">
+            <div className="col-sm-6">
+                <Card>
+                    <Card.Header>
+                        {this.props.metric_name}
+                    </Card.Header>
                     <Card.Body>
-                        
+                        <Graph exp_id={this.props.exp_id} metric={this.props.metric_name} />
                     </Card.Body>
-                </Accordion.Collapse>
-            </Accordion>
+                </Card>
+            </div>
         );
     }
 } 
@@ -165,6 +197,7 @@ export class ExperimentPage extends React.Component<ExperimentPageProps, Experim
         return (
             <Container>
                 <ExperimentInfos exp_id={this.props.match.params.exp_id} />
+                <ExperimentMetric exp_id={this.props.match.params.exp_id} metric_name="metric" />
             </Container>
         );
     }

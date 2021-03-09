@@ -1,4 +1,7 @@
-from os.path import basename
+from os.path import basename, dirname
+import sys
+import os
+import subprocess
 
 class Experiment():
 
@@ -14,11 +17,19 @@ class Experiment():
             self.load(id_exp)
         
     def create(self, path, name):
+        tmp_folder = os.getcwd()
+        script_name = sys.argv[0]
+        folder = dirname(script_name)
+        if folder != "":
+            os.chdir(folder)
+        commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip("\n")
+        os.chdir(tmp_folder)
         r = self.session.api_call(
             "new_run", 
             data={
                 "folder": path,
-                "name": name
+                "name": name,
+                "commit_hash": commit_hash
             })
 
         if not r["success"]:

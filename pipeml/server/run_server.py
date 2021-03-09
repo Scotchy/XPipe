@@ -3,6 +3,7 @@ from flask_cors import CORS
 
 from bokeh.embed import components
 from bokeh.plotting import figure 
+from bokeh.embed import json_item
 import numpy as np
 import json
 import yaml
@@ -204,9 +205,18 @@ def run(host, port):
     # ----------------------------------------
     # Draw metric
     # ----------------------------------------
-    @app.route("/api/run/graph")
-    def draw_graph(exp_id, metric_name):
-        pass
+    @app.route("/api/run/graph", methods=["GET", "POST"])
+    def draw_graph():
+        try: 
+            data = request.json
+            exp = Experiment.get(data["id"])
+            y = exp.get_timeserie(data["metric"])
+            x = [i for i in range(len(y))]
+            p = figure(sizing_mode='stretch_both', title=data["metric"], id="test")
+            p.line(x, x)
+            return APISuccess({"graph": json_item(p, "g")}).json()
+        except Exception as e:
+            return APIError(str(e)).json()
     # ----------------------------------------
 
     # Backend API for python library
@@ -220,7 +230,11 @@ def run(host, port):
             data = request.json
             name = data["name"]
             folder = data["folder"]
-            exp = Experiment.new(folder, name)
+            exp = Experiment.new(
+                folder, 
+                name, 
+                commit_hash=(data["commit_hash"] if "commit_hash" in data else "")
+            )
             return APISuccess({"id": str(exp.pk)}).json()
         except Exception as e:
             return APIError(str(e)).json()
@@ -238,11 +252,12 @@ def run(host, port):
     def get_run():
         data = request.json
         try:
-            exp = Experiment.get(data["id"]).to_mongo()
+            exp = Experiment.get(data["id"])
 
             return APISuccess({
-                "name": exp["name"],
-                "configuration": exp["configuration"]
+                "name": exp.name,
+                "configuration": exp.to_mongo()["configuration"],
+                "commit_hash": exp.commit_hash
             }).json()
         except Exception as e:
             return APIError(str(e)).json()

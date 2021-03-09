@@ -17,7 +17,6 @@ ReactDOM.render(
 				<Route path="/experiment/:exp_id" component={ExperimentPage} />
 			</Switch>
 		</BrowserRouter>
-		
 	</React.StrictMode>,
 	document.getElementById('root')
 );
