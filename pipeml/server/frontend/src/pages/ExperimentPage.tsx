@@ -4,6 +4,7 @@ import { Accordion, Button, Card, Container } from "react-bootstrap";
 import { RouteComponentProps } from "react-router-dom";
 import { API } from "../api";
 import { MdTexRenderer, Graph } from "../components";
+import { Labels } from "../components/Labels";
 
 interface ExperimentNotesProps {
     exp_id: string
@@ -198,6 +199,7 @@ export class ExperimentPage extends React.Component<ExperimentPageProps, Experim
             <Container>
                 <ExperimentInfos exp_id={this.props.match.params.exp_id} />
                 <ExperimentMetric exp_id={this.props.match.params.exp_id} metric_name="metric" />
+                <Labels exp_id={this.props.match.params.exp_id} />
             </Container>
         );
     }

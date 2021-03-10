@@ -37,14 +37,14 @@ class Experiment(Document):
         else:
             raise ValueError("Folder does not exist")
 
-    def rename(new_name):
-        this.update(set__name=new_name)
+    def rename(self, new_name):
+        self.update(set__name=new_name)
     
-    def add_label(label):
-        this.update(push__labels=label)
+    def add_label(self, label):
+        self.update(push__labels=label)
 
-    def delete_label(label):
-        this.update(pull__labels=label)
+    def delete_label(self, label):
+        self.update(pull__labels=label)
         
     @staticmethod
     def get(id):

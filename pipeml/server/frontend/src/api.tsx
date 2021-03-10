@@ -61,6 +61,13 @@ interface GetMetricsResponse extends APIResponse {
     metrics : Array<string>
 }
 
+interface ListLabelsQuery extends APIQuery {
+    id : string
+}
+interface ListLabelsResponse extends APIResponse {
+    labels : Array<string>
+}
+
 interface AddLabelQuery extends APIQuery {
     id : string
 }
@@ -184,10 +191,19 @@ class APIInstance {
         return await this.apiCall<GetMetricsQuery, GetMetricsResponse>(url, query);
     }
 
+    async listLabels(exp_id : string) {
+        let url = "/api/run/label/list";
+        let query = {
+            "id": exp_id
+        };
+        return await this.apiCall<ListLabelsQuery, ListLabelsResponse>(url, query);
+    }
+
     async addLabel(exp_id : string, label : string) {
         let url = "/api/run/label/add";
         let query = {
-            "id": exp_id
+            "id": exp_id,
+            "label": label
         };
         return await this.apiCall<AddLabelQuery, AddLabelResponse>(url, query);
     }
