@@ -5,6 +5,7 @@ import { ListExperiments } from "./ListExperiments";
 import { ParamsMetricsSelector } from "./ParamsMetricsSelector";
 import { MdTexRenderer } from "./MdTexRenderer";
 import { Graph } from "./Graph";
+import { ShowPath } from "./ShowPath";
 
 export {
     HeaderMenu,
@@ -14,5 +15,6 @@ export {
     ListExperiments,
     ParamsMetricsSelector,
     MdTexRenderer,
-    Graph
+    Graph,
+    ShowPath
 };

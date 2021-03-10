@@ -1,6 +1,6 @@
 
 import React from "react";
-import { PageWithSideMenu, ListFolders } from "../components";
+import { PageWithSideMenu, ListFolders, ShowPath } from "../components";
 import { ListExperiments } from "../components/ListExperiments";
 import { ParamsMetricsSelector } from "../components";
 
@@ -53,6 +53,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             <PageWithSideMenu sidemenu={
                 <ListFolders onOpenFolder={this.handleOnOpenFolder} folder={this.state.current_folder} />
             }>
+                <ShowPath path={this.state.current_folder} onClick={this.handleOnOpenFolder} />
                 <ParamsMetricsSelector onUpdateParams={this.handleOnUpdateParams} folder={this.state.current_folder} />
                 <ListExperiments folder={this.state.current_folder} params={this.state.selectedParams} />
             </PageWithSideMenu>
