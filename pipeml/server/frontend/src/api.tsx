@@ -114,6 +114,13 @@ interface GetExpMetricResponse extends APIResponse {
     graph: any
 }
 
+interface ListExpMetricsQuery extends APIQuery {
+    id: string
+}
+interface ListExpMetricsResponse extends APIResponse {
+    metrics: Array<string>
+}
+
 class APIInstance {
     api : AxiosInstance;
 
@@ -249,6 +256,14 @@ class APIInstance {
             "metric": metric_name
         }
         return await this.apiCall<GetExpMetricQuery, GetExpMetricResponse>(url, query);
+    }
+
+    async listExpMetrics(exp_id : string) {
+        let url = "/api/run/metric/list";
+        let query = {
+            "id": exp_id
+        }
+        return await this.apiCall<ListExpMetricsQuery, ListExpMetricsResponse>(url, query);
     }
 }
 

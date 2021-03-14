@@ -14,7 +14,6 @@ class Experiment(Document):
     configuration = DictField()
     commit_hash = StringField()
     timeseries = ListField(ReferenceField("TimeSerie"))
-    # timeseries = EmbeddedDocumentListField("TimeSerie")
     parent_folder = ReferenceField("Folder")
     notes = StringField()
     labels = ListField(StringField())
@@ -57,6 +56,9 @@ class Experiment(Document):
         timeserie = self.get_timeserie(name)
         if timeserie is not None:
             return timeserie[-1]
+    
+    def list_metrics(self):
+        return [ts.name for ts in self.timeseries]
     
     def log_metric(self, name, value):
         timeserie = self.get_timeserie(name)

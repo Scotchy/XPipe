@@ -210,13 +210,23 @@ def run(host, port):
         try: 
             data = request.json
             exp = Experiment.get(data["id"])
-            y = exp.get_timeserie(data["metric"])
+            y = exp.get_timeserie(data["metric"]).y
             x = [i for i in range(len(y))]
-            p = figure(sizing_mode='stretch_both', title=data["metric"], id="test")
-            p.line(x, x)
-            return APISuccess({"graph": json_item(p, "g")}).json()
+            p = figure(sizing_mode='stretch_both', title=data["metric"])
+            p.line(x, y)
+            return APISuccess({"graph": json_item(p)}).json()
         except Exception as e:
             return APIError(str(e)).json()
+
+    @app.route("/api/run/metric/list", methods=["GET", "POST"])
+    def list_metrics():
+        try: 
+            data = request.json
+            exp = Experiment.get(data["id"])
+            return APISuccess({"metrics": exp.list_metrics()}).json()
+        except: 
+            return APIError(str(e)).json()
+
     # ----------------------------------------
 
     # Backend API for python library

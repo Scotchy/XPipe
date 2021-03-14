@@ -1,6 +1,7 @@
 
+import { DocumentEventBatch } from "@bokeh/bokehjs/build/js/types/document";
 import React from "react";
-import { Accordion, Button, Card, Container } from "react-bootstrap";
+import { Accordion, Button, Card, Container, Tab, Tabs } from "react-bootstrap";
 import { RouteComponentProps } from "react-router-dom";
 import { API } from "../api";
 import { MdTexRenderer, Graph } from "../components";
@@ -150,34 +151,60 @@ export class ExperimentParams extends React.Component<ExperimentParamsProps, Exp
     }
 }
 
-interface ExperimentMetricProps {
-    exp_id: string,
-    metric_name: string
+interface ExperimentMetricsProps {
+    exp_id: string
 }
-interface ExperimentMetricState {
-
+interface ExperimentMetricsState {
+    metrics: Array<string>
 }
-export class ExperimentMetric extends React.Component<ExperimentMetricProps, ExperimentMetricState> {
-    constructor(props : ExperimentMetricProps) {
+export class ExperimentMetrics extends React.Component<ExperimentMetricsProps, ExperimentMetricsState> {
+    constructor(props : ExperimentMetricsProps) {
         super(props);
+        this.state = {
+            metrics: []
+        }
     }
 
     componentDidMount() {
-        
+        API.listExpMetrics(this.props.exp_id).then((resp) => {
+            this.setState({
+                metrics: resp.metrics
+            }); 
+        });
+    }
+
+    handleShowMetric = (metric : string) => {
+        return (e : React.MouseEvent) => {
+            this.hideMetrics();
+            this.showMetric(metric);
+        }
+    }
+    
+    showMetric(metric : string) {
+        const el = document.getElementById(metric+"_tab");
+        if (el)
+            el.style.display="block";
+    }
+
+    hideMetrics() {
+        for (var i = 0; i < this.state.metrics.length; i++) {
+            const el = document.getElementById(this.state.metrics[i]+"_tab")
+            if (el)
+                el.style.display="none";
+        }
     }
 
     render() {
         return (
-            <div className="col-sm-6">
-                <Card>
-                    <Card.Header>
-                        {this.props.metric_name}
-                    </Card.Header>
-                    <Card.Body>
-                        <Graph exp_id={this.props.exp_id} metric={this.props.metric_name} />
-                    </Card.Body>
-                </Card>
-            </div>
+            this.state.metrics.length && 
+            (<Tabs>
+                {this.state.metrics.map((metric_name: string) => (
+                    <Tab eventKey={metric_name} title={metric_name} key={metric_name}>
+                        <Graph exp_id={this.props.exp_id} metric={metric_name} />
+                    </Tab>
+                ))}
+            </Tabs>)
+            
         );
     }
 } 
@@ -196,9 +223,9 @@ export class ExperimentPage extends React.Component<ExperimentPageProps, Experim
     
     render() {
         return (
-            <Container>
+            <Container style={{minHeight: "2000px"}}>
                 <ExperimentInfos exp_id={this.props.match.params.exp_id} />
-                <ExperimentMetric exp_id={this.props.match.params.exp_id} metric_name="metric" />
+                <ExperimentMetrics exp_id={this.props.match.params.exp_id} />
                 <Labels exp_id={this.props.match.params.exp_id} />
             </Container>
         );

@@ -19,14 +19,14 @@ export class Graph extends React.Component<GraphProps, GraphState> {
     componentDidMount() {
         API.getExpMetric(this.props.exp_id, this.props.metric).then((resp) => {
             const id_el = this.props.exp_id + "." + this.props.metric;
-            window.Bokeh.embed.embed_item(resp.graph, "test");
+            window.Bokeh.embed.embed_item(resp.graph, id_el);
         }); 
     }
 
     render() {
         const id_el = this.props.exp_id + "." + this.props.metric;
         return (
-            <div id="test"></div>
+            <div style={{position: "relative"}} id={id_el}></div>
         );
     }
 }
