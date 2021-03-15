@@ -44,7 +44,7 @@ interface ParametersSetProps {
     checked: { [param_name : string] : boolean }
 }
 interface ParametersSetState {
-    checked: { [param_name : string] : boolean }
+
 }
 class ParametersSet extends React.Component<ParametersSetProps, ParametersSetState> {
     constructor(props : ParametersSetProps) {
@@ -52,12 +52,6 @@ class ParametersSet extends React.Component<ParametersSetProps, ParametersSetSta
         this.state = {
             checked: props.checked
         };
-    }
-
-    componentWillReceiveProps(props : ParametersSetProps) {
-        this.setState({
-            checked: props.checked
-        });
     }
 
     isObject(key : string, params : any) : boolean {
@@ -99,7 +93,7 @@ class ParametersSet extends React.Component<ParametersSetProps, ParametersSetSta
                             name={param} 
                             path={path}
                             isObj 
-                            checked={this.state.checked[path]} />);
+                            checked={this.props.checked[path]} />);
                 }
                 else if (this.isParam(param, this.props.params)) {
                     return (
@@ -108,7 +102,7 @@ class ParametersSet extends React.Component<ParametersSetProps, ParametersSetSta
                             name={param} 
                             path={path}
                             isVal 
-                            checked={this.state.checked[path]} />);
+                            checked={this.props.checked[path]} />);
                 } 
                 else {
                     return (
@@ -118,7 +112,7 @@ class ParametersSet extends React.Component<ParametersSetProps, ParametersSetSta
                                 path={this.props.path + ((this.props.path != "") ? "." : "") + param}
                                 onUpdateParam={this.handleOnUpdateParam} 
                                 params={this.props.params[param]} 
-                                checked={this.state.checked} />
+                                checked={this.props.checked} />
                         </ParameterAccordion>
                     );
                 }
@@ -138,7 +132,7 @@ interface ParameterItemProps {
     checked : boolean
 }
 interface ParameterItemState {
-    checked: boolean
+
 }
 class ParameterItem extends React.Component<ParameterItemProps, ParameterItemState> {
     constructor(props : ParameterItemProps) {
@@ -148,10 +142,6 @@ class ParameterItem extends React.Component<ParameterItemProps, ParameterItemSta
         }
         if (this.props.checked && this.props.onToggle) 
             this.props.onToggle(this.props.path, true);
-    }
-    
-    componentWillReceiveProps(props : ParameterItemProps) {
-        this.setState({checked: props.checked});
     }
 
     handleOnChange = (e : React.ChangeEvent<HTMLInputElement>) => {
@@ -163,7 +153,7 @@ class ParameterItem extends React.Component<ParameterItemProps, ParameterItemSta
     render() {
         return (
             <div className="form-check form-switch">
-                <input className="form-check-input param_checkbox" onChange={this.handleOnChange} checked={this.state.checked} type="checkbox" id={this.props.path} />
+                <input className="form-check-input param_checkbox" onChange={this.handleOnChange} checked={this.props.checked} type="checkbox" id={this.props.path} />
                 <label className="form-check-label" htmlFor={this.props.path}>
                     {this.props.isObj && <span>(obj) </span>}
                     {this.props.name}

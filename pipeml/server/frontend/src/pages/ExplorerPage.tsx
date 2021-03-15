@@ -3,13 +3,37 @@ import React from "react";
 import { PageWithSideMenu, ListFolders, ShowPath } from "../components";
 import { ListExperiments } from "../components/ListExperiments";
 import { ParamsMetricsSelector } from "../components";
+import { Button } from "react-bootstrap";
+import { Experiment } from "../type";
 
+interface ExplorerMenuProps {
+
+}
+interface ExplorerMenuState {
+
+}
+class ExplorerMenu extends React.Component<ExplorerMenuProps, ExplorerMenuState> {
+    constructor(props: ExplorerMenuProps) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <div className="d-flex">
+                <Button style={{marginTop: "10px"}} variant="primary">Compare</Button>
+                <Button style={{marginLeft: "10px", marginTop: "10px"}} variant="danger">Delete</Button>
+                <Button style={{marginLeft: "10px", marginTop: "10px"}} variant="secondary">Move</Button>
+            </div>
+        );
+    }
+}
 interface ExplorerProps {
 
 }
 interface ExplorerState {
     current_folder: string,
-    selectedParams: Array<string>
+    selectedParams: Array<string>,
+    selectedExperiments: Array<Experiment>
 } 
 export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
 
@@ -17,7 +41,8 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         super(props);
         this.state = {
             current_folder: this.currentFolder(),
-            selectedParams: []
+            selectedParams: [],
+            selectedExperiments: []
         }
     }
 
@@ -47,6 +72,12 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             selectedParams: selectedParams
         })
     }
+
+    handleOnSelectExperiments = (selectedExperiments: Array<Experiment>) => {
+        this.setState({
+            selectedExperiments: selectedExperiments
+        }); 
+    }
     
     render() {
         return (
@@ -55,7 +86,11 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             }>
                 <ShowPath path={this.state.current_folder} onClick={this.handleOnOpenFolder} />
                 <ParamsMetricsSelector onUpdateParams={this.handleOnUpdateParams} folder={this.state.current_folder} />
-                <ListExperiments folder={this.state.current_folder} params={this.state.selectedParams} />
+                <ExplorerMenu />
+                <ListExperiments 
+                    onSelectExperiments={this.handleOnSelectExperiments}
+                    folder={this.state.current_folder} 
+                    params={this.state.selectedParams} />
             </PageWithSideMenu>
         );
     }
