@@ -122,6 +122,12 @@ class Folder(Document):
         self.parent_folder.update(pull__children_folders=self.pk)
         super(Folder, self).delete()
 
+    def get_full_path(self):
+        if self.parent_folder == None:
+            return ""
+        else:
+            return self.parent_folder.get_full_path() + "/" + self.name
+
     @staticmethod
     def get_folder(path):
         root = Folder.objects.get(parent_folder=None)

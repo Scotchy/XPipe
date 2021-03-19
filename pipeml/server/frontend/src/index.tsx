@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { Link, BrowserRouter, Route, Switch } from "react-router-dom";
 import { Index, Explorer, ExperimentPage } from "./pages";
 import "bootstrap/dist/js/bootstrap";
+import { CompareExperiments } from './pages/CompareExperimentsPage';
 
 ReactDOM.render(
 	<React.StrictMode>
@@ -13,6 +14,7 @@ ReactDOM.render(
 			<HeaderMenu />
 			<Route exact path="/" component={Index} />
 			<Route path="/explorer" component={Explorer} />
+			<Route exact path="/compare" component={() => (<CompareExperiments experiments={[]} />)} />
 			<Switch>
 				<Route path="/experiment/:exp_id" component={ExperimentPage} />
 			</Switch>

@@ -40,6 +40,7 @@ class ExperimentItem extends React.Component<ExperimentItemProps, ExperimentItem
 interface ListExperimentsProps {
     folder: string,
     params: Array<string>,
+    update: boolean, 
     onSelectExperiments?: (selectedExperiments: Array<Experiment>) => void
 }
 interface ListExperimentsState {
@@ -66,9 +67,13 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
     }
 
     componentWillReceiveProps(props : ListExperimentsProps) {
-        if (props.folder != this.props.folder || props.params != this.props.params) {
+        if (props.folder != this.props.folder || props.params != this.props.params || props.update != this.props.update) {
             this.getExperiments(props.folder, props.params);
         }
+    }
+
+    updateFolders() {
+        this.getExperiments(this.props.folder, this.props.params);
     }
 
     getExperiments(folder : string, params : Array<string> = []) {
@@ -114,7 +119,7 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
 
     render() {
         return (
-            <table id="experiments" className="table table-sm" style={{marginTop: "10p"}}>
+            <table id="experiments" className="table table-sm" style={{marginTop: "10px"}}>
                 <thead>
                     <tr>
                         <th scope="col">#</th>
@@ -126,7 +131,11 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
                 </thead>
                 <tbody id="experiments_list">
                     {this.state.experiments.map((exp) => (
-                        <ExperimentItem selected={this.state.checkedExp[exp.id]} onToggle={this.handleOnToggle} exp={exp} key={exp.id} params={this.state.params} />
+                        <ExperimentItem 
+                            selected={this.state.checkedExp[exp.id]} 
+                            onToggle={this.handleOnToggle} 
+                            exp={exp} key={exp.id} 
+                            params={this.state.params} />
                     ))}
                 </tbody>
             </table>

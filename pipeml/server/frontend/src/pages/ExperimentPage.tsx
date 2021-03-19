@@ -4,7 +4,7 @@ import React from "react";
 import { Accordion, Button, Card, Container, Tab, Tabs } from "react-bootstrap";
 import { RouteComponentProps } from "react-router-dom";
 import { API } from "../api";
-import { MdTexRenderer, Graph } from "../components";
+import { MdTexRenderer, Graph, ShowPath } from "../components";
 import { Labels } from "../components/Labels";
 
 interface ExperimentNotesProps {
@@ -69,7 +69,7 @@ export class ExperimentNotes extends React.Component<ExperimentNotesProps, Exper
 
     render() {
         return (
-            <div>
+            <div className="m-2 p-4" style={{backgroundColor: "#e9ecef", borderRadius: ".25rem"}}>
                 <div style={{display: "flex"}}>
                     { (this.state.showSendButton == "block") && <textarea style={{width: "50%", height: "200px", marginRight: "20px"}} onChange={this.handleChangeDesc} value={this.state.notes}></textarea>}
                     <div style={{display: "block"}}><MdTexRenderer source={this.state.notes}/></div>
@@ -92,7 +92,8 @@ interface ExperimentInfosProps {
 }
 interface ExperimentInfosState {
     run_name: string,
-    commit_hash: string
+    commit_hash: string,
+    path: string
 }
 export class ExperimentInfos extends React.Component<ExperimentInfosProps, ExperimentInfosState> {
     
@@ -100,7 +101,8 @@ export class ExperimentInfos extends React.Component<ExperimentInfosProps, Exper
         super(props);
         this.state = {
             run_name: "",
-            commit_hash: ""
+            commit_hash: "",
+            path: ""
         }
     }
 
@@ -108,9 +110,14 @@ export class ExperimentInfos extends React.Component<ExperimentInfosProps, Exper
         API.getExpInfos(this.props.exp_id).then((resp) => {
             this.setState({
                 run_name: resp.name,
-                commit_hash: resp.commit_hash
+                commit_hash: resp.commit_hash,
+                path: resp.path
             });
         }); 
+    }
+
+    handleOnOpenFolder = (folder : string) => {
+        window.location.href = "/explorer"+folder; 
     }
 
     render() {
@@ -121,6 +128,7 @@ export class ExperimentInfos extends React.Component<ExperimentInfosProps, Exper
                     <tr><td><b>Commit hash</b></td><td>{this.state.commit_hash}</td></tr>
                     <tr><td><b>Run name</b></td><td>{this.state.run_name}</td></tr>
                 </table>
+                <ShowPath path={this.state.path} onClick={this.handleOnOpenFolder} />
                 <h3>Notes</h3>
                 <ExperimentNotes exp_id={this.props.exp_id} />
             </div>
@@ -197,14 +205,17 @@ export class ExperimentMetrics extends React.Component<ExperimentMetricsProps, E
     render() {
         return (
             this.state.metrics.length && 
-            (<Tabs>
-                {this.state.metrics.map((metric_name: string) => (
-                    <Tab eventKey={metric_name} title={metric_name} key={metric_name}>
-                        <Graph exp_id={this.props.exp_id} metric={metric_name} />
-                    </Tab>
-                ))}
-            </Tabs>)
-            
+            (<div>
+                <h3>Metrics</h3>
+                <Tabs>
+                    {this.state.metrics.map((metric_name: string) => (
+                        <Tab eventKey={metric_name} title={metric_name} key={metric_name}>
+                            <Graph exp_id={this.props.exp_id} metric={metric_name} />
+                        </Tab>
+                    ))}
+                </Tabs>
+            </div>)
+                
         );
     }
 } 
@@ -225,8 +236,8 @@ export class ExperimentPage extends React.Component<ExperimentPageProps, Experim
         return (
             <Container style={{minHeight: "2000px"}}>
                 <ExperimentInfos exp_id={this.props.match.params.exp_id} />
-                <ExperimentMetrics exp_id={this.props.match.params.exp_id} />
                 <Labels exp_id={this.props.match.params.exp_id} />
+                <ExperimentMetrics exp_id={this.props.match.params.exp_id} />
             </Container>
         );
     }

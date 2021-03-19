@@ -5,24 +5,82 @@ import { ListExperiments } from "../components/ListExperiments";
 import { ParamsMetricsSelector } from "../components";
 import { Button } from "react-bootstrap";
 import { Experiment } from "../type";
+import { Window } from "../components/Window";
+import { API } from "../api";
 
 interface ExplorerMenuProps {
-
+    onDeleteExp: () => void,
+    onMoveExp: (folder: string) => void,
+    onCompareExp: () => void
 }
 interface ExplorerMenuState {
-
+    showDelete: boolean,
+    showMove: boolean
 }
 class ExplorerMenu extends React.Component<ExplorerMenuProps, ExplorerMenuState> {
     constructor(props: ExplorerMenuProps) {
         super(props);
+        this.state = {
+            showDelete: false,
+            showMove: false
+        }
+    }
+
+    handleOpenOnMove = () => {
+        this.setState({
+            showMove: true
+        });
+    }
+    handleOpenOnDelete = () => {
+        this.setState({
+            showDelete: true
+        });
+    }
+    handleOnMove = () => {
+        this.props.onMoveExp("");
+        this.handleOnClose();
+    }
+    handleOnDelete = () => {
+        this.props.onDeleteExp();
+        this.handleOnClose();
+    }
+    handleOnClose = () => {
+        this.setState({
+            showMove: false,
+            showDelete: false
+        })
     }
 
     render() {
         return (
             <div className="d-flex">
-                <Button style={{marginTop: "10px"}} variant="primary">Compare</Button>
-                <Button style={{marginLeft: "10px", marginTop: "10px"}} variant="danger">Delete</Button>
-                <Button style={{marginLeft: "10px", marginTop: "10px"}} variant="secondary">Move</Button>
+                <Button 
+                    style={{marginTop: "10px"}} 
+                    variant="primary"
+                    size="sm"
+                    onClick={this.props.onCompareExp}>Compare</Button>
+                <Button 
+                    style={{marginLeft: "10px", marginTop: "10px"}} 
+                    variant="danger"
+                    size="sm"
+                    onClick={this.handleOpenOnDelete}>Delete</Button>
+                <Button 
+                    style={{marginLeft: "10px", marginTop: "10px"}} 
+                    variant="secondary"
+                    size="sm"
+                    onClick={this.handleOpenOnMove}>Move</Button>
+                <Window 
+                    title="Delete folder"
+                    show={this.state.showDelete}
+                    action="Delete"
+                    onClose={this.handleOnClose}
+                    onAction={this.handleOnDelete}>Do you really want to delete those folders ?</Window>
+                <Window 
+                    title="Move folders"
+                    show={this.state.showMove}
+                    action="Move"
+                    onClose={this.handleOnClose}
+                    onAction={this.handleOnMove}>Move folders</Window>
             </div>
         );
     }
@@ -33,7 +91,8 @@ interface ExplorerProps {
 interface ExplorerState {
     current_folder: string,
     selectedParams: Array<string>,
-    selectedExperiments: Array<Experiment>
+    selectedExperiments: Array<Experiment>,
+    update: boolean
 } 
 export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
 
@@ -42,7 +101,8 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         this.state = {
             current_folder: this.currentFolder(),
             selectedParams: [],
-            selectedExperiments: []
+            selectedExperiments: [],
+            update: false
         }
     }
 
@@ -62,6 +122,12 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         return "";
     }
 
+    updateExperiments() {
+        this.setState({
+            update: !this.state.update
+        })
+    }
+
     handleOnOpenFolder = (folder : string) => {
         window.history.pushState(null, "", "/explorer"+folder);
         this.setState({current_folder: folder});
@@ -79,6 +145,22 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         }); 
     }
     
+    handleDeleteExp = () => {
+        const exp_ids = this.state.selectedExperiments.map((exp) => exp.id);
+        API.deleteExperiments(exp_ids).then((resp) => {
+            if (!resp.success) {
+                alert("Can't delete experiments ("+resp.message+")");
+            }
+            else {
+                this.updateExperiments();
+            }
+        });
+    }
+
+    handleMoveExp = () => {
+        alert(this.state.selectedExperiments);
+    }
+
     render() {
         return (
             <PageWithSideMenu sidemenu={
@@ -86,11 +168,16 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             }>
                 <ShowPath path={this.state.current_folder} onClick={this.handleOnOpenFolder} />
                 <ParamsMetricsSelector onUpdateParams={this.handleOnUpdateParams} folder={this.state.current_folder} />
-                <ExplorerMenu />
+                <ExplorerMenu 
+                    onMoveExp={this.handleMoveExp}
+                    onDeleteExp={this.handleDeleteExp}
+                    onCompareExp={() => {}}
+                />
                 <ListExperiments 
                     onSelectExperiments={this.handleOnSelectExperiments}
                     folder={this.state.current_folder} 
-                    params={this.state.selectedParams} />
+                    params={this.state.selectedParams} 
+                    update={this.state.update} />
             </PageWithSideMenu>
         );
     }

@@ -253,7 +253,12 @@ def run(host, port):
     def delete_run():
         data = request.json
         try:
-            Experiment.get(data["id"]).delete()
+            ids = data["ids"]
+            if not isinstance(ids, list):
+                ids = [ids]
+            
+            for exp_id in ids:
+                Experiment.get(exp_id).delete()
             return APISuccess().json()
         except Exception as e:
             return APIError(str(e)).json()
@@ -267,6 +272,7 @@ def run(host, port):
             return APISuccess({
                 "name": exp.name,
                 "configuration": exp.to_mongo()["configuration"],
+                "path": exp.parent_folder.get_full_path(), 
                 "commit_hash": exp.commit_hash
             }).json()
         except Exception as e:
@@ -298,6 +304,11 @@ def run(host, port):
         except Exception as e:
             return APIError(str(e)).json()
         
+    @app.route("/api/run/log_artifact", methods=["GET", "POST"])
+    def log_artifact():
+        data = request.json
+        pass
+    
     app.run(debug=True)
 
 run()

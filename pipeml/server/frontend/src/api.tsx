@@ -47,6 +47,13 @@ interface ListExperimentsResponse extends APIResponse {
     experiments: Array<Experiment>
 }
 
+interface DeleteExperimentsQuery extends APIQuery {
+    ids: Array<string>
+}
+interface DeleteExperimentsResponse extends APIResponse {
+
+}
+
 interface GetParamsQuery extends APIQuery {
     folder : string
 }
@@ -103,7 +110,9 @@ interface GetExpInfosQuery extends APIQuery {
 }
 interface GetExpInfosResponse extends APIResponse {
     name: string,
-    commit_hash: string
+    configuration: any,
+    commit_hash: string,
+    path: string
 }
 
 interface GetExpMetricQuery extends APIQuery {
@@ -180,6 +189,14 @@ class APIInstance {
             metrics: []
         };
         return await this.apiCall<ListExperimentsQuery, ListExperimentsResponse>(url, query);
+    }
+
+    async deleteExperiments(exp_ids: Array<string>) {
+        let url = "/api/run/delete";
+        let query = {
+            ids: exp_ids
+        };
+        return await this.apiCall<DeleteExperimentsQuery, DeleteExperimentsResponse>(url, query);
     }
 
     async getParams(folder : string) {
@@ -265,6 +282,8 @@ class APIInstance {
         }
         return await this.apiCall<ListExpMetricsQuery, ListExpMetricsResponse>(url, query);
     }
+
+
 }
 
 export const API = new APIInstance();

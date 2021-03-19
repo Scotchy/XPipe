@@ -78,9 +78,9 @@ export class Labels extends React.Component<LabelsProps, LabelsState> {
 
     render() {
         return (
-            <div className="m-2 p-2">
+            <div>
                 <h3>Labels</h3>
-                <InputGroup size="sm" className="col-4">
+                <InputGroup size="sm" className="m-2 col-4">
                     <InputGroup.Prepend>
                         <Button onClick={this.handleAddLabel} ><BsPlus /> Add</Button>
                     </InputGroup.Prepend>
