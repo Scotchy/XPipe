@@ -77,3 +77,13 @@ class Experiment():
                 "metric_name": metric_name,
                 "metric_value": metric_value
             })
+    
+    def log_artifact(self, file):
+
+        return self.session.api_call(
+            "log_artifact", 
+            data={
+                "id": self.id
+            },
+            file=file
+        )

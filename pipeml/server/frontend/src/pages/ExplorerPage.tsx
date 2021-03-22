@@ -7,11 +7,12 @@ import { Button } from "react-bootstrap";
 import { Experiment } from "../type";
 import { Window } from "../components/Window";
 import { API } from "../api";
+import { Link } from "react-router-dom";
 
 interface ExplorerMenuProps {
     onDeleteExp: () => void,
     onMoveExp: (folder: string) => void,
-    onCompareExp: () => void
+    experiments: Array<Experiment>
 }
 interface ExplorerMenuState {
     showDelete: boolean,
@@ -54,11 +55,12 @@ class ExplorerMenu extends React.Component<ExplorerMenuProps, ExplorerMenuState>
     render() {
         return (
             <div className="d-flex">
-                <Button 
-                    style={{marginTop: "10px"}} 
-                    variant="primary"
-                    size="sm"
-                    onClick={this.props.onCompareExp}>Compare</Button>
+                <Link to={{pathname: "/compare", state: {experiments: this.props.experiments}}}>
+                    <Button 
+                        style={{marginTop: "10px"}} 
+                        variant="primary"
+                        size="sm">Compare</Button>
+                </Link>
                 <Button 
                     style={{marginLeft: "10px", marginTop: "10px"}} 
                     variant="danger"
@@ -158,7 +160,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     }
 
     handleMoveExp = () => {
-        alert(this.state.selectedExperiments);
+        alert(JSON.stringify(this.state.selectedExperiments));
     }
 
     render() {
@@ -171,7 +173,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
                 <ExplorerMenu 
                     onMoveExp={this.handleMoveExp}
                     onDeleteExp={this.handleDeleteExp}
-                    onCompareExp={() => {}}
+                    experiments={this.state.selectedExperiments}
                 />
                 <ListExperiments 
                     onSelectExperiments={this.handleOnSelectExperiments}

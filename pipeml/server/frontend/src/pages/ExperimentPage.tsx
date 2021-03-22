@@ -220,6 +220,42 @@ export class ExperimentMetrics extends React.Component<ExperimentMetricsProps, E
     }
 } 
 
+interface ExperimentArtifactsProps {
+    exp_id: string
+}
+interface ExperimentArtifactsState {
+    artifacts: Array<string>
+}
+class ExperimentArtifacts extends React.Component<ExperimentArtifactsProps, ExperimentArtifactsState> {
+    
+    constructor(props: ExperimentArtifactsProps) {
+        super(props);
+        this.state = {
+            artifacts: []
+        };
+    }
+
+    componentDidMount() {
+        API.listArtifacts(this.props.exp_id).then((resp) => {
+            this.setState({
+                artifacts: resp.artifacts
+            });
+        });
+    }
+
+    render() {
+        return (
+            this.state.artifacts.length > 0 && 
+            (<div>
+                <h3>Artifacts</h3>
+                {this.state.artifacts.map((artifact) => (
+                    <p>{artifact}</p>
+                ))}
+            </div>)
+        );
+    }
+}
+
 interface ExperimentPageProps extends RouteComponentProps<{exp_id: string}> {
 
 }
@@ -238,6 +274,7 @@ export class ExperimentPage extends React.Component<ExperimentPageProps, Experim
                 <ExperimentInfos exp_id={this.props.match.params.exp_id} />
                 <Labels exp_id={this.props.match.params.exp_id} />
                 <ExperimentMetrics exp_id={this.props.match.params.exp_id} />
+                <ExperimentArtifacts exp_id={this.props.match.params.exp_id} />
             </Container>
         );
     }

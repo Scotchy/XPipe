@@ -14,7 +14,7 @@ ReactDOM.render(
 			<HeaderMenu />
 			<Route exact path="/" component={Index} />
 			<Route path="/explorer" component={Explorer} />
-			<Route exact path="/compare" component={() => (<CompareExperiments experiments={[]} />)} />
+			<Route exact path="/compare" component={CompareExperiments} />
 			<Switch>
 				<Route path="/experiment/:exp_id" component={ExperimentPage} />
 			</Switch>

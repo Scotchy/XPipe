@@ -130,6 +130,13 @@ interface ListExpMetricsResponse extends APIResponse {
     metrics: Array<string>
 }
 
+interface ListArtifactsQuery extends APIQuery {
+    id: string
+}
+interface ListArtifactsResponse extends APIResponse {
+    artifacts: Array<string>
+}
+
 class APIInstance {
     api : AxiosInstance;
 
@@ -283,7 +290,13 @@ class APIInstance {
         return await this.apiCall<ListExpMetricsQuery, ListExpMetricsResponse>(url, query);
     }
 
-
+    async listArtifacts(exp_id : string) {
+        let url = "/api/run/list_artifacts"
+        let query = {
+            "id": exp_id
+        };
+        return await this.apiCall<ListArtifactsQuery, ListArtifactsResponse>(url, query);
+    }
 }
 
 export const API = new APIInstance();

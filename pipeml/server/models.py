@@ -1,6 +1,8 @@
 import mongoengine 
 from mongoengine import Document, DictField, StringField, IntField, FloatField, ListField, EmbeddedDocument, EmbeddedDocumentField, EmbeddedDocumentListField, ReferenceField
 import re
+import os
+from pathlib import Path
 
 class TimeSerie(Document):
     name = StringField()
@@ -101,6 +103,17 @@ class Experiment(Document):
             return None
         return conf
 
+    def log_artifact(self, file, artifact_folder="./artifacts"):
+        folder = os.path.join(os.getcwd(), artifact_folder, str(self.pk), "artifacts")
+        Path(folder).mkdir(parents=True, exist_ok=True)
+        path = os.path.join(folder, file.filename)
+        file.save(path)
+
+    def list_artifacts(self, artifact_folder="./artifacts"):
+        folder = os.path.join(os.getcwd(), artifact_folder, str(self.pk), "artifacts")
+        artifacts = os.listdir(folder)
+        return artifacts
+        
 class Folder(Document):
     name = StringField()
     children_folders = ListField(ReferenceField("Folder"))

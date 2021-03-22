@@ -224,7 +224,7 @@ def run(host, port):
             data = request.json
             exp = Experiment.get(data["id"])
             return APISuccess({"metrics": exp.list_metrics()}).json()
-        except: 
+        except Exception as e: 
             return APIError(str(e)).json()
 
     # ----------------------------------------
@@ -306,9 +306,31 @@ def run(host, port):
         
     @app.route("/api/run/log_artifact", methods=["GET", "POST"])
     def log_artifact():
-        data = request.json
-        pass
-    
-    app.run(debug=True)
+        try:
+            data = json.load(request.files["json"])
+            exp_id = data["id"]
+            exp = Experiment.get(exp_id)
+            if exp is None:
+                raise ValueError("Experiment not found")
+            if "file" not in request.files:
+                raise ValueError("No file to save")
+                
+            exp.log_artifact(request.files["file"])
+            return APISuccess().json()
+        except Exception as e:
+            return APIError(str(e)).json()
 
+    @app.route("/api/run/list_artifacts", methods=["GET", "POST"])
+    def list_artifacts():
+        try: 
+            data = request.json
+            exp_id = data["id"]
+            exp = Experiment.get(exp_id)
+            return APISuccess({
+                "artifacts": exp.list_artifacts()
+            }).json()
+        except Exception as e:
+            return APIError(str(e)).json()
+
+    app.run(debug=True)
 run()

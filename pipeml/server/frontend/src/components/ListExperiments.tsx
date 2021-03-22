@@ -105,16 +105,10 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
             checkedExp: checkedExp
         });
 
-        const selectedExperiments : Array<Experiment> = [];
-        for (let exp_id in this.state.checkedExp) {
-            if (this.state.checkedExp[exp_id]) {
-                selectedExperiments.push(exp);
-            }
-        }
+        const selExps = this.state.experiments.filter((e) => (e.id in this.state.checkedExp && this.state.checkedExp[e.id]));
+
         if (this.props.onSelectExperiments)
-            this.props.onSelectExperiments(selectedExperiments);
-        
-        
+            this.props.onSelectExperiments(selExps);
     }
 
     render() {
