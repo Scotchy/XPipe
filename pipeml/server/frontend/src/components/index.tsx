@@ -6,6 +6,8 @@ import { ParamsMetricsSelector } from "./ParamsMetricsSelector";
 import { MdTexRenderer } from "./MdTexRenderer";
 import { Graph } from "./Graph";
 import { ShowPath } from "./ShowPath";
+import { FileVisualizer } from "./FileVisualizer";
+import { HighlightCode } from "./HighlightCode";
 
 export {
     HeaderMenu,
@@ -16,5 +18,7 @@ export {
     ParamsMetricsSelector,
     MdTexRenderer,
     Graph,
-    ShowPath
+    ShowPath,
+    FileVisualizer,
+    HighlightCode
 };

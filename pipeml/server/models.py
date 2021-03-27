@@ -110,8 +110,11 @@ class Experiment(Document):
         file.save(path)
 
     def list_artifacts(self, artifact_folder="./artifacts"):
-        folder = os.path.join(os.getcwd(), artifact_folder, str(self.pk), "artifacts")
-        artifacts = os.listdir(folder)
+        try:
+            folder = os.path.join(os.getcwd(), artifact_folder, str(self.pk), "artifacts")
+            artifacts = os.listdir(folder)
+        except:
+            return []
         return artifacts
         
 class Folder(Document):

@@ -4,7 +4,7 @@ import React from "react";
 import { Accordion, Button, Card, Container, Tab, Tabs } from "react-bootstrap";
 import { RouteComponentProps } from "react-router-dom";
 import { API } from "../api";
-import { MdTexRenderer, Graph, ShowPath } from "../components";
+import { MdTexRenderer, Graph, ShowPath, FileVisualizer } from "../components";
 import { Labels } from "../components/Labels";
 
 interface ExperimentNotesProps {
@@ -170,7 +170,7 @@ export class ExperimentMetrics extends React.Component<ExperimentMetricsProps, E
         super(props);
         this.state = {
             metrics: []
-        }
+        };
     }
 
     componentDidMount() {
@@ -204,7 +204,7 @@ export class ExperimentMetrics extends React.Component<ExperimentMetricsProps, E
 
     render() {
         return (
-            this.state.metrics.length && 
+            this.state.metrics.length > 0 && 
             (<div>
                 <h3>Metrics</h3>
                 <Tabs>
@@ -226,12 +226,12 @@ interface ExperimentArtifactsProps {
 interface ExperimentArtifactsState {
     artifacts: Array<string>
 }
-class ExperimentArtifacts extends React.Component<ExperimentArtifactsProps, ExperimentArtifactsState> {
+export class ExperimentArtifacts extends React.Component<ExperimentArtifactsProps, ExperimentArtifactsState> {
     
     constructor(props: ExperimentArtifactsProps) {
         super(props);
         this.state = {
-            artifacts: []
+            artifacts: [""]
         };
     }
 
@@ -245,8 +245,7 @@ class ExperimentArtifacts extends React.Component<ExperimentArtifactsProps, Expe
 
     render() {
         return (
-            this.state.artifacts.length > 0 && 
-            (<div>
+            this.state.artifacts.length > 0 && (<div>
                 <h3>Artifacts</h3>
                 {this.state.artifacts.map((artifact) => (
                     <p>{artifact}</p>
@@ -257,7 +256,6 @@ class ExperimentArtifacts extends React.Component<ExperimentArtifactsProps, Expe
 }
 
 interface ExperimentPageProps extends RouteComponentProps<{exp_id: string}> {
-
 }
 interface ExperimentPageState {
 
@@ -268,6 +266,9 @@ export class ExperimentPage extends React.Component<ExperimentPageProps, Experim
         super(props);
     }
     
+    componentDidMount() {
+    }
+
     render() {
         return (
             <Container style={{minHeight: "2000px"}}>
@@ -275,6 +276,7 @@ export class ExperimentPage extends React.Component<ExperimentPageProps, Experim
                 <Labels exp_id={this.props.match.params.exp_id} />
                 <ExperimentMetrics exp_id={this.props.match.params.exp_id} />
                 <ExperimentArtifacts exp_id={this.props.match.params.exp_id} />
+                <FileVisualizer addr="eerg.ok" />
             </Container>
         );
     }
