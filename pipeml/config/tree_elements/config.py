@@ -1,9 +1,8 @@
 # from .template import Template
 from .utils import is_object, is_objects_list, is_var
-from . import SingleObject, ObjectsList, Variable
+from .objects import SingleObject, ObjectsList, Variable, Parameters
 import yaml
 from .node import Node
-from .parameters import Parameters
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
