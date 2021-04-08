@@ -109,9 +109,9 @@ class Experiment(Document):
         path = os.path.join(folder, file.filename)
         file.save(path)
 
-    def list_artifacts(self, artifact_folder="./artifacts"):
+    def list_artifacts(self, artifacts_folder="./artifacts"):
         try:
-            folder = os.path.join(os.getcwd(), artifact_folder, str(self.pk), "artifacts")
+            folder = os.path.join(os.getcwd(), artifacts_folder, str(self.pk), "artifacts")
             artifacts = os.listdir(folder)
         except:
             return []

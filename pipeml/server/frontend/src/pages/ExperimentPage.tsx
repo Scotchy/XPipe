@@ -1,11 +1,17 @@
 
 import { DocumentEventBatch } from "@bokeh/bokehjs/build/js/types/document";
 import React from "react";
-import { Accordion, Button, Card, Container, Tab, Tabs } from "react-bootstrap";
+import { Accordion, Button, Card, Col, Container, Nav, Row, Tab, Tabs } from "react-bootstrap";
 import { RouteComponentProps } from "react-router-dom";
 import { API } from "../api";
-import { MdTexRenderer, Graph, ShowPath, FileVisualizer } from "../components";
+import { MdTexRenderer, Graph, ShowPath, FileVisualizer, ImageViewer } from "../components";
 import { Labels } from "../components/Labels";
+
+const Block : React.FunctionComponent<{}> = (props) => (
+    <div className="m-2 p-4" style={{backgroundColor: "#e9ecef", borderRadius: ".25rem"}}>
+        { props.children }
+    </div>
+)
 
 interface ExperimentNotesProps {
     exp_id: string
@@ -69,7 +75,7 @@ export class ExperimentNotes extends React.Component<ExperimentNotesProps, Exper
 
     render() {
         return (
-            <div className="m-2 p-4" style={{backgroundColor: "#e9ecef", borderRadius: ".25rem"}}>
+            <Block>
                 <div style={{display: "flex"}}>
                     { (this.state.showSendButton == "block") && <textarea style={{width: "50%", height: "200px", marginRight: "20px"}} onChange={this.handleChangeDesc} value={this.state.notes}></textarea>}
                     <div style={{display: "block"}}><MdTexRenderer source={this.state.notes}/></div>
@@ -82,7 +88,7 @@ export class ExperimentNotes extends React.Component<ExperimentNotesProps, Exper
                     <Button variant="primary" onClick={this.handleSendModif}>Submit</Button>
                     <Button className="m-2" variant="secondary" onClick={this.handleCancel}>Cancel</Button>
                 </div>
-            </div> 
+            </Block>
         );
     }
 } 
@@ -224,14 +230,16 @@ interface ExperimentArtifactsProps {
     exp_id: string
 }
 interface ExperimentArtifactsState {
-    artifacts: Array<string>
+    artifacts: Array<string>,
+    selectedArtifact: string
 }
 export class ExperimentArtifacts extends React.Component<ExperimentArtifactsProps, ExperimentArtifactsState> {
     
     constructor(props: ExperimentArtifactsProps) {
         super(props);
         this.state = {
-            artifacts: [""]
+            artifacts: [],
+            selectedArtifact: ""
         };
     }
 
@@ -243,13 +251,36 @@ export class ExperimentArtifacts extends React.Component<ExperimentArtifactsProp
         });
     }
 
+    selectArtifact(artifact: string) {  
+        this.setState({
+            selectedArtifact: artifact
+        });
+    }
+
     render() {
         return (
             this.state.artifacts.length > 0 && (<div>
                 <h3>Artifacts</h3>
-                {this.state.artifacts.map((artifact) => (
-                    <p>{artifact}</p>
-                ))}
+                <Block>
+                    <Tab.Container defaultActiveKey="first">
+                        <Row>
+                            <Col sm={2}>
+                                <Nav variant="pills" className="flex-column">
+                                    <Nav.Item>
+                                        {this.state.artifacts.map((artifact) => (
+                                            <Nav.Link style={{fontSize: "1rem"}} onSelect={() => this.selectArtifact(artifact)} eventKey={artifact} key={artifact} >
+                                                {artifact}
+                                            </Nav.Link>
+                                        ))}
+                                    </Nav.Item>
+                                </Nav>
+                            </Col>
+                            <Col sm={10}>
+                                <FileVisualizer addr={"http://localhost:5000/static/"+this.props.exp_id+"/artifacts/"+this.state.selectedArtifact} />
+                            </Col>
+                        </Row>
+                    </Tab.Container>
+                </Block>
             </div>)
         );
     }
@@ -274,9 +305,9 @@ export class ExperimentPage extends React.Component<ExperimentPageProps, Experim
             <Container style={{minHeight: "2000px"}}>
                 <ExperimentInfos exp_id={this.props.match.params.exp_id} />
                 <Labels exp_id={this.props.match.params.exp_id} />
+                <hr />
                 <ExperimentMetrics exp_id={this.props.match.params.exp_id} />
                 <ExperimentArtifacts exp_id={this.props.match.params.exp_id} />
-                <FileVisualizer addr="eerg.ok" />
             </Container>
         );
     }

@@ -9,6 +9,7 @@ import json
 import yaml
 import click
 
+import os
 from os.path import dirname, basename, realpath, join
 
 from .models import Project, Folder, Experiment, init_db
@@ -19,12 +20,13 @@ from mongoengine import connect
 @click.command()
 @click.option("--host", default="127.0.0.1", help="IP Address of the MongoDB server")
 @click.option("--port", default=27017, help="Port of the MongoDB server")
-def run(host, port):
+@click.option("--artifacts-dir", default="./artifacts", help="Folder to store artifacts")
+def run(host, port, artifacts_dir):
     connect("pipeml", host=host, port=port)
     init_db()
     dir_path = dirname(realpath(__file__))
-    print(dir_path)
-    app = Flask(__name__, static_url_path="/static", template_folder=join(dir_path, "templates"), static_folder=join(dir_path, "static"))
+    artifacts_dir = os.path.join(os.getcwd(), artifacts_dir)
+    app = Flask(__name__, static_url_path="/static", static_folder=artifacts_dir)
     CORS(app)
     
     @app.route("/index")
@@ -315,7 +317,7 @@ def run(host, port):
             if "file" not in request.files:
                 raise ValueError("No file to save")
                 
-            exp.log_artifact(request.files["file"])
+            exp.log_artifact(request.files["file"], artifact_folder=artifacts_dir)
             return APISuccess().json()
         except Exception as e:
             return APIError(str(e)).json()
@@ -327,7 +329,7 @@ def run(host, port):
             exp_id = data["id"]
             exp = Experiment.get(exp_id)
             return APISuccess({
-                "artifacts": exp.list_artifacts()
+                "artifacts": exp.list_artifacts(artifacts_folder=artifacts_dir)
             }).json()
         except Exception as e:
             return APIError(str(e)).json()

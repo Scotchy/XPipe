@@ -8,6 +8,7 @@ import { Graph } from "./Graph";
 import { ShowPath } from "./ShowPath";
 import { FileVisualizer } from "./FileVisualizer";
 import { HighlightCode } from "./HighlightCode";
+import { ImageViewer } from "./ImageViewer";
 
 export {
     HeaderMenu,
@@ -20,5 +21,6 @@ export {
     Graph,
     ShowPath,
     FileVisualizer,
-    HighlightCode
+    HighlightCode,
+    ImageViewer
 };

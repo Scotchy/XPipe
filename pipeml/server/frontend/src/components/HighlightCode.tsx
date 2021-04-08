@@ -16,7 +16,9 @@ export class HighlightCode extends React.Component<HighlightCodeProps, Highlight
     render() {
         const s : string = hljs.highlightAuto(this.props.text).value; 
         return (
-            <code dangerouslySetInnerHTML={{__html: s}}></code>
+            <div className="p-2" style={{backgroundColor: "white", borderRadius: "0.25rem"}}>
+                <pre><code dangerouslySetInnerHTML={{__html: s}}></code></pre>
+            </div>
         );
     }
 }

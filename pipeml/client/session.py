@@ -24,7 +24,7 @@ class Session():
         if file is None:
             return requests.post(url, data=json.dumps(data), headers={'Content-Type': 'application/json'}).json()
 
-        with open(file, "r") as f:
+        with open(file, "rb") as f:
             file = { 
                 "file": (basename(file), f, "application/octet-stream"), 
                 "json": ("data", json.dumps(data), "application/json")
