@@ -15,6 +15,7 @@
     "axios": "^0.21.1",
     "bokehjs": "^1.4.0",
     "bootstrap": "^4.6.0",
+    "csv-to-html-table": "^1.0.2",
     "highlight.js": "^9.18.5",
     "mathjax-react": "^1.0.6",
     "node-sass": "^5.0.0",

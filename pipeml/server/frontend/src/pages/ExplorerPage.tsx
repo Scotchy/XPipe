@@ -10,20 +10,24 @@ import { API } from "../api";
 import { Link } from "react-router-dom";
 
 interface ExplorerMenuProps {
+    currentFolder: string, 
     onDeleteExp: () => void,
     onMoveExp: (folder: string) => void,
     experiments: Array<Experiment>
 }
 interface ExplorerMenuState {
     showDelete: boolean,
-    showMove: boolean
+    showMove: boolean,
+    newFolder: string
 }
 class ExplorerMenu extends React.Component<ExplorerMenuProps, ExplorerMenuState> {
+    
     constructor(props: ExplorerMenuProps) {
         super(props);
         this.state = {
             showDelete: false,
-            showMove: false
+            showMove: false,
+            newFolder: props.currentFolder
         }
     }
 
@@ -38,7 +42,7 @@ class ExplorerMenu extends React.Component<ExplorerMenuProps, ExplorerMenuState>
         });
     }
     handleOnMove = () => {
-        this.props.onMoveExp("");
+        this.props.onMoveExp(this.state.newFolder);
         this.handleOnClose();
     }
     handleOnDelete = () => {
@@ -50,6 +54,12 @@ class ExplorerMenu extends React.Component<ExplorerMenuProps, ExplorerMenuState>
             showMove: false,
             showDelete: false
         })
+    }
+
+    handleOnNewFolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            newFolder: e.target.value
+        });
     }
 
     render() {
@@ -82,7 +92,14 @@ class ExplorerMenu extends React.Component<ExplorerMenuProps, ExplorerMenuState>
                     show={this.state.showMove}
                     action="Move"
                     onClose={this.handleOnClose}
-                    onAction={this.handleOnMove}>Move folders</Window>
+                    onAction={this.handleOnMove}>
+                        <label htmlFor="folderField">Move folder</label>
+                        <input className="form-control" 
+                            id="moveToFolderField" 
+                            value={this.state.newFolder} 
+                            onChange={this.handleOnNewFolderChange}
+                            placeholder="folder path" />
+                    </Window>
             </div>
         );
     }
@@ -91,7 +108,7 @@ interface ExplorerProps {
 
 }
 interface ExplorerState {
-    current_folder: string,
+    currentFolder: string,
     selectedParams: Array<string>,
     selectedExperiments: Array<Experiment>,
     update: boolean
@@ -101,7 +118,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     constructor(props : ExplorerProps) {
         super(props);
         this.state = {
-            current_folder: this.currentFolder(),
+            currentFolder: this.currentFolder(),
             selectedParams: [],
             selectedExperiments: [],
             update: false
@@ -109,7 +126,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     }
 
     componentDidMount() {
-        window.addEventListener("popstate", () => this.setState({current_folder: this.currentFolder()}));
+        window.addEventListener("popstate", () => this.setState({currentFolder: this.currentFolder()}));
     }
 
     currentFolder() : string {
@@ -124,6 +141,11 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         return "";
     }
 
+    getSelectedExpIds() {
+        const exp_ids = this.state.selectedExperiments.map((exp) => exp.id);
+        return exp_ids;
+    }
+
     updateExperiments() {
         this.setState({
             update: !this.state.update
@@ -132,7 +154,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
 
     handleOnOpenFolder = (folder : string) => {
         window.history.pushState(null, "", "/explorer"+folder);
-        this.setState({current_folder: folder});
+        this.setState({currentFolder: folder});
     }
 
     handleOnUpdateParams = (selectedParams : Array<string>) => {
@@ -148,7 +170,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     }
     
     handleDeleteExp = () => {
-        const exp_ids = this.state.selectedExperiments.map((exp) => exp.id);
+        const exp_ids = this.getSelectedExpIds();
         API.deleteExperiments(exp_ids).then((resp) => {
             if (!resp.success) {
                 alert("Can't delete experiments ("+resp.message+")");
@@ -159,25 +181,34 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         });
     }
 
-    handleMoveExp = () => {
-        alert(JSON.stringify(this.state.selectedExperiments));
+    handleMoveExp = (newFolder : string) => {
+        const exp_ids = this.getSelectedExpIds();
+        API.moveExperiments(exp_ids, newFolder).then((resp) => {
+            if (!resp.success) {
+                alert("Can't move experiments ("+resp.message+")");
+            }
+            else {
+                this.updateExperiments();
+            }
+        })
     }
 
     render() {
         return (
             <PageWithSideMenu sidemenu={
-                <ListFolders onOpenFolder={this.handleOnOpenFolder} folder={this.state.current_folder} />
+                <ListFolders onOpenFolder={this.handleOnOpenFolder} folder={this.state.currentFolder} />
             }>
-                <ShowPath path={this.state.current_folder} onClick={this.handleOnOpenFolder} />
-                <ParamsMetricsSelector onUpdateParams={this.handleOnUpdateParams} folder={this.state.current_folder} />
+                <ShowPath path={this.state.currentFolder} onClick={this.handleOnOpenFolder} />
+                <ParamsMetricsSelector onUpdateParams={this.handleOnUpdateParams} folder={this.state.currentFolder} />
                 <ExplorerMenu 
+                    currentFolder={this.state.currentFolder}
                     onMoveExp={this.handleMoveExp}
                     onDeleteExp={this.handleDeleteExp}
                     experiments={this.state.selectedExperiments}
                 />
                 <ListExperiments 
                     onSelectExperiments={this.handleOnSelectExperiments}
-                    folder={this.state.current_folder} 
+                    folder={this.state.currentFolder} 
                     params={this.state.selectedParams} 
                     update={this.state.update} />
             </PageWithSideMenu>

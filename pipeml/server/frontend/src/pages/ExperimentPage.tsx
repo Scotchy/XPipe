@@ -226,6 +226,67 @@ export class ExperimentMetrics extends React.Component<ExperimentMetricsProps, E
     }
 } 
 
+interface ExperimentGraphsProps {
+    exp_id: string
+}
+interface ExperimentGraphsState {
+    graphs: Array<string>,
+    selectedGraph: string
+}
+export class ExperimentGraphs extends React.Component<ExperimentGraphsProps, ExperimentGraphsState> {
+
+    
+    constructor(props: ExperimentGraphsProps) {
+        super(props);
+        this.state = {
+            graphs: [],
+            selectedGraph: ""
+        };
+    }
+
+    componentDidMount() {
+        API.listGraphs(this.props.exp_id).then((resp) => {
+            this.setState({
+                graphs: resp.graphs
+            });
+        });
+    }
+
+    selectArtifact(graph: string) {  
+        this.setState({
+            selectedGraph: graph
+        });
+    }
+
+    render() {
+        return (
+            this.state.graphs.length > 0 && (<div>
+                <h3>Artifacts</h3>
+                <Block>
+                    <Tab.Container defaultActiveKey="first">
+                        <Row>
+                            <Col sm={2}>
+                                <Nav variant="pills" className="flex-column">
+                                    <Nav.Item>
+                                        {this.state.graphs.map((graph) => (
+                                            <Nav.Link style={{fontSize: "1rem"}} onSelect={() => this.selectArtifact(graph)} eventKey={graph} key={graph} >
+                                                {graph}
+                                            </Nav.Link>
+                                        ))}
+                                    </Nav.Item>
+                                </Nav>
+                            </Col>
+                            <Col sm={10}>
+                                <FileVisualizer addr={"http://localhost:5000/static/"+this.props.exp_id+"/artifacts/"+this.state.selectedGraph} />
+                            </Col>
+                        </Row>
+                    </Tab.Container>
+                </Block>
+            </div>)
+        );
+    }
+}
+
 interface ExperimentArtifactsProps {
     exp_id: string
 }

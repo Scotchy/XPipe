@@ -54,6 +54,14 @@ interface DeleteExperimentsResponse extends APIResponse {
 
 }
 
+interface MoveExperimentsQuery extends APIQuery {
+    ids: Array<string>,
+    folder: string
+}
+interface MoveExperimentsResponse extends APIResponse {
+
+}
+
 interface GetParamsQuery extends APIQuery {
     folder : string
 }
@@ -137,6 +145,13 @@ interface ListArtifactsResponse extends APIResponse {
     artifacts: Array<string>
 }
 
+interface ListGraphsQuery extends APIQuery {
+    id: string
+}
+interface ListGraphsResponse extends APIResponse {
+    graphs: Array<string>
+}
+
 class APIInstance {
     api : AxiosInstance;
 
@@ -204,6 +219,15 @@ class APIInstance {
             ids: exp_ids
         };
         return await this.apiCall<DeleteExperimentsQuery, DeleteExperimentsResponse>(url, query);
+    }
+
+    async moveExperiments(exp_ids: Array<string>, folder: string) {
+        let url = "/api/run/move";
+        let query = {
+            ids: exp_ids,
+            folder: folder
+        };
+        return await this.apiCall<MoveExperimentsQuery, MoveExperimentsResponse>(url, query);
     }
 
     async getParams(folder : string) {
@@ -291,11 +315,19 @@ class APIInstance {
     }
 
     async listArtifacts(exp_id : string) {
-        let url = "/api/run/list_artifacts"
+        let url = "/api/run/list_artifacts";
         let query = {
             "id": exp_id
         };
         return await this.apiCall<ListArtifactsQuery, ListArtifactsResponse>(url, query);
+    }
+
+    async listGraphs(exp_id : string) {
+        let url = "/api/run/list_graphs";
+        let query = {
+            "id": exp_id
+        };
+        return await this.apiCall<ListGraphsQuery, ListGraphsResponse>(url, query);
     }
 }
 
