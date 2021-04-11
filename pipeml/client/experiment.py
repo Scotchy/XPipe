@@ -3,6 +3,9 @@ import sys
 import os
 import subprocess
 
+from bokeh.embed import json_item
+import json
+
 class Experiment():
 
     def __init__(self, session, id_exp=None, path=None, name=None):
@@ -78,7 +81,7 @@ class Experiment():
                 "metric_value": metric_value
             })
     
-    def log_artifact(self, file):
+    def log_artifact(self, file, increment_name=False   ):
 
         return self.session.api_call(
             "log_artifact", 
@@ -86,4 +89,15 @@ class Experiment():
                 "id": self.id
             },
             file=file
+        )
+    
+    def log_graph(self, name, graph):
+        
+        return self.session.api_call(
+            "log_graph", 
+            data={
+                "id": self.id,
+                "name": name, 
+                "graph": json.dumps(json_item(graph))
+            }
         )

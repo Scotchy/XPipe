@@ -4,7 +4,8 @@ import React from "react";
 import { Accordion, Button, Card, Col, Container, Nav, Row, Tab, Tabs } from "react-bootstrap";
 import { RouteComponentProps } from "react-router-dom";
 import { API } from "../api";
-import { MdTexRenderer, Graph, ShowPath, FileVisualizer, ImageViewer } from "../components";
+import { MdTexRenderer, DrawMetric, Graph, ShowPath, FileVisualizer, ImageViewer } from "../components";
+import { DrawGraph } from "../components/Graph";
 import { Labels } from "../components/Labels";
 
 const Block : React.FunctionComponent<{}> = (props) => (
@@ -216,7 +217,7 @@ export class ExperimentMetrics extends React.Component<ExperimentMetricsProps, E
                 <Tabs>
                     {this.state.metrics.map((metric_name: string) => (
                         <Tab eventKey={metric_name} title={metric_name} key={metric_name}>
-                            <Graph exp_id={this.props.exp_id} metric={metric_name} />
+                            <DrawMetric exp_id={this.props.exp_id} metric={metric_name} />
                         </Tab>
                     ))}
                 </Tabs>
@@ -261,23 +262,23 @@ export class ExperimentGraphs extends React.Component<ExperimentGraphsProps, Exp
     render() {
         return (
             this.state.graphs.length > 0 && (<div>
-                <h3>Artifacts</h3>
+                <h3>Custom graphs</h3>
                 <Block>
-                    <Tab.Container defaultActiveKey="first">
+                    <Tab.Container defaultActiveKey="">
                         <Row>
                             <Col sm={2}>
                                 <Nav variant="pills" className="flex-column">
                                     <Nav.Item>
                                         {this.state.graphs.map((graph) => (
                                             <Nav.Link style={{fontSize: "1rem"}} onSelect={() => this.selectArtifact(graph)} eventKey={graph} key={graph} >
-                                                {graph}
+                                                { graph }
                                             </Nav.Link>
                                         ))}
                                     </Nav.Item>
                                 </Nav>
                             </Col>
                             <Col sm={10}>
-                                <FileVisualizer addr={"http://localhost:5000/static/"+this.props.exp_id+"/artifacts/"+this.state.selectedGraph} />
+                                { this.state.selectedGraph != "" && <DrawGraph exp_id={this.props.exp_id} graph={this.state.selectedGraph} /> }
                             </Col>
                         </Row>
                     </Tab.Container>
@@ -368,6 +369,7 @@ export class ExperimentPage extends React.Component<ExperimentPageProps, Experim
                 <Labels exp_id={this.props.match.params.exp_id} />
                 <hr />
                 <ExperimentMetrics exp_id={this.props.match.params.exp_id} />
+                <ExperimentGraphs exp_id={this.props.match.params.exp_id} />
                 <ExperimentArtifacts exp_id={this.props.match.params.exp_id} />
             </Container>
         );

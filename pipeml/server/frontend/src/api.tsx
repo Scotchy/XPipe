@@ -329,6 +329,12 @@ class APIInstance {
         };
         return await this.apiCall<ListGraphsQuery, ListGraphsResponse>(url, query);
     }
+
+    async getGraph(exp_id: string, graph: string) {
+        let url = "http://localhost:5000/static/" + exp_id + "/bokeh/" + graph;
+        let graph_def = await fetch(url).then((resp) => { return resp.text() }).then((t) => {return t});
+        return graph_def
+    }
 }
 
 export const API = new APIInstance();

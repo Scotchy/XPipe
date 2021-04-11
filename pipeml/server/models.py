@@ -46,7 +46,11 @@ class Experiment(Document):
 
     def delete_label(self, label):
         self.update(pull__labels=label)
-        
+    
+    def move(self, folder):
+        folder = Folder.get_folder(folder)
+        self.update(set__parent_folder=folder.pk)
+
     @staticmethod
     def get(id):
         return Experiment.objects.get(id=id)
@@ -103,8 +107,8 @@ class Experiment(Document):
             return None
         return conf
 
-    def log_artifact(self, file, artifact_folder="./artifacts"):
-        folder = os.path.join(os.getcwd(), artifact_folder, str(self.pk), "artifacts")
+    def log_artifact(self, file, artifacts_folder="./artifacts"):
+        folder = os.path.join(os.getcwd(), artifacts_folder, str(self.pk), "artifacts")
         Path(folder).mkdir(parents=True, exist_ok=True)
         path = os.path.join(folder, file.filename)
         file.save(path)
@@ -116,6 +120,21 @@ class Experiment(Document):
         except:
             return []
         return artifacts
+    
+    def log_graph(self, name, graph, artifacts_folder="./artifacts"):
+        folder = os.path.join(os.getcwd(), artifacts_folder, str(self.pk), "bokeh")
+        Path(folder).mkdir(parents=True, exist_ok=True)
+        path = os.path.join(folder, name)
+        with open(path, "w") as f:
+            f.write(graph)
+
+    def list_graphs(self, artifacts_folder="./artifacts"):
+        try:
+            folder = os.path.join(os.getcwd(), artifacts_folder, str(self.pk), "bokeh")
+            graphs = os.listdir(folder)
+        except:
+            return []
+        return graphs
         
 class Folder(Document):
     name = StringField()

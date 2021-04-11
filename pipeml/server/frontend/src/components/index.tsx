@@ -4,7 +4,7 @@ import { ListFolders } from "./ListFolders";
 import { ListExperiments } from "./ListExperiments";
 import { ParamsMetricsSelector } from "./ParamsMetricsSelector";
 import { MdTexRenderer } from "./MdTexRenderer";
-import { Graph } from "./Graph";
+import { Graph, DrawMetric } from "./Graph";
 import { ShowPath } from "./ShowPath";
 import { FileVisualizer } from "./FileVisualizer";
 import { HighlightCode } from "./HighlightCode";
@@ -19,6 +19,7 @@ export {
     ParamsMetricsSelector,
     MdTexRenderer,
     Graph,
+    DrawMetric,
     ShowPath,
     FileVisualizer,
     HighlightCode,

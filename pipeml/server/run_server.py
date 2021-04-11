@@ -251,6 +251,21 @@ def run(host, port, artifacts_dir):
         except Exception as e:
             return APIError(str(e)).json()
 
+    @app.route("/api/run/move", methods=["GET", "POST"])
+    def move_run():
+        data = request.json
+        try:
+            ids = data["ids"]
+            new_folder = data["folder"]
+            if not isinstance(ids, list):
+                ids = [ids]
+            
+            for exp_id in ids:
+                Experiment.get(exp_id).move(new_folder)
+            return APISuccess().json()
+        except Exception as e:
+            return APIError(str(e)).json()
+
     @app.route("/api/run/delete", methods=["GET", "POST"])
     def delete_run():
         data = request.json
@@ -330,6 +345,34 @@ def run(host, port, artifacts_dir):
             exp = Experiment.get(exp_id)
             return APISuccess({
                 "artifacts": exp.list_artifacts(artifacts_folder=artifacts_dir)
+            }).json()
+        except Exception as e:
+            return APIError(str(e)).json()
+        
+    @app.route("/api/run/log_graph", methods=["GET", "POST"])
+    def log_graph():
+        try:
+            data = request.json
+            exp_id = data["id"]
+            name = data["name"]
+            graph = data["graph"]
+            exp = Experiment.get(exp_id)
+            if exp is None:
+                raise ValueError("Experiment not found")
+                
+            exp.log_graph(name, graph, artifacts_folder=artifacts_dir)
+            return APISuccess().json()
+        except Exception as e:
+            return APIError(str(e)).json()
+
+    @app.route("/api/run/list_graphs", methods=["GET", "POST"])
+    def list_graphs():
+        try: 
+            data = request.json
+            exp_id = data["id"]
+            exp = Experiment.get(exp_id)
+            return APISuccess({
+                "graphs": exp.list_graphs(artifacts_folder=artifacts_dir)
             }).json()
         except Exception as e:
             return APIError(str(e)).json()
