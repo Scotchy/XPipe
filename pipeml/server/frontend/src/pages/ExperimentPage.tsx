@@ -2,7 +2,7 @@
 import { DocumentEventBatch } from "@bokeh/bokehjs/build/js/types/document";
 import React from "react";
 import { Accordion, Button, Card, Col, Container, Nav, Row, Tab, Tabs } from "react-bootstrap";
-import { RouteComponentProps } from "react-router-dom";
+import { withRouter, RouteComponentProps } from "react-router-dom";
 import { API } from "../api";
 import { MdTexRenderer, DrawMetric, Graph, ShowPath, FileVisualizer, ImageViewer } from "../components";
 import { DrawGraph } from "../components/Graph";
@@ -94,7 +94,7 @@ export class ExperimentNotes extends React.Component<ExperimentNotesProps, Exper
     }
 } 
 
-interface ExperimentInfosProps {
+interface ExperimentInfosProps extends RouteComponentProps<{}> {
     exp_id: string
 }
 interface ExperimentInfosState {
@@ -102,8 +102,8 @@ interface ExperimentInfosState {
     commit_hash: string,
     path: string
 }
-export class ExperimentInfos extends React.Component<ExperimentInfosProps, ExperimentInfosState> {
-    
+class ExperimentInfosWithoutRouter extends React.Component<ExperimentInfosProps, ExperimentInfosState> { 
+
     constructor(props : ExperimentInfosProps) {
         super(props);
         this.state = {
@@ -124,7 +124,7 @@ export class ExperimentInfos extends React.Component<ExperimentInfosProps, Exper
     }
 
     handleOnOpenFolder = (folder : string) => {
-        window.location.href = "/explorer"+folder; 
+        this.props.history.push("/explorer"+folder);
     }
 
     render() {
@@ -142,6 +142,7 @@ export class ExperimentInfos extends React.Component<ExperimentInfosProps, Exper
         );
     }
 }
+const ExperimentInfos = withRouter(ExperimentInfosWithoutRouter);
 
 interface ExperimentParamsProps {
 
