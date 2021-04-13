@@ -1,7 +1,6 @@
 import React from "react";
 import { HighlightCode, ImageViewer } from ".";
 import { API } from "../api";
-import { ExperimentArtifacts } from "../pages/ExperimentPage";
 
 interface FileVisualizerProps {
     addr: string

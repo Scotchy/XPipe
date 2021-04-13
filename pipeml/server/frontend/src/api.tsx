@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { Folder, Experiment } from "./type";
+import { ENV, DEV_PORT } from "./config";
 
 interface APIQuery {
 
@@ -157,8 +158,21 @@ class APIInstance {
 
     constructor() {
         this.api = axios.create({
-            baseURL: `http://localhost:5000`
+            baseURL: this.getHost()
         });
+    }
+
+    getHost() : string {
+        if (ENV == "prod") {
+            return location.origin;
+        }
+        else {
+            return location.protocol + "//" + location.hostname;
+        }   
+    }
+
+    getArtifactsUrl(expId: string, artifactName: string) : string {
+        return this.getHost() + "/artifacts/" + expId + "/artifacts/" + artifactName;
     }
 
     async apiCall<QueryT extends APIQuery, RespT extends APIResponse>(url : string, data : QueryT) {
@@ -331,7 +345,7 @@ class APIInstance {
     }
 
     async getGraph(exp_id: string, graph: string) {
-        let url = "http://localhost:5000/static/" + exp_id + "/bokeh/" + graph;
+        let url = this.getHost() + "/artifacts/" + exp_id + "/bokeh/" + graph;
         let graph_def = await fetch(url).then((resp) => { return resp.text() }).then((t) => {return t});
         return graph_def
     }

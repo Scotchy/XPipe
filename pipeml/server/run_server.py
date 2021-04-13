@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from flask_cors import CORS
 
 from bokeh.embed import components
@@ -18,59 +18,43 @@ from .utils import APISuccess, APIError, update
 from mongoengine import connect
 
 @click.command()
-@click.option("--host", default="127.0.0.1", help="IP Address of the MongoDB server")
-@click.option("--port", default=27017, help="Port of the MongoDB server")
+@click.option("--host", default="127.0.0.1", help="Flask host")
+@click.option("--port", default="5000", help="Flask port")
+@click.option("--db-host", default="127.0.0.1", help="IP Address of the MongoDB server")
+@click.option("--db-port", default=27017, help="Port of the MongoDB server")
 @click.option("--artifacts-dir", default="./artifacts", help="Folder to store artifacts")
-def run(host, port, artifacts_dir):
-    connect("pipeml", host=host, port=port)
-    init_db()
+def run(host, port, db_host, db_port, artifacts_dir):
+    connect("pipeml", host=db_host, port=db_port) # Connect to mongodb
+    init_db() # Initialize models
+
     dir_path = dirname(realpath(__file__))
     artifacts_dir = os.path.join(os.getcwd(), artifacts_dir)
-    app = Flask(__name__, static_url_path="/static", static_folder=artifacts_dir)
+    static_dir = os.path.join(dir_path, "frontend/build")
+    app = Flask(__name__, 
+        static_url_path="/", 
+        static_folder=static_dir,
+        template_folder=static_dir)
     CORS(app)
-    
-    @app.route("/index")
+
+
     @app.route("/")
     def index():
-        p = figure(plot_width=400, plot_height=400, title="Test")
-        p.line([1,2], [1,2])
-        s, p = components(p)
-        return render_template("index.html", script=s, plot=p)
+        return render_template("index.html")
 
-    @app.route("/experiment/<id>")
-    def show_exp(exp_id=""):
-        exp = Experiment.get(exp_id)
-        configuration = yaml.dump(
-            yaml.dump(exp.to_mongo()["configuration"], Dumper=yaml.Dumper).replace("\n", "<br />")
-            , Dumper=yaml.Dumper
-        )
-        metric = exp.get_timeserie("test")
-        y = metric.y
-        x = [i for i in range(len(y))]
-        p = figure(plot_width=400, plot_height=400, title=metric.name)
-        p.line(x, y)
-        s, p = components(p)
-
-        return render_template(
-            "experiment.html", 
-            exp={
-                "id": exp.id,
-                "name": exp.name,
-                "configuration": configuration
-            }, 
-            graph_html=p,
-            graph_js=s
-            )
-    
-    @app.route("/explorer/<path:path>")
     @app.route("/explorer")
-    @app.route("/explorer/")
-    def explorer(path=""):
-        return render_template("explorer.html")
-        
+    @app.route("/explorer/<path:path>")
+    @app.route("/experiment")
+    @app.route("/experiment/<path:path>")
+    def pipeml(path=None):
+        return render_template("index.html")
+    
+    @app.route('/artifacts/<path:filename>')
+    def base_static(filename):
+        return send_from_directory(artifacts_dir, filename)
+
     # Backend API
 
-    @app.route("/api/folder/new", methods=["POST"])
+    @app.route("/api/folder/new", methods=["POST", "GET"])
     def create_folder():
         data = request.json
         path = data["folder"]
@@ -119,7 +103,6 @@ def run(host, port, artifacts_dir):
         data = request.json
         folder = Folder.get_folder(data["folder"]).delete()
         return APISuccess().json()
-
 
     @app.route("/api/folder/list", methods=["POST"])
     def list_folders():
@@ -332,7 +315,7 @@ def run(host, port, artifacts_dir):
             if "file" not in request.files:
                 raise ValueError("No file to save")
                 
-            exp.log_artifact(request.files["file"], artifact_folder=artifacts_dir)
+            exp.log_artifact(request.files["file"], artifacts_folder=artifacts_dir)
             return APISuccess().json()
         except Exception as e:
             return APIError(str(e)).json()
@@ -377,5 +360,5 @@ def run(host, port, artifacts_dir):
         except Exception as e:
             return APIError(str(e)).json()
 
-    app.run(debug=True)
+    app.run(host=host, port=port, debug=True)
 run()

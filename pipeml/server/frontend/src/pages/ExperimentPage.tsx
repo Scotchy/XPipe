@@ -339,7 +339,7 @@ export class ExperimentArtifacts extends React.Component<ExperimentArtifactsProp
                                 </Nav>
                             </Col>
                             <Col sm={10}>
-                                <FileVisualizer addr={"http://localhost:5000/static/"+this.props.exp_id+"/artifacts/"+this.state.selectedArtifact} />
+                                <FileVisualizer addr={API.getArtifactsUrl(this.props.exp_id, this.state.selectedArtifact)} />
                             </Col>
                         </Row>
                     </Tab.Container>

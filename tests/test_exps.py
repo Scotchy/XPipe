@@ -23,7 +23,8 @@ class TestExp(unittest.TestCase):
         self.assertEqual(exp.name, self.exp_name)
 
         # Test remove
-        r = self.session.delete_run(id_exp)
-        self.assertEqual(r["success"], True)
+        self.session.delete_run(id_exp)
+        delete_again = lambda : self.session.delete_run(id_exp)
         load_exp = lambda : self.session.get_run(id_exp)
+        self.assertRaises(ValueError, delete_again)
         self.assertRaises(ValueError, load_exp)

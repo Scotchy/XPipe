@@ -43,11 +43,11 @@ class Experiment():
         r = self.session.api_call(
             "delete_run",
             data={
-                "id": self.id
+                "ids": self.id
             })
         
         if not r["success"]:
-            raise ValueError(f"Can't delete run {id} ({r['message']})")
+            raise ValueError(f"Can't delete run {self.id} ({r['message']})")
     
     def load(self, id_exp):
         r = self.session.api_call(

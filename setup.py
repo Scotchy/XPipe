@@ -19,7 +19,10 @@ setup(
     version="0.1.1",
     description="Standardize your ML projects",
     author="Jules Tevissen",
-    license="MIT",
+    license="GNU GPLv3",
+    install_requires=[
+        "numpy", "bokeh", "mongoengine", "Flask", "flask-cors", "pyyaml", "click"
+    ],
     package_data={"pipeml": template_files + static_files}, 
     entry_points={
         "console_scripts": [
