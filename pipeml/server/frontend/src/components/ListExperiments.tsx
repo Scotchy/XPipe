@@ -112,16 +112,38 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
     }
 
     render() {
+        var ths : Array<any> = [{"#": 1, "Name": 1}];
+        this.state.params.map( (param) => {
+            let n_ths = ths.length;
+            let split_param = param.split(".");
+            let n_levels = split_param.length;
+            for (var i = 0; i < n_levels; i++) {
+                if (i >= n_ths) {
+                    ths.push({"": 2});
+                }
+                let level_name = split_param[i];
+                if (level_name in ths[i]) {
+                    ths[i][level_name] += 1;
+                }
+                else {
+                    ths[i][level_name] = 1;
+                }
+            }
+        });
         return (
             <table id="experiments" className="table table-sm" style={{marginTop: "10px"}}>
                 <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        {this.state.params.map((param) => (
-                            <th scope="col">{param}</th>
-                        ))}
-                    </tr>
+                    {
+                        ths.map( (th, i) => (
+                            <tr>
+                                {Object.keys(th).map( (level) => (
+                                    i < ths.length - 1 ? 
+                                    <th scope="col" colSpan={th[level]} style={{textAlign: "center"}}>{level}</th> :
+                                    <th scope="col" colSpan={th[level]}>{level}</th>
+                                ))}
+                            </tr>
+                        ))
+                    }
                 </thead>
                 <tbody id="experiments_list">
                     {this.state.experiments.map((exp) => (

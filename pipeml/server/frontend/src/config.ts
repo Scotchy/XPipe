@@ -1,5 +1,5 @@
 // "prod" or "dev"
-export const ENV = "prod";
+export var ENV = "dev";
 
 // The port of the backend API that will be used if ENV=="dev". 
 // It allows you to use "npm start" and connect to the React server while using another port for the backend.

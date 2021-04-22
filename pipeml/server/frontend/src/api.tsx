@@ -167,7 +167,7 @@ class APIInstance {
             return location.origin;
         }
         else {
-            return location.protocol + "//" + location.hostname;
+            return location.protocol + "//" + location.hostname + ":" + DEV_PORT;
         }   
     }
 
