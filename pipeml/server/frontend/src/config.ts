@@ -5,4 +5,4 @@ export var ENV = "dev";
 // It allows you to use "npm start" and connect to the React server while using another port for the backend.
 // In production environment, the React app is served by the Flask server on a port (5000 for example).
 // The Flask server also handle the backend API on the same port.
-export const DEV_PORT = 5000;
+export const DEV_PORT = 5000; 
