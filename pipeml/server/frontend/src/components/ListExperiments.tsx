@@ -3,6 +3,7 @@ import { Experiment } from "../type";
 import { API } from "../api";
 import { Link } from "react-router-dom";
 import { Form } from "react-bootstrap";
+import { ParamsMetricsSelector } from ".";
 
 interface ExperimentItemProps {
     exp : Experiment, 
@@ -112,35 +113,55 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
     }
 
     render() {
-        var ths : Array<any> = [{"#": 1, "Name": 1}];
+        var ths : Array<any> = [{"default": {"#": 1, "Name": 1}}];
+        var n_tot_levels = 0;
+        var levels = this.state.params.map( (param) => (param.split(".").length)); 
+        for (var i = 0; i < levels.length; i++) {
+            if (n_tot_levels < levels[i]) {
+                n_tot_levels = levels[i];
+            }
+        }
+        for (var i = 0; i < n_tot_levels - 1; i++) {
+            ths.push({"default": {"#": 1, "Name": 1}});
+        }
+
         this.state.params.map( (param) => {
-            let n_ths = ths.length;
             let split_param = param.split(".");
             let n_levels = split_param.length;
             for (var i = 0; i < n_levels; i++) {
-                if (i >= n_ths) {
-                    ths.push({"": 2});
-                }
+                const key = (i > 0) ? split_param.slice(0, i).join(".") : "root";
+                
                 let level_name = split_param[i];
-                if (level_name in ths[i]) {
-                    ths[i][level_name] += 1;
+
+                const ind = i + n_tot_levels - n_levels;
+                if (key in ths[ind]) {
+                    if (level_name in ths[i][key]) {
+                        ths[ind][key][level_name] += 1;
+                    }
+                    else {
+                        ths[ind][key][level_name] = 1
+                    }
                 }
                 else {
-                    ths[i][level_name] = 1;
+                    ths[ind][key] = {[level_name]: 1}
                 }
             }
         });
         return (
-            <table id="experiments" className="table table-sm" style={{marginTop: "10px"}}>
+            <table id="experiments" className="table-bordered table-sm" style={{marginTop: "10px", fontSize: "0.9rem"}}>
                 <thead>
                     {
-                        ths.map( (th, i) => (
+                        ths.map( (th_level, i) => (
                             <tr>
-                                {Object.keys(th).map( (level) => (
-                                    i < ths.length - 1 ? 
-                                    <th scope="col" colSpan={th[level]} style={{textAlign: "center"}}>{level}</th> :
-                                    <th scope="col" colSpan={th[level]}>{level}</th>
-                                ))}
+                                {
+                                    Object.keys(th_level).map( (th_group) => (
+                                        Object.keys(th_level[th_group]).map( (level) => (
+                                            i < ths.length - 1 ? 
+                                            <th scope="col" colSpan={th_level[th_group][level]} style={{textAlign: "center"}}>{level}</th> :
+                                            <th scope="col" colSpan={th_level[th_group][level]}>{level}</th>
+                                        ))    
+                                    ))
+                                }
                             </tr>
                         ))
                     }
