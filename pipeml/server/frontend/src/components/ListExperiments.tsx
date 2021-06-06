@@ -4,6 +4,7 @@ import { API } from "../api";
 import { Link } from "react-router-dom";
 import { Form } from "react-bootstrap";
 import { ParamsMetricsSelector } from ".";
+import { Node } from "./utils";
 
 interface ExperimentItemProps {
     exp : Experiment, 
@@ -48,6 +49,7 @@ interface ListExperimentsState {
     folder: string,
     experiments: Array<Experiment>,
     params: Array<string>,
+    params_tree: Node,
     checkedExp: {[exp_id: string] : boolean},
 }
 export class ListExperiments extends React.Component<ListExperimentsProps, ListExperimentsState> {
@@ -59,6 +61,7 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
             folder: folder,
             experiments: [],
             params: this.props.params,
+            params_tree: new Node("root"), 
             checkedExp: {}
         };
     }
@@ -90,10 +93,17 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
                     checkedExp[id] = false;
                 }
             }
+            
+            var tree = new Node("root");
+            tree.insert("-Name-")
+            params.map( (param) => {
+                tree.insert(param);
+            });
 
             this.setState({
                 experiments: resp.experiments,
                 params: params,
+                params_tree: tree, 
                 checkedExp: checkedExp
             });
         });
@@ -113,53 +123,27 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
     }
 
     render() {
-        var ths : Array<any> = [{"default": {"#": 1, "Name": 1}}];
-        var n_tot_levels = 0;
-        var levels = this.state.params.map( (param) => (param.split(".").length)); 
-        for (var i = 0; i < levels.length; i++) {
-            if (n_tot_levels < levels[i]) {
-                n_tot_levels = levels[i];
-            }
-        }
-        for (var i = 0; i < n_tot_levels - 1; i++) {
-            ths.push({"default": {"#": 1, "Name": 1}});
+        const depth = this.state.params_tree.getDepth();
+        const width = this.state.params_tree.getWidth();
+
+        var tab = [];
+        for (var i = depth-1; i >= 0; i--) {
+            tab.push(this.state.params_tree.getNodesAtDepth(i));
         }
 
-        this.state.params.map( (param) => {
-            let split_param = param.split(".");
-            let n_levels = split_param.length;
-            for (var i = 0; i < n_levels; i++) {
-                const key = (i > 0) ? split_param.slice(0, i).join(".") : "root";
-                
-                let level_name = split_param[i];
-
-                const ind = i + n_tot_levels - n_levels;
-                if (key in ths[ind]) {
-                    if (level_name in ths[i][key]) {
-                        ths[ind][key][level_name] += 1;
-                    }
-                    else {
-                        ths[ind][key][level_name] = 1
-                    }
-                }
-                else {
-                    ths[ind][key] = {[level_name]: 1}
-                }
-            }
-        });
         return (
-            <table id="experiments" className="table-bordered table-sm" style={{marginTop: "10px", fontSize: "0.9rem"}}>
+            <table id="experiments" className="experiment-tab table-bordered table-sm borderless-cell" style={{marginTop: "10px", fontSize: "0.9rem"}}>
                 <thead>
                     {
-                        ths.map( (th_level, i) => (
+                        tab.map( (tab_level, i) => (
                             <tr>
+                                <th scope="col" className="borderless-cell"></th>
                                 {
-                                    Object.keys(th_level).map( (th_group) => (
-                                        Object.keys(th_level[th_group]).map( (level) => (
-                                            i < ths.length - 1 ? 
-                                            <th scope="col" colSpan={th_level[th_group][level]} style={{textAlign: "center"}}>{level}</th> :
-                                            <th scope="col" colSpan={th_level[th_group][level]}>{level}</th>
-                                        ))    
+                                    tab_level.map( (node) => (
+                                        (node.name != "") ?
+                                        <th scope="col" colSpan={node.width} style={{textAlign: "center"}}>{node.name}</th>
+                                        :
+                                        <th scope="col" className="borderless-cell" colSpan={node.width} style={{textAlign: "center"}}>{node.name}</th>
                                     ))
                                 }
                             </tr>
@@ -172,7 +156,7 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
                             selected={this.state.checkedExp[exp.id]} 
                             onToggle={this.handleOnToggle} 
                             exp={exp} key={exp.id} 
-                            params={this.state.params} />
+                            params={this.state.params_tree.getParameters().slice(1)} />
                     ))}
                 </tbody>
             </table>
