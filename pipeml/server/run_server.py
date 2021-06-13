@@ -1,9 +1,12 @@
+from bokeh.models.annotations import Legend
 from flask import Flask, render_template, request, send_from_directory
 from flask_cors import CORS
 
 from bokeh.embed import components
 from bokeh.plotting import figure 
 from bokeh.embed import json_item
+from bokeh.palettes import Category20_20
+
 import numpy as np
 import json
 import yaml
@@ -132,7 +135,9 @@ def run(host, port, db_host, db_port, artifacts_dir):
             {
                 **{"id": str(e.pk), "name": e.name},
                 **{"params": {param_name: e.get_param(param_name) for param_name in data["params"]}},
-                **{"metrics": {metric_name: e.get_metric(metric_name) for metric_name in data["metrics"]}}
+                **{"metrics": {metric_name: e.get_metric(metric_name) for metric_name in data["metrics"]}},
+                **{"commit_hash": e.commit_hash}, 
+                **{"start_date": e.start_date_str}
             } for e in experiments
         ]
         return APISuccess({
@@ -209,6 +214,39 @@ def run(host, port, db_host, db_port, artifacts_dir):
         except Exception as e:
             return APIError(str(e)).json()
 
+    @app.route("/api/compare/graph", methods=["GET", "POST"])
+    def draw_compare_graph():
+        
+        try: 
+            data = request.json
+            exps = [Experiment.get(i) for i in data["ids"]]
+
+            p = figure(sizing_mode='stretch_both', title=data["metric"])
+            plotted_exps = []
+            for i, exp in enumerate(exps):
+                timeserie = exp.get_timeserie(data["metric"])
+                if timeserie is None:
+                    continue
+                y = timeserie.y
+                x = [i for i in range(len(y))]
+
+                # Check if exp name already exists and add (n) if needed
+                name = exp.name
+                if name in plotted_exps:
+                    i = 1
+                    while name + f" ({i})" in plotted_exps:
+                        i += 1
+                    name = name + f" ({i})"
+                plotted_exps += [name]
+
+                p.line(x, y, line_color=Category20_20[i], legend_label=name)
+
+            p.legend.click_policy="hide"
+
+            return APISuccess({"graph": json_item(p)}).json()
+        except Exception as e:
+            return APIError(str(e)).json()
+
     @app.route("/api/run/metric/list", methods=["GET", "POST"])
     def list_metrics():
         try: 
@@ -218,6 +256,19 @@ def run(host, port, db_host, db_port, artifacts_dir):
         except Exception as e: 
             return APIError(str(e)).json()
 
+    @app.route("/api/compare/metric/list", methods=["GET", "POST"])
+    def list_compare_metrics():
+        try: 
+            data = request.json
+            exps = [Experiment.get(i) for i in data["ids"]]
+            metrics = []
+            for exp in exps:
+                metrics += exp.list_metrics()
+            metrics = list(set(metrics))
+            print(metrics)
+            return APISuccess({"metrics": metrics}).json()
+        except Exception as e: 
+            return APIError(str(e)).json()
     # ----------------------------------------
 
     # Backend API for python library
@@ -279,7 +330,8 @@ def run(host, port, db_host, db_port, artifacts_dir):
                 "name": exp.name,
                 "configuration": exp.to_mongo()["configuration"],
                 "path": exp.parent_folder.get_full_path(), 
-                "commit_hash": exp.commit_hash
+                "commit_hash": exp.commit_hash,
+                "start_date": exp.start_date_str
             }).json()
         except Exception as e:
             return APIError(str(e)).json()

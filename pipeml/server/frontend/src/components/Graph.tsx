@@ -29,7 +29,6 @@ export class Graph extends React.Component<GraphProps, GraphState> {
     }
 }
 
-
 interface DrawMetricProps {
     exp_id: string,
     metric: string
@@ -104,6 +103,49 @@ export class DrawGraph extends React.Component<DrawGraphProps, DrawGraphState> {
         API.getGraph(exp_id, graph).then((resp) => {
             this.setState({
                 graph_def: JSON.parse(resp)
+            })
+        });
+    }
+
+    render() {
+        return (
+            this.state.graph_def != "" && <Graph graph={this.state.graph_def} />
+        );
+    }
+}
+
+
+interface CompareMetricProps {
+    exp_ids: Array<string>,
+    metric: string
+}
+interface CompareMetricState {
+    graph_def: any
+}
+
+export class CompareMetric extends React.Component<CompareMetricProps, CompareMetricState> {
+    id: string;
+
+    constructor(props : CompareMetricProps) {
+        super(props);
+        this.state = {
+            graph_def: ""
+        }
+        this.id = uniqueId("draw-metric-"); 
+    }
+
+    componentDidMount() {
+        this.update(this.props.exp_ids, this.props.metric);
+    }
+
+    componentWillReceiveProps(props: CompareMetricProps) {
+        this.update(props.exp_ids, props.metric);
+    }
+
+    update(exp_ids: Array<string>, metric: string) {
+        API.getExpsMetric(exp_ids, metric).then((resp) => {
+            this.setState({
+                graph_def: resp.graph
             })
         });
     }

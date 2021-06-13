@@ -1,8 +1,11 @@
 import mongoengine 
-from mongoengine import Document, DictField, StringField, IntField, FloatField, ListField, EmbeddedDocument, EmbeddedDocumentField, EmbeddedDocumentListField, ReferenceField
+from mongoengine import Document, DictField, StringField, IntField, FloatField, ListField, ReferenceField
 import re
 import os
 from pathlib import Path
+
+from mongoengine.fields import DateTimeField
+from datetime import datetime
 
 class TimeSerie(Document):
     name = StringField()
@@ -13,6 +16,7 @@ class TimeSerie(Document):
 class Experiment(Document): 
     name = StringField()
     duration = IntField()
+    start_date = DateTimeField()
     configuration = DictField()
     commit_hash = StringField()
     timeseries = ListField(ReferenceField("TimeSerie"))
@@ -32,6 +36,7 @@ class Experiment(Document):
             exp = Experiment()
             exp.name = name
             exp.commit_hash = commit_hash
+            exp.start_date = datetime.now()
             exp.parent_folder = Folder.get_folder(folder)
             exp.save()
             return exp
@@ -135,7 +140,11 @@ class Experiment(Document):
         except:
             return []
         return graphs
-        
+
+    @property 
+    def start_date_str(self):
+        return self.start_date.strftime("%d/%m/%y %H:%M") if self.start_date is not None else ""
+    
 class Folder(Document):
     name = StringField()
     children_folders = ListField(ReferenceField("Folder"))

@@ -31,6 +31,7 @@ class ExperimentItem extends React.Component<ExperimentItemProps, ExperimentItem
             <tr>
                 <th><Form.Check checked={this.props.selected} onChange={this.handleOnToggle} /></th>
                 <th><Link to={"/experiment/"+this.props.exp.id}>{this.props.exp.name}</Link></th>
+                <th>{this.props.exp.start_date}</th>
                 {this.props.params.map( (param) => (
                     <th>{this.props.exp.params[param]}</th>
                 ))}
@@ -95,7 +96,8 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
             }
             
             var tree = new Node("root");
-            tree.insert("-Name-")
+            tree.insert("-Name")
+            tree.insert("-date")
             params.map( (param) => {
                 tree.insert(param);
             });
@@ -156,7 +158,7 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
                             selected={this.state.checkedExp[exp.id]} 
                             onToggle={this.handleOnToggle} 
                             exp={exp} key={exp.id} 
-                            params={this.state.params_tree.getParameters().slice(1)} />
+                            params={this.state.params_tree.getParameters().slice(2)} />
                     ))}
                 </tbody>
             </table>

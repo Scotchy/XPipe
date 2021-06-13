@@ -8,6 +8,8 @@ export interface Folder {
 export interface Experiment {
     name: string,
     id: string,
+    commit_hash: string,
     params: any,
-    metrics: any
+    metrics: any,
+    start_date: string
 }

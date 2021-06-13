@@ -100,7 +100,8 @@ interface ExperimentInfosProps extends RouteComponentProps<{}> {
 interface ExperimentInfosState {
     run_name: string,
     commit_hash: string,
-    path: string
+    path: string,
+    start_date: string
 }
 class ExperimentInfosWithoutRouter extends React.Component<ExperimentInfosProps, ExperimentInfosState> { 
 
@@ -109,7 +110,8 @@ class ExperimentInfosWithoutRouter extends React.Component<ExperimentInfosProps,
         this.state = {
             run_name: "",
             commit_hash: "",
-            path: ""
+            path: "",
+            start_date: ""
         }
     }
 
@@ -118,7 +120,8 @@ class ExperimentInfosWithoutRouter extends React.Component<ExperimentInfosProps,
             this.setState({
                 run_name: resp.name,
                 commit_hash: resp.commit_hash,
-                path: resp.path
+                path: resp.path,
+                start_date: resp.start_date
             });
         }); 
     }
@@ -134,6 +137,7 @@ class ExperimentInfosWithoutRouter extends React.Component<ExperimentInfosProps,
                     <tr><td><b>Run id</b></td><td>{this.props.exp_id}</td></tr>
                     <tr><td><b>Commit hash</b></td><td>{this.state.commit_hash}</td></tr>
                     <tr><td><b>Run name</b></td><td>{this.state.run_name}</td></tr>
+                    <tr><td><b>Start date</b></td><td>{this.state.start_date}</td></tr>
                 </table>
                 <ShowPath path={this.state.path} onClick={this.handleOnOpenFolder} />
                 <h3>Notes</h3>

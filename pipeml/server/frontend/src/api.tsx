@@ -121,7 +121,8 @@ interface GetExpInfosResponse extends APIResponse {
     name: string,
     configuration: any,
     commit_hash: string,
-    path: string
+    path: string,
+    start_date: string
 }
 
 interface GetExpMetricQuery extends APIQuery {
@@ -132,10 +133,25 @@ interface GetExpMetricResponse extends APIResponse {
     graph: any
 }
 
+interface GetExpsMetricQuery extends APIQuery {
+    ids: Array<string>,
+    metric: string
+}
+interface GetExpsMetricResponse extends APIResponse {
+    graph: any
+}
+
 interface ListExpMetricsQuery extends APIQuery {
     id: string
 }
 interface ListExpMetricsResponse extends APIResponse {
+    metrics: Array<string>
+}
+
+interface ListExpsMetricsQuery extends APIQuery {
+    ids: Array<string>
+}
+interface ListExpsMetricsResponse extends APIResponse {
     metrics: Array<string>
 }
 
@@ -320,12 +336,29 @@ class APIInstance {
         return await this.apiCall<GetExpMetricQuery, GetExpMetricResponse>(url, query);
     }
 
+    async getExpsMetric(exp_ids : Array<string>, metric_name : string) {
+        let url = "/api/compare/graph";
+        let query = {
+            "ids": exp_ids,
+            "metric": metric_name
+        }
+        return await this.apiCall<GetExpsMetricQuery, GetExpsMetricResponse>(url, query);
+    }
+
     async listExpMetrics(exp_id : string) {
         let url = "/api/run/metric/list";
         let query = {
             "id": exp_id
         }
         return await this.apiCall<ListExpMetricsQuery, ListExpMetricsResponse>(url, query);
+    }
+
+    async listExpsMetrics(exp_ids : Array<string>) {
+        let url = "/api/compare/metric/list";
+        let query = {
+            "ids": exp_ids
+        }
+        return await this.apiCall<ListExpsMetricsQuery, ListExpsMetricsResponse>(url, query);
     }
 
     async listArtifacts(exp_id : string) {
