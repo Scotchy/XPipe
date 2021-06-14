@@ -130,7 +130,7 @@ def run(host, port, db_host, db_port, artifacts_dir):
     @app.route("/api/run/list", methods=["POST"])
     def list_runs():
         data = request.json
-        experiments = Experiment.list(data["folder"])
+        experiments = Experiment.list(data["folder"], order_by="start_date")
         experiments = [
             {
                 **{"id": str(e.pk), "name": e.name},
@@ -329,6 +329,7 @@ def run(host, port, db_host, db_port, artifacts_dir):
             return APISuccess({
                 "name": exp.name,
                 "configuration": exp.to_mongo()["configuration"],
+                "metrics": exp.get_metrics(), 
                 "path": exp.parent_folder.get_full_path(), 
                 "commit_hash": exp.commit_hash,
                 "start_date": exp.start_date_str

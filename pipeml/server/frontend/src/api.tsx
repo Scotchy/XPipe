@@ -122,6 +122,7 @@ interface GetExpInfosResponse extends APIResponse {
     configuration: any,
     commit_hash: string,
     path: string,
+    metrics: { [metric: string]: number },
     start_date: string
 }
 

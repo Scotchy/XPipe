@@ -37,7 +37,7 @@ export class CompareExperiments extends React.Component<CompareExperimentsProps,
 
         return (
             <div>
-                <Container>
+                <Container style={{minHeight: "2000px"}}>
                     <h2>Run comparison</h2>
                     
                     Selected runs

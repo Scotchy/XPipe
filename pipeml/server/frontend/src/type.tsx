@@ -10,6 +10,6 @@ export interface Experiment {
     id: string,
     commit_hash: string,
     params: any,
-    metrics: any,
+    metrics: { [metric: string]: number },
     start_date: string
 }

@@ -25,9 +25,11 @@ class Experiment(Document):
     labels = ListField(StringField())
     
     @staticmethod
-    def list(folder):
+    def list(folder, order_by=None):
         folder_id = Folder.get_folder(folder).pk
         experiments = Experiment.objects(parent_folder=folder_id)
+        if order_by is not None:
+            experiments = experiments.order_by("-start_date")
         return experiments
     
     @staticmethod
@@ -65,9 +67,17 @@ class Experiment(Document):
 
     def get_metric(self, name):
         timeserie = self.get_timeserie(name)
-        if timeserie is not None:
-            return timeserie[-1]
+        if timeserie is not None and len(timeserie.y) > 0:
+            return timeserie.y[-1]
+        return None
     
+    def get_metrics(self):
+        metrics_names = self.list_metrics()
+        metrics = {}
+        for metric_name in metrics_names:
+            metrics[metric_name] = self.get_metric(metric_name)
+        return metrics
+
     def list_metrics(self):
         return [ts.name for ts in self.timeseries]
     
