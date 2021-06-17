@@ -9,3 +9,10 @@
     font-size: 0.9rem;
     padding: 0.2rem;
 }
+
+#ParametersMetricsSelector {
+    opacity: 0.8
+}
+#ParametersMetricsSelector:hover {
+    opacity: 1;
+}

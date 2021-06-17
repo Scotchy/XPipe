@@ -163,15 +163,54 @@ class ParameterItem extends React.Component<ParameterItemProps, ParameterItemSta
     }
 }
 
+interface MetricsSetProps {
+    onUpdateMetric: (name : string, selected : boolean) => void,
+    metrics: Array<string>,
+    checked: { [metric: string]: boolean }
+}
+interface MetricsSetState {
+
+}
+class MetricsSet extends React.Component<MetricsSetProps, MetricsSetState> {
+    constructor(props : MetricsSetProps) {
+        super(props);
+        this.state = {
+            checked: props.checked
+        };
+    }
+
+    render() {
+        return (
+            <div>
+                {this.props.metrics.map((metric : string) => {
+                    return (
+                        <ParameterItem
+                            name={metric}
+                            onToggle={this.props.onUpdateMetric} 
+                            path={metric}
+                            isVal 
+                            checked={this.props.checked[metric]} />
+                    );
+                    })
+                }
+            </div>
+        );
+    }
+}
+
+
 interface ParamsMetricsSelectorProps {
     folder: string,
-    onUpdateParams : (selectedParams : Array<string>) => void
+    onUpdateParams : (selectedParams : Array<string>) => void,
+    onUpdateMetrics : (selectedMetrics : Array<string>) => void
 }
 interface ParamsMetricsSelectorState {
     displaySelector: boolean,
     params: any,
+    metrics: Array<string>,
     selectedParams: Array<string>,
-    checked: { [param : string] : boolean }
+    checked: { [param : string] : boolean },
+    checkedMetrics: { [MetricsSet : string] : boolean }
 }
 export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelectorProps, ParamsMetricsSelectorState> {
     dropdownEl : React.RefObject<HTMLDivElement>;
@@ -182,8 +221,10 @@ export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelector
         this.state = {
             displaySelector: false,
             params: {},
+            metrics: [],
             selectedParams: [],
-            checked: {}
+            checked: {},
+            checkedMetrics: {}
         }
     }
 
@@ -193,9 +234,10 @@ export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelector
 
     componentWillReceiveProps(props : ParamsMetricsSelectorProps) {
         if (this.props.folder != props.folder) {
-            API.getParams(props.folder).then((resp) => {
+            API.getParamsMetrics(props.folder).then((resp) => {
                 this.setState({
-                    params: resp.params
+                    params: resp.params,
+                    metrics: resp.metrics
                 });
                 this.loadDefaultParams(props.folder);
             });
@@ -205,14 +247,18 @@ export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelector
     loadDefaultParams(folder : string) {
         this.setState({
             selectedParams: [],
-            checked: {}
+            checked: {},
+            checkedMetrics: {}
         });
         this.props.onUpdateParams([]);
     }
     
     componentDidMount() {
-        API.getParams(this.props.folder).then((resp) => {
-            this.setState({params: resp.params});
+        API.getParamsMetrics(this.props.folder).then((resp) => {
+            this.setState({
+                params: resp.params,
+                metrics: resp.metrics
+            });
         });
     }
 
@@ -229,13 +275,28 @@ export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelector
         }
         this.props.onUpdateParams(selectedParams);
     }
+
+    handleOnUpdateMetric = (name : string, selected : boolean) => {
+        const checked = this.state.checkedMetrics;
+        checked[name] = selected;
+        this.setState({checkedMetrics : checked});
+
+        const selectedMetrics : Array<string> = []
+        for (let metric_name in checked) {
+            if (checked[metric_name]) {
+                selectedMetrics.push(metric_name);
+            }
+        }
+        this.props.onUpdateMetrics(selectedMetrics);
+    }
             
 
     render() {
         return (
-            <div className="position-relative">
+            <div>
+            <div className="position-relative" id="ParametersMetricsSelector">
                 <Button onClick={this.toggleDropdown}>Columns <BsFillCaretDownFill /></Button>
-                <div className="dropdown-menu" id="select_columns" style={{minWidth: "500px", "boxShadow": "grey 0px 0px 3px", display: this.state.displaySelector ? "block" : "none"}}>
+                </div><div id="select_columns" style={{paddingBottom: "5px", minWidth: "500px", "boxShadow": "grey 0px 0px 3px", display: this.state.displaySelector ? "block" : "none"}}>
                     <ul className="nav nav-tabs" id="myTab" role="tablist">
                         <li className="nav-item" role="presentation">
                             <a className="nav-link active" id="parameters_tab_button" data-toggle="tab" href="#parameters_tab" role="tab" aria-controls="home" aria-selected="true">Parameters</a>
@@ -254,7 +315,11 @@ export class ParamsMetricsSelector extends React.Component<ParamsMetricsSelector
                                 checked={this.state.checked} />
                         </div>
                         <div className="tab-pane fade m-2 " id="metrics_tab" role="tabpanel" aria-labelledby="metrics_tab">
-
+                            <MetricsSet 
+                                onUpdateMetric={this.handleOnUpdateMetric}
+                                metrics={this.state.metrics}
+                                checked={this.state.checkedMetrics}
+                            />
                         </div>
                     </div>
                 </div>

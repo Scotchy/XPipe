@@ -110,6 +110,7 @@ interface ExplorerProps {
 interface ExplorerState {
     currentFolder: string,
     selectedParams: Array<string>,
+    selectedMetrics: Array<string>,
     selectedExperiments: Array<Experiment>,
     update: boolean
 } 
@@ -120,6 +121,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         this.state = {
             currentFolder: this.currentFolder(),
             selectedParams: [],
+            selectedMetrics: [], 
             selectedExperiments: [],
             update: false
         }
@@ -163,6 +165,12 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         })
     }
 
+    handleOnUpdateMetrics = (selectedMetrics : Array<string>) => {
+        this.setState({
+            selectedMetrics: selectedMetrics
+        })
+    }
+
     handleOnSelectExperiments = (selectedExperiments: Array<Experiment>) => {
         this.setState({
             selectedExperiments: selectedExperiments
@@ -199,7 +207,10 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
                 <ListFolders onOpenFolder={this.handleOnOpenFolder} folder={this.state.currentFolder} />
             }>
                 <ShowPath path={this.state.currentFolder} onClick={this.handleOnOpenFolder} />
-                <ParamsMetricsSelector onUpdateParams={this.handleOnUpdateParams} folder={this.state.currentFolder} />
+                <ParamsMetricsSelector 
+                    onUpdateParams={this.handleOnUpdateParams} 
+                    onUpdateMetrics={this.handleOnUpdateMetrics}
+                    folder={this.state.currentFolder} />
                 <ExplorerMenu 
                     currentFolder={this.state.currentFolder}
                     onMoveExp={this.handleMoveExp}
@@ -210,6 +221,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
                     onSelectExperiments={this.handleOnSelectExperiments}
                     folder={this.state.currentFolder} 
                     params={this.state.selectedParams} 
+                    metrics={this.state.selectedMetrics}
                     update={this.state.update} />
             </PageWithSideMenu>
         );

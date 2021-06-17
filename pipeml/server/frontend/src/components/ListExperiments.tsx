@@ -10,6 +10,7 @@ interface ExperimentItemProps {
     exp : Experiment, 
     onToggle?: (exp: Experiment, selected: boolean) => void,
     params: Array<string>,
+    metrics: Array<string>, 
     selected: boolean
 }
 interface ExperimentItemState {
@@ -35,6 +36,9 @@ class ExperimentItem extends React.Component<ExperimentItemProps, ExperimentItem
                 {this.props.params.map( (param) => (
                     <th>{this.props.exp.params[param]}</th>
                 ))}
+                {this.props.metrics.map( (metric) => (
+                    <th>{this.props.exp.metrics[metric]}</th>
+                ))}
             </tr>
         );
     }
@@ -43,6 +47,7 @@ class ExperimentItem extends React.Component<ExperimentItemProps, ExperimentItem
 interface ListExperimentsProps {
     folder: string,
     params: Array<string>,
+    metrics: Array<string>, 
     update: boolean, 
     onSelectExperiments?: (selectedExperiments: Array<Experiment>) => void
 }
@@ -50,6 +55,7 @@ interface ListExperimentsState {
     folder: string,
     experiments: Array<Experiment>,
     params: Array<string>,
+    metrics: Array<string>, 
     params_tree: Node,
     checkedExp: {[exp_id: string] : boolean},
 }
@@ -62,6 +68,7 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
             folder: folder,
             experiments: [],
             params: this.props.params,
+            metrics: this.props.metrics, 
             params_tree: new Node("root"), 
             checkedExp: {}
         };
@@ -72,8 +79,8 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
     }
 
     componentWillReceiveProps(props : ListExperimentsProps) {
-        if (props.folder != this.props.folder || props.params != this.props.params || props.update != this.props.update) {
-            this.getExperiments(props.folder, props.params);
+        if (props.folder != this.props.folder || props.params != this.props.params || props.metrics != this.props.metrics || props.update != this.props.update) {
+            this.getExperiments(props.folder, props.params, props.metrics);
         }
     }
 
@@ -81,8 +88,8 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
         this.getExperiments(this.props.folder, this.props.params);
     }
 
-    getExperiments(folder : string, params : Array<string> = []) {
-        API.listExperiments(folder, params).then((resp) => {
+    getExperiments(folder : string, params : Array<string> = [], metrics: Array<string> = []) {
+        API.listExperiments(folder, params, metrics).then((resp) => {
 
             const checkedExp : {[exp_id: string] : boolean} = {};
             for (var i = 0; i < resp.experiments.length; i++) {
@@ -96,15 +103,18 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
             }
             
             var tree = new Node("root");
+            
             tree.insert("-Name")
             tree.insert("-date")
+            
             params.map( (param) => {
-                tree.insert(param);
+                tree.insert("Parameters." + param);
             });
 
             this.setState({
                 experiments: resp.experiments,
                 params: params,
+                metrics: metrics, 
                 params_tree: tree, 
                 checkedExp: checkedExp
             });
@@ -148,6 +158,14 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
                                         <th scope="col" className="borderless-cell" colSpan={node.width} style={{textAlign: "center"}}>{node.name}</th>
                                     ))
                                 }
+                                {/* {
+                                    i == 0 && this.state.metrics.length > 0 && <th scope="col" colSpan={this.state.metrics.length} style={{textAlign: "center"}}><b>Metrics</b></th>
+                                } */}
+                                {
+                                    i == depth - 1 && this.state.metrics.map( (metric) => (
+                                        <th scope="col" style={{textAlign: "center"}}>{metric}</th>
+                                    ))
+                                }
                             </tr>
                         ))
                     }
@@ -158,9 +176,11 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
                             selected={this.state.checkedExp[exp.id]} 
                             onToggle={this.handleOnToggle} 
                             exp={exp} key={exp.id} 
-                            params={this.state.params_tree.getParameters().slice(2)} />
+                            params={this.state.params_tree.getParameters().slice(2)} 
+                            metrics={this.state.metrics} />
                     ))}
                 </tbody>
+                
             </table>
         );
     }

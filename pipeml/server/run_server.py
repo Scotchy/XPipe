@@ -82,19 +82,22 @@ def run(host, port, db_host, db_port, artifacts_dir):
             }).json()
         return APIError("Can't create new folder").json()
 
-    @app.route("/api/folder/params", methods=["POST", "GET"])
+    @app.route("/api/folder/params_metrics", methods=["POST", "GET"])
     def folder_params():
         data = request.json
         folder = Folder.get_folder(data["folder"])
         exps = Experiment.objects(parent_folder=folder.pk)
         confs = [exp.to_mongo()["configuration"] for exp in exps]
+        metrics = [exp.list_metrics() for exp in exps]
+        metrics = set().union(*metrics)
         if len(confs) == 0:
             return APISuccess({"params": {}}).json()
         conf = confs[0]
         for c in confs[1:]:
             conf = update(conf, c)
         return APISuccess({
-            "params": conf
+            "params": conf,
+            "metrics": list(metrics)
         }).json()
 
     @app.route("/api/folder/rename", methods=["POST"])

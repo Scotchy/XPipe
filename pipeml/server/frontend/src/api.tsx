@@ -67,14 +67,8 @@ interface GetParamsQuery extends APIQuery {
     folder : string
 }
 interface GetParamsResponse extends APIResponse {
-    params : any
-}
-
-interface GetMetricsQuery extends APIQuery {
-    folder : string
-}
-interface GetMetricsResponse extends APIResponse {
-    metrics : Array<string>
+    params : any,
+    metrics: Array<string> 
 }
 
 interface ListLabelsQuery extends APIQuery {
@@ -234,12 +228,12 @@ class APIInstance {
         return await this.apiCall<DeleteFolderQuery, DeleteFolderResponse>(url, query);
     }
 
-    async listExperiments(folder: string, params: Array<string> = []) {
+    async listExperiments(folder: string, params: Array<string> = [], metrics: Array<string> = []) {
         let url = "/api/run/list";
         let query = {
             folder: folder,
             params: params,
-            metrics: []
+            metrics: metrics
         };
         return await this.apiCall<ListExperimentsQuery, ListExperimentsResponse>(url, query);
     }
@@ -261,20 +255,12 @@ class APIInstance {
         return await this.apiCall<MoveExperimentsQuery, MoveExperimentsResponse>(url, query);
     }
 
-    async getParams(folder : string) {
-        let url = "/api/folder/params";
+    async getParamsMetrics(folder : string) {
+        let url = "/api/folder/params_metrics";
         let query = {
             folder: folder
         };
         return await this.apiCall<GetParamsQuery, GetParamsResponse>(url, query);
-    }
-
-    async getMetrics(folder : string) {
-        let url = "/api/folder/metrics";
-        let query = {
-            folder: folder
-        };
-        return await this.apiCall<GetMetricsQuery, GetMetricsResponse>(url, query);
     }
 
     async listLabels(exp_id : string) {
