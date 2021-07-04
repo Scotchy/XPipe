@@ -8,7 +8,7 @@ class TestConfiguration(TestCase):
 
     def setUp(self):
         dir_path = dirname(realpath(__file__))
-        self.conf = load_config(join(dir_path, "./template.yaml"))
+        self.conf = load_config(join(dir_path, "./resources/template.yaml"))
 
     def test_get_integer(self):
         self.assertEqual(
@@ -37,3 +37,11 @@ class TestConfiguration(TestCase):
         self.assertListEqual(list(objects_list[0]), [1, 2])
         self.assertListEqual(list(objects_list[1]), [2, 3])
         self.assertEqual(len(objects_list), 4)
+    
+    def test_include(self):
+        a = self.conf.include.a()
+        self.assertEqual(a, 1)
+    
+    def test_include_obj(self):
+        a = self.conf.obj_include()
+        self.assertListEqual(list(a), [1,2,3,4])

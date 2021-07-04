@@ -1,6 +1,7 @@
 # from .template import Template
-from .utils import is_object, is_objects_list, is_var
-from .objects import SingleObject, ObjectsList, Variable, Parameters
+import pdb
+from .utils import get_statement, is_include, is_object, is_objects_list, is_var
+from .objects import SingleObject, ObjectsList, Variable, Include, Parameters
 import yaml
 from .node import Node
 try:
@@ -28,7 +29,7 @@ class Config(Node):
         return self.name == "root"
 
     def _construct(self, name, sub_config):
-        for name, sub_config in self.config_dict.items():
+        for name, sub_config in sub_config.items():
             self.set_node(name, sub_config)
 
     def set_node(self, name, sub_config):
@@ -59,6 +60,15 @@ class Config(Node):
                     sub_config
                 )
             )
+        elif is_include(sub_config):
+            # Load the configuration file
+            path = get_statement(sub_config)["argument"]
+            with open(path, "r") as f:
+                conf = yaml.load(f, Loader=yaml.Loader)
+            conf = {name: conf}
+            self._construct(name, conf)
+            # Note that if some conf keys are present in an included file and in the current file
+            # They will overwrite each other (depending their order in the configuration file)  
         elif isinstance(sub_config, dict):
 
             setattr(self, name, Config(sub_config, name)) # Create an attribute containing the config stored in 'key'

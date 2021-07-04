@@ -1,6 +1,8 @@
+
+import yaml
 from .node import Node
 import importlib
-from .utils import is_object, is_objects_list, is_var
+from .utils import get_statement, is_include, is_object, is_objects_list, is_var
 from .variable import Variable
 
 __all__ = ["SingleObject", "ObjectsList", "Parameters"]
@@ -20,26 +22,39 @@ class Parameters(Node):
     def __init__(self, class_name, param_dict):
         super(Parameters, self).__init__(class_name, param_dict)
         
-    def _construct(self, class_name, param_dict):
+    def _construct(self, class_name, params_dict):
         self.class_name = class_name
         self._params = {}
-        for k, param_dict in param_dict.items():
+        for k, param_dict in params_dict.items():
             if is_var(param_dict):
-                self._params[k] = Variable(k, param_dict)
-                self.__dict__[k] = Variable(k, param_dict)
+                var = Variable(k, param_dict)
+                self._params[k] = var
+                self.__dict__[k] = var
             elif is_object(param_dict):
-                self._params[k] = SingleObject(k, param_dict)
-                self.__dict__[k] = SingleObject(k, param_dict)
+                so = SingleObject(k, param_dict)
+                self._params[k] = so
+                self.__dict__[k] = so
             elif is_objects_list(param_dict):
-                self._params[k] = ObjectsList(class_name, param_dict)
-                self.__dict__[k] = ObjectsList(class_name, param_dict)
+                ol = ObjectsList(class_name, param_dict)
+                self._params[k] = ol
+                self.__dict__[k] = ol
+            elif is_include(param_dict):
+                # Parameters are stored in another file
+                path = get_statement(param_dict)["argument"]
+                with open(path, "r") as f:
+                    included_params = yaml.load(f, Loader=yaml.Loader)
+                self._construct(class_name, included_params) # Add loaded parameters
+                # Note that if some parameters are present in an included file and in the current file
+                # They will overwrite each other (depending their order in the configuration file)
             else:
-                raise ValueError("")
+                # Parameter is a dictionary
+                self._params[k] = param_dict
+                self.__dict__[k] = param_dict
 
     def _check_valid(self, class_name, param_dict):
         for k, v in param_dict.items():
-            if not is_var(v) and not is_object(v) and not is_objects_list(v):
-                raise ValueError(f"Found bad format for parameter {k} of object {class_name} {param_dict}.")
+            if not is_var(v) and not is_object(v) and not is_objects_list(v) and not is_include(v):
+                raise ValueError(f"Found bad format for parameter '{k}'' of object '{class_name}' {param_dict}.")
         return True
 
     def unwarp(self):
@@ -103,3 +118,16 @@ class ObjectsList(Node):
 
     def __call__(self, **args):
         return [obj(**args) for obj in self.objects]
+
+class Include(Node):
+    
+    def __init__(self, name, config_dict):
+        super().__init__(name, config_dict)
+
+    def _check_valid(self, name, config_dict):
+        return True
+    
+    def _construct(self, name, config_dict):
+        self.name = name
+        include_path = get_statement(config_dict)["argument"]
+
