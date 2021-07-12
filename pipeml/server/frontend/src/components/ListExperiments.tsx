@@ -151,11 +151,11 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
                             <tr>
                                 <th scope="col" className="borderless-cell"></th>
                                 {
-                                    tab_level.map( (node) => (
-                                        (node.name != "") ?
-                                        <th scope="col" colSpan={node.width} style={{textAlign: "center"}}>{node.name}</th>
-                                        :
+                                    tab_level.map( (node, j) => (
+                                        (node.name == "" && j <= 1) ?
                                         <th scope="col" className="borderless-cell" colSpan={node.width} style={{textAlign: "center"}}>{node.name}</th>
+                                        :
+                                        <th scope="col" colSpan={node.width} style={{textAlign: "center"}}>{node.name}</th>
                                     ))
                                 }
                                 {/* {

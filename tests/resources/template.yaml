@@ -21,3 +21,9 @@ obj_include:
   obj:numpy.array:
     include:
       include:/home/jules/dev/PipeML/tests/resources/include_param.yaml: {}
+
+obj_config: 
+  obj:test.ObjTest: 
+    conf:
+      a: 1
+      b: 2

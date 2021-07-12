@@ -77,7 +77,9 @@ export class Node {
             nodes.push(child.getNodesAtDepth(depth));
         }
         var c : Array<Node> = [];
-        return c.concat(...nodes);
+        var r = c.concat(...nodes);
+        r.sort((n1, n2) => (n1.depth - n2.depth));
+        return r;
     }
 }
 

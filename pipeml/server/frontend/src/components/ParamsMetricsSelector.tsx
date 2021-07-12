@@ -182,7 +182,7 @@ class MetricsSet extends React.Component<MetricsSetProps, MetricsSetState> {
     render() {
         return (
             <div>
-                {this.props.metrics.map((metric : string) => {
+                {this.props.metrics != undefined && this.props.metrics.map((metric : string) => {
                     return (
                         <ParameterItem
                             name={metric}
