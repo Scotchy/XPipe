@@ -45,3 +45,12 @@ class TestConfiguration(TestCase):
     def test_include_obj(self):
         a = self.conf.obj_include()
         self.assertListEqual(list(a), [1,2,3,4])
+
+    def test_double_star(self):
+        def test(batch_size, obj, classes, **kwargs):
+            self.assertEqual(batch_size(), 10)
+            self.assertListEqual(list(obj.params.object()), [1,2])
+        a = self.conf.training
+        test(**a)
+
+

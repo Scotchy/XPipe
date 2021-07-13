@@ -4,19 +4,20 @@ from .node import Node
 import importlib
 from .utils import get_statement, is_include, is_object, is_objects_list, is_var
 from .variable import Variable
+from collections.abc import Mapping
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
 
-class Config(Node):
+class Config(Node, Mapping):
 
     def __init__(self, config_dict, name=None):
         if name == "root":
             raise ValueError("Forbidden name 'root' in yaml file.")
         if name is None:
             name = "root"
-        super(Config, self).__init__(name, config_dict)
         self.config_dict = config_dict
         self._properties = {}
+        super(Config, self).__init__(name, config_dict)
 
     def _check_valid(self, name, config_dict):
         return True
@@ -61,6 +62,9 @@ class Config(Node):
         else: 
 
             raise ValueError(f"Yaml file format not supported ({name} : {type(sub_config)})")
+
+    def __len__(self):
+        return len(self._properties)
 
     def __iter__(self):
         for prop in self._properties.keys():
@@ -116,8 +120,9 @@ class Parameters(Node):
                 # They will overwrite each other (depending their order in the configuration file)
             else:
                 # Parameter is a dictionary
-                self._params[k] = Config(param_dict)
-                self.__dict__[k] = Config(param_dict)
+                conf = Config(param_dict)
+                self._params[k] = conf
+                self.__dict__[k] = conf
 
     def _check_valid(self, class_name, param_dict):
         return True
