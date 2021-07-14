@@ -27,6 +27,9 @@ class Variable(Node):
 @Tags.register
 class EnvVariable(Variable): 
     yaml_tag = u"!env"
+    """This class defines a yaml tag.
+    It will load an environment variable.
+    """
 
     def __init__(self, value):
         self.var_name = value
@@ -50,6 +53,9 @@ class EnvVariable(Variable):
 @Tags.register
 class FormatStrVariable(Variable):
     yaml_tag = u"!f"
+    """This class defines a yaml tag. 
+    The class will automatically replace substrings $ENV_VAR or ${ENV_VAR} with the corresponding environment variables.
+    """
 
     def __init__(self, value):
         self.original_str = value
@@ -73,6 +79,10 @@ class FormatStrVariable(Variable):
 @Tags.register
 class Include(Variable):
     yaml_tag = u"!include"
+    """
+    This class defines a yaml tag.
+    It will include another yaml into the current configuration.
+    """
 
     def __init__(self, path):
         self.path = path
