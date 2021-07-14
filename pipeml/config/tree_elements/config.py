@@ -1,14 +1,8 @@
 # from .template import Template
-import pdb
-from .utils import get_statement, is_include, is_object, is_objects_list, is_var
-from .objects import Config, SingleObject, ObjectsList, Variable, Include, Parameters
+from .objects import Config
 import yaml
 from .tags import Tags
-
-try:
-    from yaml import CLoader as Loader, CDumper as Dumper
-except ImportError:
-    from yaml import Loader, Dumper
+import yaml
 
 def load_config(config_file : str, template=None):
     """Load a configuration file and return an ObjectLoader which can instantiate the wanted objects.

@@ -1,8 +1,6 @@
-
-import yaml
 from .node import Node
 import importlib
-from .utils import get_statement, is_include, is_object, is_objects_list, is_var
+from .utils import is_object, is_objects_list, is_var
 from .variable import Include, Variable
 from collections.abc import Mapping
 

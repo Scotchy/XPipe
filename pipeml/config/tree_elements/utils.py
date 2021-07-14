@@ -65,19 +65,6 @@ def is_object(config_dict):
         return False
     return len(config_dict) == 1 and get_statement(config_dict)["statement"] == "obj"
 
-def is_include(config_dict):
-    """Checks if the given configuration is an include statement.
-
-    Args:
-        config_dict (any): A configuration
-
-    Returns:
-        bool: True if 'config_dict' is an include statement.
-    """
-    if not isinstance(config_dict, dict):
-        return False
-    return len(config_dict) == 1 and get_statement(config_dict)["statement"] == "include"
-
 def is_var(config_dict):
     """Checks if the given configuration defines a variable
 
@@ -95,7 +82,6 @@ def is_var(config_dict):
 types_detectors = {
     "object": is_object,
     "objects_list": is_objects_list,
-    "is_include": is_include, 
     "var": is_var
 }
 
