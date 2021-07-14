@@ -7,9 +7,6 @@ training:
   lr: 0.01
   classes: [0,1,2,3,4]
 
-obj:test:
-  a: 1
-
 data:
   transforms: 
     - obj:numpy.array : {"object": [1, 2]}
@@ -21,7 +18,6 @@ include: !include /home/jules/dev/PipeML/tests/resources/include.yaml
 
 obj_include: 
   obj:numpy.array: 
-    object: [1,2]
     params1: !include /home/jules/dev/PipeML/tests/resources/include_param.yaml
 
 obj_config: 

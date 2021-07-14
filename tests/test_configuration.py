@@ -29,7 +29,7 @@ class TestConfiguration(TestCase):
 
     def test_get_object_parameter(self):
         self.assertListEqual(
-            self.conf.training.obj.params.object(), 
+            self.conf.training.obj._params.object(), 
             [1, 2]
         )
 
@@ -42,6 +42,9 @@ class TestConfiguration(TestCase):
     def test_include(self):
         a = self.conf.inc.a()
         self.assertEqual(a, 1)
+        self.assertTrue(len(self.conf.inc.user()))
+        self.assertListEqual(self.conf.inc.inc.object(), [1,2,3,4])
+        
     
     def test_include_obj(self):
         a = self.conf.obj_include()
@@ -50,7 +53,7 @@ class TestConfiguration(TestCase):
     def test_double_star(self):
         def test(batch_size, obj, classes, **kwargs):
             self.assertEqual(batch_size(), 10)
-            self.assertListEqual(list(obj.params.object()), [1,2])
+            self.assertListEqual(list(obj._params.object()), [1,2])
         a = self.conf.training
         test(**a)
 
