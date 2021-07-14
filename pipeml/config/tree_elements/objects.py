@@ -3,7 +3,7 @@ import yaml
 from .node import Node
 import importlib
 from .utils import get_statement, is_include, is_object, is_objects_list, is_var
-from .variable import Variable
+from .variable import Include, Variable
 from collections.abc import Mapping
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
@@ -45,22 +45,22 @@ class Config(Node, Mapping):
             obj_list = ObjectsList(name, sub_config)
             self._properties[name] = obj_list
             setattr(self, name, obj_list)
-
-        elif is_include(sub_config):
-            # Load the configuration file
-            path = get_statement(sub_config)["argument"]
-            with open(path, "r") as f:
-                conf = yaml.load(f, Loader=yaml.Loader)
-            conf = {name: conf}
-            self._construct(name, conf)
-            # Note that if some conf keys are present in an included file and in the current file
-            # They will overwrite each other (depending their order in the configuration file)  
+            
         elif isinstance(sub_config, dict):
             conf = Config(sub_config, name)
             self._properties[name] = conf
             setattr(self, name, conf) # Create an attribute containing the config stored in 'key'
+        elif isinstance(sub_config, Include):
+            conf = sub_config.load()
+            conf = {name: conf}
+            self._construct(name, conf)
+            # Note that if some conf keys are present in an included file and in the current file
+            # They will overwrite each other (depending their order in the configuration file)
+        elif isinstance(sub_config, Variable):
+            sub_config.set_name(name) # Set variable name
+            self._properties[name] = sub_config
+            setattr(self, name, sub_config)
         else: 
-
             raise ValueError(f"Yaml file format not supported ({name} : {type(sub_config)})")
 
     def __len__(self):
@@ -110,13 +110,10 @@ class Parameters(Node):
                 ol = ObjectsList(class_name, param_dict)
                 self._params[k] = ol
                 self.__dict__[k] = ol
-            elif is_include(param_dict):
-                # Parameters are stored in another file
-                path = get_statement(param_dict)["argument"]
-                with open(path, "r") as f:
-                    included_params = yaml.load(f, Loader=yaml.Loader)
+            elif isinstance(param_dict, Include):
+                included_params = param_dict.load()
                 self._construct(class_name, included_params) # Add loaded parameters
-                # Note that if some parameters are present in an included file and in the current file
+                # Note that if some conf keys are present in an included file and in the current file
                 # They will overwrite each other (depending their order in the configuration file)
             else:
                 # Parameter is a dictionary
@@ -194,16 +191,3 @@ class ObjectsList(Node):
 
     def __call__(self, **args):
         return [obj(**args) for obj in self.objects]
-
-class Include(Node):
-    
-    def __init__(self, name, config_dict):
-        super().__init__(name, config_dict)
-
-    def _check_valid(self, name, config_dict):
-        return True
-    
-    def _construct(self, name, config_dict):
-        self.name = name
-        include_path = get_statement(config_dict)["argument"]
-

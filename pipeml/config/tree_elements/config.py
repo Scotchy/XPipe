@@ -3,7 +3,8 @@ import pdb
 from .utils import get_statement, is_include, is_object, is_objects_list, is_var
 from .objects import Config, SingleObject, ObjectsList, Variable, Include, Parameters
 import yaml
-from .node import Node
+from .tags import Tags
+
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
@@ -16,6 +17,7 @@ def load_config(config_file : str, template=None):
         config_file (str): The path of the yaml config file
         template (Template): A template containing information of how to load objects defined in the configuration file
     """
+    Tags.save_tags(yaml) # Set tags constructors and representers
     with open(config_file, "r") as stream:
-        yaml_dict = yaml.load(stream, Loader=Loader)
+        yaml_dict = yaml.safe_load(stream)
     return Config(yaml_dict)

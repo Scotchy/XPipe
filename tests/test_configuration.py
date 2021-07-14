@@ -1,8 +1,9 @@
-from unittest import TestCase
+from unittest import TestCase, mock
 
 from os.path import dirname, realpath, join
 from pipeml.config import load_config
 import numpy as np
+import os
 
 class TestConfiguration(TestCase):
 
@@ -39,7 +40,7 @@ class TestConfiguration(TestCase):
         self.assertEqual(len(objects_list), 4)
     
     def test_include(self):
-        a = self.conf.include.a()
+        a = self.conf.inc.a()
         self.assertEqual(a, 1)
     
     def test_include_obj(self):
@@ -53,4 +54,10 @@ class TestConfiguration(TestCase):
         a = self.conf.training
         test(**a)
 
-
+    def test_env_var(self):
+        a = self.conf.user()
+        self.assertTrue(len(a))
+    
+    def test_str_fmt(self):
+        a = self.conf.str_fmt()
+        self.assertTrue(len(a))
