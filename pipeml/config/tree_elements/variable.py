@@ -32,6 +32,10 @@ class EnvVariable(Variable):
     """
 
     def __init__(self, value):
+        if not isinstance(value, str):
+            raise ValueError("Environment variable name must be a string.")
+        if value[0] == "$":
+            value = value[1:]
         self.var_name = value
         if value in os.environ:
             value = os.environ[value]
@@ -62,7 +66,7 @@ class FormatStrVariable(Variable):
         try:
             value = string.Template(value).substitute(os.environ)
         except KeyError as e:
-            raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in variable '{self.name}'.")
+            raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in formatted string.")
         super().__init__("", value)
     
     @classmethod
@@ -85,6 +89,10 @@ class Include(Variable):
     """
 
     def __init__(self, path):
+        try:
+            path = string.Template(path).substitute(os.environ)
+        except KeyError as e:
+            raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in include statement.")
         self.path = path
     
     def load(self):
