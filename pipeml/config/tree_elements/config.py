@@ -14,4 +14,4 @@ def load_config(config_file : str, template=None):
     Tags.save_tags(yaml) # Set tags constructors and representers
     with open(config_file, "r") as stream:
         yaml_dict = yaml.safe_load(stream)
-    return Config(yaml_dict)
+    return Config("__root__", yaml_dict)

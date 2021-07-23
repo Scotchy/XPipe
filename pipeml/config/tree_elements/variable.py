@@ -33,17 +33,16 @@ class EnvVariable(Variable):
     """
 
     def __init__(self, value):
-        self._properties = {}
         if not isinstance(value, str):
             raise ValueError("Environment variable name must be a string.")
         if value[0] == "$":
             value = value[1:]
-        self._properties["var_name"] = value
+        self.var_name = value
         if value in os.environ:
             value = os.environ[value]
         else:
             raise EnvironmentError(f"Environment variable '{value}' is not defined.")
-        self._properties["value"] = value
+        self.value = value
         super().__init__("", value)
     
     @classmethod
@@ -65,13 +64,12 @@ class FormatStrVariable(Variable):
     """
 
     def __init__(self, value):
-        self._properties = {}
-        self._properties["original_str"] = value
+        self.original_str = value
         try:
             value = string.Template(value).substitute(os.environ)
         except KeyError as e:
             raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in formatted string.")
-        self._properties["str"] = value
+        self.str = value
         super().__init__("", value)
     
     @classmethod
@@ -94,14 +92,12 @@ class Include(Variable):
     """
     
     def __init__(self, path):
-        self._properties = {
-            "original_path": path
-        }
+        self.original_path = path
         try:
             path = string.Template(path).substitute(os.environ)
         except KeyError as e:
             raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in include statement.")
-        self._properties["path"] = path
+        self.path = path
     
     def load(self):
         with open(self.path, "r") as f:

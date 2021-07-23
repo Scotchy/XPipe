@@ -10,21 +10,13 @@ __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
 
 class Config(Node, Mapping):
 
-    def __init__(self, config_dict, name=None):
-        if name == "root":
-            raise ValueError("Forbidden name 'root' in yaml file.")
-        if name is None:
-            name = "root"
+    def __init__(self, name, config_dict):
         self._config_dict = config_dict
         self._properties = {}
         Node.__init__(self, name, config_dict)
 
     def _check_valid(self, name, config_dict):
         return True
-
-    @property
-    def is_root(self):
-        return self._name == "root"
 
     def _construct(self, name, sub_config):
         for name, sub_config in sub_config.items():
@@ -44,7 +36,7 @@ class Config(Node, Mapping):
             self._properties[name] = obj_list
             
         elif isinstance(sub_config, dict):
-            conf = Config(sub_config, name)
+            conf = Config(name, sub_config)
             self._properties[name] = conf
 
         elif isinstance(sub_config, Include):
@@ -61,6 +53,25 @@ class Config(Node, Mapping):
         else: 
             raise ValueError(f"Yaml file format not supported ({name} : {type(sub_config)})")
 
+    def __getattribute__(self, prop: str):
+        properties = super(Node, self).__getattribute__("_properties")
+        if prop in properties:
+            return properties[prop]
+        else:
+            try: 
+                return super(Node, self).__getattribute__(prop)
+            except:
+                raise AttributeError(f"'{self._name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
+
+    def __getitem__(self, prop):
+        if prop in self._properties:
+            return self._properties[prop]
+        else:
+            raise AttributeError(f"'{self._name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
+
+    def __contains__(self, prop):
+        return prop in self._properties
+    
     def __len__(self):
         return len(self._properties)
 
@@ -78,12 +89,12 @@ class IncludedConfig(Config):
 
     def __init__(self, config_dict, name, path=None):
         self._path = path
-        super(IncludedConfig, self).__init__(config_dict, name=name)
+        super(IncludedConfig, self).__init__(name, config_dict)
     
     def __repr__(self) -> str:
         return f"IncludedConfig(len={len(self)}, path={self._path})"
 
-class Parameters(Node):
+class Parameters(Config):
     """Create parameters of an object from a dict 'param_dict' of format 
         { 
             object_param_name: {class_name: obj_param_dict},
@@ -118,7 +129,7 @@ class Parameters(Node):
                 # They will overwrite each other (depending their order in the configuration file)
             else:
                 # Parameter is a dictionary
-                conf = Config(param_dict)
+                conf = Config(class_name, param_dict)
                 self._properties[k] = conf
 
     def _check_valid(self, class_name, param_dict):
