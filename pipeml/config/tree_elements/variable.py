@@ -16,6 +16,7 @@ class Variable(Node):
         self.value = value
     
     def _check_valid(self, name, value):
+        valid_var_name(name)
         return True
 
     def set_name(self, name):
@@ -116,3 +117,23 @@ class Include(Variable):
         
     def __repr__(self) -> str:
         return f"Include(path={self.path})"
+    
+def valid_var_name(name : str):
+    """Raise an error if 'name' is not a valid Variable name.
+
+    Args:
+        name (str): Name of the variable
+
+    Raises:
+        ValueError: If name contains caracters that are not alphabetical or numerical
+        ValueError: If name begin with a number
+    """
+    if name == "":
+        return 
+    stripped_name = name.replace("_", "")
+    if stripped_name == "":
+        raise ValueError(f"Variable '{name}' cannot contain only underscores.")
+    if not stripped_name.isalnum():
+        raise ValueError(f"Variable '{name}' must contain alphabetical or numerical caracters or underscores.")
+    if not name[0].isalpha() or name[0] == "_":
+        raise ValueError(f"Variable '{name}' must begin with an alphabetical caracter or an underscore.")
