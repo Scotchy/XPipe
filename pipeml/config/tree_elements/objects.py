@@ -111,7 +111,6 @@ class Parameters(Config):
         
     def _construct(self, class_name, params_dict):
         self._class_name = class_name
-        self._properties = {}
         for k, param_dict in params_dict.items():
             if is_var(param_dict):
                 var = Variable(k, param_dict)
