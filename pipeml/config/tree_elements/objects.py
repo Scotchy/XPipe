@@ -3,7 +3,7 @@ from pipeml import config
 from .node import Node
 import importlib
 from .utils import is_object, is_objects_list, is_var
-from .variable import Include, Variable
+from .variable import Include, SingleObjectTag, Variable
 from collections.abc import Mapping
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
@@ -41,7 +41,7 @@ class Config(Node, Mapping):
 
         elif isinstance(sub_config, Include):
             conf = sub_config.load()
-            conf = IncludedConfig(conf, name, path=path)
+            conf = IncludedConfig(conf, name, path=sub_config.path)
             self._properties[name] = conf
             # Note that if some conf keys are present in an included file and in the current file
             # They will overwrite each other (depending their order in the configuration file)
@@ -53,6 +53,21 @@ class Config(Node, Mapping):
         else: 
             raise ValueError(f"Yaml file format not supported ({name} : {type(sub_config)})")
 
+    def _to_yaml(self, n_indents=0):
+        r = []
+        for key, value in self.items():
+            el = "  " * n_indents
+            el += f"{key}: "
+            if isinstance(value, Config) or isinstance(value, ObjectsList):
+                el += "\n"
+            el += f"{value._to_yaml(n_indents=n_indents + 1)}"
+            r += [el]
+        joiner = "\n\n" if self._name == "__root__" else "\n"
+        return joiner.join(r)
+
+    def _to_dict(self):
+        return { k: v._to_dict() for k, v in self.items() }
+    
     def __getattribute__(self, prop: str):
         properties = super(Node, self).__getattribute__("_properties")
         if prop in properties:
@@ -159,18 +174,28 @@ class SingleObject(Node):
 
     def _construct(self, name, config_dict):
         self._name = name
-        self._class_name, self._params = list(config_dict.items())[0]
-        self._class_name = self._class_name.replace("obj:", "")
+        object, self._params = list(config_dict.items())[0]
+        self._class_name = object.class_name
         split_index = len(self._class_name) - self._class_name[::-1].index(".") # Get index of the last point
         self._module, self._class_name = self._class_name[:split_index-1], self._class_name[split_index:]
         self._params = Parameters(self._class_name, self._params)
 
+    def _to_yaml(self, n_indents=0):
+        r = f"{SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
+        r += self._params._to_yaml(n_indents=n_indents + 1)
+        return r
+
+    def _to_dict(self):
+        return {
+            f"obj:{self._module}.{self._class_name}": self._params._to_dict()
+        }
+        
     def __call__(self, **args):
         module = importlib.import_module(self._module)
         class_object = getattr(module, self._class_name)
         params = self._params.unwarp()
         return class_object(**params, **args)
-    
+
     def __repr__(self) -> str:
         return f"SingleObject(name={self._class_name})"
 
@@ -196,6 +221,17 @@ class ObjectsList(Node):
         self._name = name
         self._objects = [SingleObject(name, obj_dict) for obj_dict in config_dict]
         
+    def _to_yaml(self, n_indents=0):
+        r = []
+        for object in self._objects:
+            el = "  " * (n_indents + 1)
+            el += f"- {object._to_yaml(n_indents=n_indents + 1)}"
+            r += [el]
+        return "\n".join(r)
+    
+    def _to_dict(self):
+        return [ obj._to_dict() for obj in self._objects ]
+
     def __getitem__(self, i):
         return self._objects[i]
 

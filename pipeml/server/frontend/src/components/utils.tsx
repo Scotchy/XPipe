@@ -72,14 +72,21 @@ export class Node {
         }
 
         var nodes = [];
-        for (var name in this.children) {
+        var children_sorted_names = Object.keys(this.children).sort((n1, n2) => 2 * (Number(n2 < n1) - 0.5));
+        for (var i in children_sorted_names) {
+            const name = children_sorted_names[i];
             const child = this.children[name];
-            nodes.push(child.getNodesAtDepth(depth));
+            var new_nodes = child.getNodesAtDepth(depth);
+            // new_nodes.sort((n1, n2) => 2 * (Number(n1.name < n2.name) - 0.5));
+            nodes.push(new_nodes);
         }
         var c : Array<Node> = [];
         var r = c.concat(...nodes);
-        r.sort((n1, n2) => (n1.depth - n2.depth));
         return r;
+    }
+
+    sort(depth : number = 0) {
+
     }
 }
 

@@ -15,3 +15,14 @@ def load_config(config_file : str, template=None):
     with open(config_file, "r") as stream:
         yaml_dict = yaml.safe_load(stream)
     return Config("__root__", yaml_dict)
+
+def parse_str_config(conf: str):
+    Tags.save_tags(yaml) # Set tags constructors and representers
+    yaml_dict = yaml.safe_load(conf)
+    return Config("__root__", yaml_dict)
+
+def to_yaml(conf):
+    return conf._to_yaml()
+
+def to_dict(conf):
+    return conf._to_dict()

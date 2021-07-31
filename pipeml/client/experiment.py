@@ -2,6 +2,7 @@ from os.path import basename, dirname
 import sys
 import os
 import subprocess
+from ..config import load_config, to_yaml
 
 from bokeh.embed import json_item
 import json
@@ -63,13 +64,13 @@ class Experiment():
         self.name = r["name"]
     
     def log_param_file(self, file):
-        
+        parameters = to_yaml(load_config(file))
         return self.session.api_call(
             "log_param",
             data={
-                "id": self.id
-            },
-            file=file
+                "id": self.id,
+                "params_file": parameters
+            }
         )
 
     def log_metric(self, metric_name, metric_value):

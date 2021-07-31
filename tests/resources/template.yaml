@@ -4,28 +4,29 @@ training:
   batch_size: 10
   
   obj:
-    obj:numpy.array : {"object": [1, 2]}
+    !obj numpy.array : {"object": [1, 2]}
 
   lr: 0.01
   classes: [0,1,2,3,4]
 
 data:
   transforms: 
-    - obj:numpy.array : {"object": [1, 2]}
-    - obj:numpy.array : {"object": [2, 3]}
-    - obj:numpy.array : {"object": [1, 2]}
-    - obj:numpy.array : {"object": [1, 2]}
-    # - obj:numpy.array : [1, 2]
+    - !obj numpy.array : {"object": [1, 2]}
+    - !obj numpy.array : {"object": [2, 3]}
+    - !obj numpy.array : {"object": [1, 2]}
+    - !obj numpy.array : {"object": [1, 2]}
 
 include: !include /home/jules/dev/PipeML/tests/resources/include.yaml
 
-obj_include: 
-  obj:numpy.array: 
-    params1: !include /home/jules/dev/PipeML/tests/resources/include_param.yaml
+obj_test: 
+  !obj numpy.array : {"object": [1, 2]}
 
+obj_include: 
+  !obj numpy.array: 
+    params1: !include /home/jules/dev/PipeML/tests/resources/include_param.yaml
     
 obj_config: 
-  obj:test.ObjTest: 
+  !obj test.ObjTest: 
     conf:
       a: 1
       b: 2

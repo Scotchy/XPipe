@@ -15,6 +15,12 @@ class Variable(Node):
         self.name = name
         self.value = value
     
+    def _to_yaml(self, n_indents=0):
+        return self.value
+    
+    def _to_dict(self):
+        return self.value
+
     def _check_valid(self, name, value):
         valid_var_name(name)
         return True
@@ -57,33 +63,6 @@ class EnvVariable(Variable):
         return f"EnvVariable(var={self.var_name}, value={self.value})"
     
 @Tags.register
-class FormatStrVariable(Variable):
-    yaml_tag = u"!f"
-    """This class defines a yaml tag. 
-    The class will automatically replace substrings $ENV_VAR or ${ENV_VAR} with the corresponding environment variables.
-    """
-
-    def __init__(self, value):
-        self.original_str = value
-        try:
-            value = string.Template(value).substitute(os.environ)
-        except KeyError as e:
-            raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in formatted string.")
-        self.str = value
-        super().__init__("", value)
-    
-    @classmethod
-    def from_yaml(cls, loader, node):
-        return FormatStrVariable(node.value)
-
-    @classmethod
-    def to_yaml(cls, dumper, data):
-        return dumper.represent_scalar(data)
-
-    def __repr__(self) -> str:
-        return f"FormatStrVariable(original={self.original_str}, output={self.value})"
-    
-@Tags.register
 class Include(Variable):
     yaml_tag = u"!include"
     """
@@ -113,7 +92,60 @@ class Include(Variable):
         
     def __repr__(self) -> str:
         return f"Include(path={self.path})"
+
+@Tags.register
+class FormatStrVariable(Variable):
+    yaml_tag = u"!f"
+    """This class defines a yaml tag. 
+    The class will automatically replace substrings $ENV_VAR or ${ENV_VAR} with the corresponding environment variables.
+    """
+
+    def __init__(self, value):
+        self.original_str = value
+        try:
+            value = string.Template(value).substitute(os.environ)
+        except KeyError as e:
+            raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in formatted string.")
+        self.str = value
+        super().__init__("", value)
     
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return FormatStrVariable(node.value)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_scalar(data)
+
+    def __repr__(self) -> str:
+        return f"FormatStrVariable(original={self.original_str}, output={self.value})"
+    
+@Tags.register
+class SingleObjectTag(Variable):
+    yaml_tag = u"!obj"
+    """
+    This class defines a yaml tag.
+    It will include another yaml into the current configuration.
+    """
+    
+    def __init__(self, class_name):
+        self.class_name = class_name
+    
+    def load(self):
+        with open(self.path, "r") as f:
+            return yaml.safe_load(f)
+    
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return SingleObjectTag(node.value)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_scalar(data)
+
+    def __repr__(self) -> str:
+        return f"SingleObjectTag(class_name={self.class_name})"
+
 def valid_var_name(name : str):
     """Raise an error if 'name' is not a valid Variable name.
 

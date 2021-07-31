@@ -17,6 +17,8 @@ from os.path import dirname, basename, realpath, join
 
 from .models import Project, Folder, Experiment, init_db
 from .utils import APISuccess, APIError, update
+from pipeml.config import parse_str_config, to_dict
+from ..config import parse_str_config, to_dict
 
 from mongoengine import connect
 
@@ -342,17 +344,20 @@ def run(host, port, db_host, db_port, artifacts_dir):
 
     @app.route("/api/run/log_param", methods=["GET", "POST"])
     def log_param():
-        data = json.load(request.files["json"])
-        exp_id = data["id"]
-        exp = Experiment.get(exp_id)
+        try: 
+            data = json.load(request.json)
+            exp_id = data["id"]
+            exp = Experiment.get(exp_id)
 
-        if "file" not in request.files:
-            return APIError("No file provided.")
+            if "params_file" not in data:
+                raise Exception("No file provided.")
 
-        f = request.files["file"]
-        parsed_file = yaml.load(f, Loader=yaml.Loader)
-        exp.update(set__configuration=parsed_file)
-        return APISuccess().json()
+            parsed_file = parse_str_config(data["params_file"])
+            params_dict = to_dict(parsed_file)
+            exp.update(set__configuration=params_dict)
+            return APISuccess().json()
+        except Exception as e:
+            return APIError(str(e)).json()
 
     @app.route("/api/run/log_metric", methods=["GET", "POST"])
     def log_metric():

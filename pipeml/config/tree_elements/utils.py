@@ -1,4 +1,7 @@
 
+from pipeml.config.tree_elements.variable import SingleObjectTag
+
+
 def get_statement(config_dict):
     """Chekcs if 'config_dict' is a statement. A statement is a key in the configuration in the following format:
     {
@@ -63,7 +66,8 @@ def is_object(config_dict):
     """
     if not isinstance(config_dict, dict):
         return False
-    return len(config_dict) == 1 and get_statement(config_dict)["statement"] == "obj"
+    keys = list(config_dict.keys())
+    return len(keys) == 1 and isinstance(keys[0], SingleObjectTag)
 
 def is_var(config_dict):
     """Checks if the given configuration defines a variable
