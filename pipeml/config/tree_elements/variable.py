@@ -4,7 +4,7 @@ import string
 from .tags import Tags
 import yaml
 
-__all__ = ["Variable"]
+__all__ = ["Variable", "EnvVariable", "Include", "FormatStrVariable", "SingleObjectTag"]
 
 class Variable(Node):
 

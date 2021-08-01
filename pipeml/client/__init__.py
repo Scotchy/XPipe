@@ -1,6 +1,5 @@
-from .client import *
+from .client import connect
 from .experiment import Experiment
+from .session import Session
 
-del client      # pylint: disable=undefined-variable
-del experiment  # pylint: disable=undefined-variable
-del session     # pylint: disable=undefined-variable
+__all__ = ["connect", "Session", "Experiment"]

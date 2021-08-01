@@ -20,26 +20,18 @@ pipeml.config.tree\_elements.node module
    :undoc-members:
    :show-inheritance:
 
-pipeml.config.tree\_elements.objects\_list module
--------------------------------------------------
+pipeml.config.tree\_elements.objects module
+-------------------------------------------
 
-.. automodule:: pipeml.config.tree_elements.objects_list
+.. automodule:: pipeml.config.tree_elements.objects
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.config.tree\_elements.parameters module
-----------------------------------------------
+pipeml.config.tree\_elements.tags module
+----------------------------------------
 
-.. automodule:: pipeml.config.tree_elements.parameters
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pipeml.config.tree\_elements.single\_object module
---------------------------------------------------
-
-.. automodule:: pipeml.config.tree_elements.single_object
+.. automodule:: pipeml.config.tree_elements.tags
    :members:
    :undoc-members:
    :show-inheritance:

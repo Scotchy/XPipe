@@ -111,14 +111,14 @@ class IncludedConfig(Config):
 
 class Parameters(Config):
     """Create parameters of an object from a dict 'param_dict' of format 
-        { 
-            object_param_name: {class_name: obj_param_dict},
-            variable_param_name: value,
-            objects_list_param_name: [class_name: obj_param_dict, ...]
-        }
+    { 
+    object_param_name: {class_name: obj_param_dict},
+    variable_param_name: value,
+    objects_list_param_name: [class_name: obj_param_dict, ...]
+    }
 
-        Args:
-            param_dict (dict): Dictionary of the parameters
+    Args:
+        param_dict (dict): Dictionary of the parameters
     """
 
     def __init__(self, class_name, param_dict):
@@ -158,12 +158,9 @@ class Parameters(Config):
 class SingleObject(Node):
     """Allow the instantiation of an object defined in a yaml configuration file.
 
-        Args:
-            name (str): Name of the object
-            config_dict (dict): A dictionary defining the object (class name and parameters). Its format is
-            {
-                'obj:module.class_name': {'param1': value, ...},
-            }
+    Args:
+        name (str): Name of the object
+        config_dict (dict): A dictionary defining the object (class name and parameters).
     """
 
     def __init__(self, name, config_dict):
@@ -202,13 +199,9 @@ class SingleObject(Node):
 class ObjectsList(Node):
     """Create a list of SingleObject from a yaml configuration file.
 
-        Args:
-            name (str): Name of the list of objects
-            config_dict (dict): A list of dictionaries which defines the list. Its format is 
-            [
-                {'obj:class_name': {'param1': value, ...}}
-                ...
-            ]
+    Args:
+        name (str): Name of the list of objects
+        config_dict (list<dict>): A list of dictionaries which defines the objects list.
     """
     
     def __init__(self, name, config_dict):

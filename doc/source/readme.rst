@@ -1,7 +1,0 @@
-.. _readme:
-
-Readme
-======
-
-Hello !
-~~~~~~~

@@ -3,9 +3,9 @@ from pipeml.config.tree_elements.variable import SingleObjectTag
 
 
 def get_statement(config_dict):
-    """Chekcs if 'config_dict' is a statement. A statement is a key in the configuration in the following format:
+    """Checks if 'config_dict' is a statement. A statement is a key in the configuration in the following format:
     {
-        object:np.array: { "object": [1,2,3,4] }
+    object:np.array: { "object": [1,2,3,4] }
     }
     Here 'object' is the statement and 'np.array' the argument. Both values are returned
 
@@ -14,8 +14,8 @@ def get_statement(config_dict):
 
     Returns:
         dict: {
-            "statement": The statement found (None if no statement found),
-            "Argument": The argument found (None if no statement found)
+        "statement": The statement found (None if no statement found),
+        "Argument": The argument found (None if no statement found)
         }
     """
     r = {

@@ -1,4 +1,3 @@
-# from .template import Template
 from .objects import Config
 import yaml
 from .tags import Tags

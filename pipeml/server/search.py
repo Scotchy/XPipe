@@ -1,9 +1,10 @@
 
 def search_exp(prop : str):
-    """Serach all experiments that satisfy 'prop'
+    """Search all experiments that satisfy 'prop'
     prop format:
-        && : and
-        || : or
+    - && : and
+    - || : or
+    
     Args:
         prop (str): A proposition to be evaluated
     Return:
@@ -27,14 +28,14 @@ class PropTree:
                 level += 1
                 if level == 1:
                     # Begin block
+                    ...
             else: 
                 if level == 0:
                     # Begin block
+                    ...
 
             if prop[i] == ")":
                 if level > 0:
                     level -= 1
                 else: 
                     raise ValueError("There is too much closing parenthesis")
-                
-    def 
