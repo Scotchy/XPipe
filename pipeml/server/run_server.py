@@ -2,15 +2,16 @@ from bokeh.models.annotations import Legend
 from flask import Flask, render_template, request, send_from_directory
 from flask_cors import CORS
 
-from bokeh.embed import components
 from bokeh.plotting import figure 
 from bokeh.embed import json_item
 from bokeh.palettes import Category20_20
+import bokeh.resources
 
 import numpy as np
 import json
 import yaml
 import click
+import shutil as sh
 
 import os
 from os.path import dirname, basename, realpath, join
@@ -20,7 +21,9 @@ from .utils import APISuccess, APIError, update
 from pipeml.config import parse_str_config, to_dict
 from ..config import parse_str_config, to_dict
 
-from mongoengine import connect
+from mongoengine import base, connect
+
+dir_path = dirname(realpath(__file__))
 
 @click.command()
 @click.option("--host", default="127.0.0.1", help="Flask host")
@@ -32,7 +35,6 @@ def run(host, port, db_host, db_port, artifacts_dir):
     connect("pipeml", host=db_host, port=db_port) # Connect to mongodb
     init_db() # Initialize models
 
-    dir_path = dirname(realpath(__file__))
     artifacts_dir = os.path.join(os.getcwd(), artifacts_dir)
     static_dir = os.path.join(dir_path, "frontend/build")
     app = Flask(__name__, 
@@ -40,6 +42,8 @@ def run(host, port, db_host, db_port, artifacts_dir):
         static_folder=static_dir,
         template_folder=static_dir)
     CORS(app)
+    prepare_bokeh_dependancies() # Copy bokeh js dependancies into ./frontend/public
+
     print("""
      ██████╗ ██╗██████╗ ███████╗███╗   ███╗██╗     
      ██╔══██╗██║██╔══██╗██╔════╝████╗ ████║██║     
@@ -428,4 +432,16 @@ def run(host, port, db_host, db_port, artifacts_dir):
             return APIError(str(e)).json()
 
     app.run(host=host, port=port, debug=True)
+
+def prepare_bokeh_dependancies():
+    try:
+        print("Loading Bokeh javascript dependancies.")
+        base_dir = bokeh.resources.INLINE.base_dir
+        sh.copyfile(join(base_dir, "js/bokeh.min.js"), join(dir_path, "frontend/public/bokeh.min.js"))
+        sh.copyfile(join(base_dir, "js/bokeh-widgets.min.js"), join(dir_path, "frontend/public/bokeh-widgets.min.js"))
+        sh.copyfile(join(base_dir, "js/bokeh-tables.min.js"), join(dir_path, "frontend/public/bokeh-tables.min.js"))
+        sh.copyfile(join(base_dir, "js/bokeh-api.min.js"), join(dir_path, "frontend/public/bokeh-api.min.js"))
+    except:
+        raise Exception("Can't load Bokeh javascript dependancies.")
+
 run()

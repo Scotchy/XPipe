@@ -43,6 +43,7 @@ export class CompareExperiments extends React.Component<CompareExperimentsProps,
                     Selected runs
 
                     <table className="table table-sm" style={{margin: "10px 0px 10px 0px"}}>
+                        <tr><td>name</td><td>date</td><td>commit</td></tr>
                         {experiments.map((exp : Experiment) => (
                             <tr><td>{exp.name}</td><td>{exp.start_date}</td><td>{exp.commit_hash}</td></tr>
                         ))}

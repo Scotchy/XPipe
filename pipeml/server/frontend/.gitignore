@@ -5,6 +5,12 @@
 /.pnp
 .pnp.js
 
+# Bokeh dependancies
+bokeh.min.js
+bokeh-widgets.min.js
+bokeh-tables.min.js
+bokeh-api.min.js
+
 # testing
 /coverage
 
