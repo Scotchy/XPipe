@@ -18,12 +18,12 @@ sys.path.insert(0, os.path.abspath('../..'))
 # -- Project information -----------------------------------------------------
 
 project = 'PipeML'
-copyright = '2021, Jules T.'
-author = 'Jules T.'
+copyright = '2021, Jules Tevissen'
+author = 'Jules Tevissen'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1.0'
-
+autodoc_member_order = 'bysource' # Display function doc in the same order as in source code
 
 # -- General configuration ---------------------------------------------------
 
@@ -32,7 +32,7 @@ release = '0.1.0'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.napoleon'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -51,6 +51,13 @@ exclude_patterns = []
 #
 html_theme = 'sphinx_rtd_theme'
 
+html_theme_options = {
+    'display_version': True,
+    'prev_next_buttons_location': 'bottom',
+    # Toc options
+    'sticky_navigation': True,
+    'navigation_depth': 4
+}
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".

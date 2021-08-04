@@ -4,24 +4,50 @@ from .tags import Tags
 import yaml
 
 def load_config(config_file : str, template=None):
-    """Load a configuration file and return an ObjectLoader which can instantiate the wanted objects.
+    """Loads a configuration file and return a Config Object which can instantiate the wanted objects.
 
     Args:
         config_file (str): The path of the yaml config file
-        template (Template): A template containing information of how to load objects defined in the configuration file
+    
+    Returns:
+        Config: A Config object
     """
     Tags.save_tags(yaml) # Set tags constructors and representers
     with open(config_file, "r") as stream:
         yaml_dict = yaml.safe_load(stream)
     return Config("__root__", yaml_dict)
 
-def parse_str_config(conf: str):
+def load_config_from_str(conf: str):
+    """Loads a configuration from a string and return a Config Object which can instantiate the wanted objects.
+
+    Args:
+        conf (str): A configuration
+    
+    Returns:
+        Config: A Config object
+    """
     Tags.save_tags(yaml) # Set tags constructors and representers
     yaml_dict = yaml.safe_load(conf)
     return Config("__root__", yaml_dict)
 
 def to_yaml(conf):
+    """Converts a Config object to a yaml string
+
+    Args:
+        conf (Config): A configuration
+
+    Returns:
+        str: The corresponding yaml string
+    """
     return conf._to_yaml()
 
 def to_dict(conf):
+    """Converts a Config object to a dictionary.
+
+    Args:
+        conf (Config): A Config object
+
+    Returns:
+        dict: A multi-level dictionary containing a representation ogf the configuration.
+    """
     return conf._to_dict()

@@ -21,6 +21,18 @@ class Experiment():
             self.load(id_exp)
         
     def create(self, path, name):
+        """Create a new experiment
+
+        Args:
+            path (str): Path of the directory in which the experiment will be stored
+            name (str): Name of the experiment
+
+        Raises:
+            ValueError: If the experiment cannot be created (more details in the error message)
+
+        Returns:
+            str: The id of the created experiment
+        """
         tmp_folder = os.getcwd()
         script_name = sys.argv[0]
         folder = dirname(script_name)
@@ -41,6 +53,11 @@ class Experiment():
         return r["id"]
 
     def delete(self):
+        """Delete the current run
+
+        Raises:
+            ValueError: If the run cannot be deleted (more details in the error message)
+        """
         r = self.session.api_call(
             "delete_run",
             data={
@@ -51,6 +68,14 @@ class Experiment():
             raise ValueError(f"Can't delete run {self.id} ({r['message']})")
     
     def load(self, id_exp):
+        """Load an experiment according to its id in the current object
+
+        Args:
+            id_exp (str): Experiment id
+
+        Raises:
+            ValueError: If the experiment cannot be loaded (more details in the error message)
+        """
         r = self.session.api_call(
             "get_run",
             data={
@@ -64,6 +89,14 @@ class Experiment():
         self.name = r["name"]
     
     def log_param_file(self, file):
+        """Log a yaml configuration file to the experiment
+
+        Args:
+            file (str): Path to the yaml configuration file
+
+        Returns:
+            dict: Server response
+        """
         parameters = to_yaml(load_config(file))
         return self.session.api_call(
             "log_param",
@@ -74,6 +107,15 @@ class Experiment():
         )
 
     def log_metric(self, metric_name, metric_value):
+        """Log a metric. Each call to this function will add the metric value to the list of the older one.
+
+        Args:
+            metric_name (str): The name of the metric
+            metric_value (foat): Value of the metric
+
+        Returns:
+            dict: Server response
+        """
         return self.session.api_call(
             "log_metric", 
             data={
@@ -82,7 +124,15 @@ class Experiment():
                 "metric_value": metric_value
             })
     
-    def log_artifact(self, file, increment_name=False   ):
+    def log_artifact(self, file):
+        """Log a file to the current experiment.
+
+        Args:
+            file (str): Path to the artefact
+
+        Returns:
+            dict: Server response
+        """
 
         return self.session.api_call(
             "log_artifact", 
@@ -93,6 +143,15 @@ class Experiment():
         )
     
     def log_graph(self, name, graph):
+        """Log a graph to the experiment
+
+        Args:
+            name (str): Name of the graph
+            graph (Figure): A bokeh graph
+
+        Returns:
+            dict: Server response
+        """
         
         return self.session.api_call(
             "log_graph", 

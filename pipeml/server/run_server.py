@@ -18,8 +18,7 @@ from os.path import dirname, basename, realpath, join
 
 from .models import Project, Folder, Experiment, init_db
 from .utils import APISuccess, APIError, update
-from pipeml.config import parse_str_config, to_dict
-from ..config import parse_str_config, to_dict
+from pipeml.config import load_config_from_str, to_dict
 
 from mongoengine import base, connect
 
@@ -356,7 +355,7 @@ def run(host, port, db_host, db_port, artifacts_dir):
             if "params_file" not in data:
                 raise Exception("No file provided.")
 
-            parsed_file = parse_str_config(data["params_file"])
+            parsed_file = load_config_from_str(data["params_file"])
             params_dict = to_dict(parsed_file)
             exp.update(set__configuration=params_dict)
             return APISuccess().json()

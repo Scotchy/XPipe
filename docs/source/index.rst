@@ -3,6 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. toctree::
+   :maxdepth: 4
+   :hidden: 
+
+   Welcome to PipeML's documentation !
+   pipeml.config
+   pipeml.client
+
 Welcome to PipeML's documentation !
 ===================================
 
@@ -18,10 +26,6 @@ PipeML focuses on two principal components to make Data Science easier: *configu
 The philosophy behind the project is to be simple and customizable.
 
 As a team, you can run a single PipeML server for everyone. It will promote exchange as everyone can easily share their work with others.
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
 
 
 Indices and tables

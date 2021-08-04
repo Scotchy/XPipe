@@ -19,6 +19,16 @@ class Session():
         return urljoin(self.url, path)
     
     def api_call(self, func_name, data=None, file=None):
+        """Carry an API call to the pipeml server.
+
+        Args:
+            func_name (str): Function to execute
+            data (dict, optional): Argument of the function (can be any jsonizable object, but is proabably a dictionary). Defaults to None.
+            file (str, optional): Path to a file to send to the server. Defaults to None.
+
+        Returns:
+            response (dict): Server response
+        """
         url = self.api_calls[func_name]
         url = self.get_url(url)
         if file is None:
@@ -39,19 +49,48 @@ class Session():
 
     # Handle runs
     def start_run(self, path, name):
+        """Begin an experiment
+
+        Args:
+            path (str): Path to the directory in which the experiment will be saved
+            name (str): Name of the experiment
+
+        Returns:
+            experiment (Experiment): An Experiment object
+        """
         return Experiment(self, path=path, name=name)
 
     def get_run(self, id_exp):
+        """Get an experiment according to its id
+
+        Args:
+            id_exp (str): Experiment id
+
+        Returns:
+            experiment (Experiment): The corresponding experiment
+        """
         return Experiment(self, id_exp=id_exp)
     
     def delete_run(self, id_exp):
+        """Delete an experiment according to its id
+
+        Args:
+            id_exp (str): Experiment id
+        """
         exp = self.get_run(id_exp)
         if exp is not None:
-            return exp.delete()
-        return False
+            exp.delete()
     
     # Handle folders
     def new_folder(self, path):
+        """Create a new folder
+
+        Args:
+            path (str): Path of the new folder
+
+        Returns:
+            response (dict): Server response
+        """
         return self.api_call(
             "new_folder", 
             data={
@@ -59,6 +98,14 @@ class Session():
             })
     
     def delete_folder(self, path):
+        """Delete a folder
+
+        Args:
+            path (str): Path of the folder
+
+        Returns:
+            response (dict): Server response
+        """
         return self.api_call(
             "delete_folder",
             data={
@@ -66,6 +113,15 @@ class Session():
             })
     
     def rename_folder(self, path, new_name):
+        """Rename a folder
+
+        Args:
+            path (str): Path of the folder to rename
+            new_name (str): New name of the folder
+
+        Returns:
+            response (dict): Server response
+        """
         return self.api_call(
             "rename_folder", 
             data={
