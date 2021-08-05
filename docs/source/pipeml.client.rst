@@ -1,7 +1,7 @@
 
 
-pipeml.client
-=============
+PipeML Tracking 
+===============
 
 .. automodule:: pipeml.client
    :members:

@@ -1,7 +1,7 @@
 
 
-pipeml.config
-=============
+PipeML Configuration
+====================
 
 .. automodule:: pipeml.config
    :members:

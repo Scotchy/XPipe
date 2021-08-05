@@ -8,6 +8,7 @@
    :hidden: 
 
    Welcome to PipeML's documentation !
+   install
    pipeml.config
    pipeml.client
 
