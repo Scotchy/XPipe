@@ -10,8 +10,8 @@ def package_files(directory):
             paths.append(os.path.join("..", path, filename))
     return paths
 
-template_files = package_files("pipeml/server/templates")
-static_files = package_files("pipeml/server/static")
+template_files = package_files("pipeml/server/frontend/build")
+static_files = package_files("pipeml/server/frontend/public")
 
 setup(
     name="PipeML",
