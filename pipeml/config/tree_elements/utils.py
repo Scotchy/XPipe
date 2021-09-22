@@ -82,7 +82,10 @@ def is_var(config_dict):
     if is_objects_list(config_dict):
         return False
     return isinstance(config_dict, int) or isinstance(config_dict, float) or isinstance(config_dict, str) or isinstance(config_dict, list)
-    
+
+def is_list(config_dict):
+    return is_var(config_dict) and isinstance(config_dict, list)
+
 types_detectors = {
     "object": is_object,
     "objects_list": is_objects_list,

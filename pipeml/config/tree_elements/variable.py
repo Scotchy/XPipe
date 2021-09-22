@@ -31,6 +31,30 @@ class Variable(Node):
     def __call__(self):
         return self.value
 
+    def __repr__(self) -> str:
+        return f"{self.name} = {self.value}"
+
+class ListVariable(Variable):
+
+    def __init__(self, name, value):
+        super().__init__(name, value)
+    
+    def __getitem__(self, index):
+        value = self.value[index]
+        if isinstance(value, Include): 
+            return value.load()
+        else:
+            return value()
+    
+    def __len__(self):
+        return len(self.value)
+
+    def __call__(self):
+        return [el for el in self]
+
+    def __repr__(self) -> str:
+        return f"{self.name} = List(len={len(self)})"
+        
 @Tags.register
 class EnvVariable(Variable): 
     yaml_tag = u"!env"

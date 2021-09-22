@@ -2,8 +2,8 @@ from os import path
 from pipeml import config
 from .node import Node
 import importlib
-from .utils import is_object, is_objects_list, is_var
-from .variable import Include, SingleObjectTag, Variable
+from .utils import is_object, is_objects_list, is_var, is_list
+from .variable import Include, ListVariable, SingleObjectTag, Variable
 from collections.abc import Mapping
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
@@ -23,7 +23,11 @@ class Config(Node, Mapping):
             self.set_node(name, sub_config)
 
     def set_node(self, name, sub_config):
-        if is_var(sub_config):
+        if is_list(sub_config): 
+            var = ListVariable(name, sub_config)
+            self._properties[name] = var
+            
+        elif is_var(sub_config):
             var = Variable(name, sub_config)
             self._properties[name] = var
 
@@ -45,7 +49,7 @@ class Config(Node, Mapping):
             self._properties[name] = conf
             # Note that if some conf keys are present in an included file and in the current file
             # They will overwrite each other (depending their order in the configuration file)
-
+        
         elif isinstance(sub_config, Variable):
             sub_config.set_name(name) # Set variable name
             self._properties[name] = sub_config
