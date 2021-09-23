@@ -43,8 +43,10 @@ class ListVariable(Variable):
         value = self.value[index]
         if isinstance(value, Include): 
             return value.load()
-        else:
+        elif isinstance(value, Node):
             return value()
+        else: 
+            return value
     
     def __len__(self):
         return len(self.value)
