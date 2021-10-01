@@ -42,8 +42,7 @@ class Config(Node, Mapping):
             self._pipeml_properties[name] = conf
 
         elif isinstance(sub_config, variables.Include):
-            conf = sub_config.load()
-            conf = IncludedConfig(conf, name, path=sub_config.path)
+            conf = IncludedConfig(name, sub_config)
             self._pipeml_properties[name] = conf
             # Note that if some conf keys are present in an included file and in the current file
             # They will overwrite each other (depending their order in the configuration file)
@@ -104,12 +103,13 @@ class Config(Node, Mapping):
 
 class IncludedConfig(Config):
 
-    def __init__(self, config_dict, name, path=None):
-        self._path = path
-        super(IncludedConfig, self).__init__(name, config_dict)
+    def __init__(self, name, config_dict):
+        conf = config_dict.load()
+        self._pipeml_path = config_dict.path
+        super(IncludedConfig, self).__init__(name, conf)
     
     def __repr__(self) -> str:
-        return f"IncludedConfig(len={len(self)}, path={self._path})"
+        return f"IncludedConfig(len={len(self)}, path={self._pipeml_path})"
 
 class Parameters(Config):
     """Create parameters of an object from a dict 'param_dict' of format 
@@ -180,7 +180,7 @@ class SingleObject(Node):
         self._params = Parameters(self._class_name, self._params)
 
     def _pipeml_to_yaml(self, n_indents=0):
-        r = f"{SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
+        r = f"{variables.SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
         r += self._params._pipeml_to_yaml(n_indents=n_indents + 1)
         return r
 
