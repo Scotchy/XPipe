@@ -1,9 +1,7 @@
-from os import path
-from pipeml import config
 from .node import Node
 import importlib
-from .utils import is_object, is_objects_list, is_var, is_list
-from .variable import Include, ListVariable, SingleObjectTag, Variable
+from .utils import is_object, is_objects_list, is_var, is_list, is_config
+import pipeml.config.tree_elements.variables as variables
 from collections.abc import Mapping
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
@@ -24,11 +22,11 @@ class Config(Node, Mapping):
 
     def set_node(self, name, sub_config):
         if is_list(sub_config): 
-            var = ListVariable(name, sub_config)
+            var = variables.ListVariable(name, sub_config)
             self._pipeml_properties[name] = var
             
         elif is_var(sub_config):
-            var = Variable(name, sub_config)
+            var = variables.Variable(name, sub_config)
             self._pipeml_properties[name] = var
 
         elif is_object(sub_config):
@@ -43,14 +41,14 @@ class Config(Node, Mapping):
             conf = Config(name, sub_config)
             self._pipeml_properties[name] = conf
 
-        elif isinstance(sub_config, Include):
+        elif isinstance(sub_config, variables.Include):
             conf = sub_config.load()
             conf = IncludedConfig(conf, name, path=sub_config.path)
             self._pipeml_properties[name] = conf
             # Note that if some conf keys are present in an included file and in the current file
             # They will overwrite each other (depending their order in the configuration file)
         
-        elif isinstance(sub_config, Variable):
+        elif isinstance(sub_config, variables.Variable):
             sub_config.set_name(name) # Set variable name
             self._pipeml_properties[name] = sub_config
 
@@ -132,7 +130,7 @@ class Parameters(Config):
         self._class_name = class_name
         for k, param_dict in params_dict.items():
             if is_var(param_dict):
-                var = Variable(k, param_dict)
+                var = variables.Variable(k, param_dict)
                 self._pipeml_properties[k] = var
             elif is_object(param_dict):
                 so = SingleObject(k, param_dict)
@@ -140,7 +138,7 @@ class Parameters(Config):
             elif is_objects_list(param_dict):
                 ol = ObjectsList(class_name, param_dict)
                 self._pipeml_properties[k] = ol
-            elif isinstance(param_dict, Include):
+            elif isinstance(param_dict, variables.Include):
                 included_pipeml_properties = param_dict.load()
                 self._pipeml_construct(class_name, included_pipeml_properties) # Add loaded parameters
                 # Note that if some conf keys are present in an included file and in the current file
@@ -234,3 +232,24 @@ class ObjectsList(Node):
 
     def __call__(self, **args):
         return [obj(**args) for obj in self._objects]
+
+
+def get_node_type(conf):
+    
+    if len(conf) == 1:
+        obj = list(conf.values())[0]
+        if isinstance(obj, variables.Variable):
+            # Return the builder class defined by the variable or None if none is needed
+            return getattr(obj.__class__, "builder_class", None)
+
+    # Note that the order of the checks is important
+    builder_checkers = [
+        (SingleObject, is_object),
+        (ObjectsList, is_objects_list),
+        (variables.Variable, is_var), 
+        (Config, is_config)
+    ]
+    for node_type, can_build in builder_checkers:
+        if can_build(conf):
+            return node_type
+    raise Exception(f"Configuration cannot be parsed: {conf}")
