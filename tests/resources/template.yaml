@@ -1,5 +1,8 @@
 #define numpy np
 
+a: 
+- !include /home/jules/dev/PipeML/tests/resources/include.yaml
+
 training:
   batch_size: 10
   

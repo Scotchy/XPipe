@@ -3,6 +3,7 @@ import os
 import string
 from .tags import Tags
 import yaml
+import pipeml.config as conf
 
 __all__ = ["Variable", "EnvVariable", "Include", "FormatStrVariable", "SingleObjectTag"]
 
@@ -11,28 +12,28 @@ class Variable(Node):
     def __init__(self, name, value):
         super(Variable, self).__init__(name, value)
 
-    def _construct(self, name, value):
+    def _pipeml_construct(self, name, value):
         self.name = name
         self.value = value
     
+    def _pipeml_check_valid(self, name, value):
+        valid_var_name(name)
+        return True
+
+    def set_name(self, name):
+        self.name = name
+    
+    def __call__(self):
+        return self.value
+
     def _to_yaml(self, n_indents=0):
         return self.value
     
     def _to_dict(self):
         return self.value
 
-    def _check_valid(self, name, value):
-        valid_var_name(name)
-        return True
-
-    def set_name(self, name):
-        self.name = name
-
-    def __call__(self):
-        return self.value
-
     def __repr__(self) -> str:
-        return f"{self.name} = {self.value}"
+        return f"{self.name} = Variable({self.value})"
 
 class ListVariable(Variable):
 
@@ -157,10 +158,6 @@ class SingleObjectTag(Variable):
     def __init__(self, class_name):
         self.class_name = class_name
     
-    def load(self):
-        with open(self.path, "r") as f:
-            return yaml.safe_load(f)
-    
     @classmethod
     def from_yaml(cls, loader, node):
         return SingleObjectTag(node.value)
@@ -171,6 +168,28 @@ class SingleObjectTag(Variable):
 
     def __repr__(self) -> str:
         return f"SingleObjectTag(class_name={self.class_name})"
+
+
+@Tags.register
+class ClassTag(Variable):
+    yaml_tag = u"!class"
+    """This class defines a yaml tag
+    It store a class (not an instance)"""
+
+    def __init__(self, class_name):
+        self.class_name = class_name
+    
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return ClassTag(node.value)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_scalar(data)
+
+    def __repr__(self) -> str:
+        return f"ClassTag(class_name={self.class_name})"
+
 
 def valid_var_name(name : str):
     """Raise an error if 'name' is not a valid Variable name.
