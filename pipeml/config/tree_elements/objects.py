@@ -64,13 +64,13 @@ class Config(Node, Mapping):
             el += f"{key}: "
             if isinstance(value, Config) or isinstance(value, ObjectsList):
                 el += "\n"
-            el += f"{value._to_yaml(n_indents=n_indents + 1)}"
+            el += f"{value._pipeml_to_yaml(n_indents=n_indents + 1)}"
             r += [el]
         joiner = "\n\n" if self._name == "__root__" else "\n"
         return joiner.join(r)
 
-    def _to_dict(self):
-        return { k: v._to_dict() for k, v in self.items() }
+    def _pipeml_to_dict(self):
+        return { k: v._pipeml_to_dict() for k, v in self.items() }
     
     def __getattribute__(self, prop: str):
         properties = super(Node, self).__getattribute__("_pipeml_properties")
@@ -181,14 +181,14 @@ class SingleObject(Node):
         self._module, self._class_name = self._class_name[:split_index-1], self._class_name[split_index:]
         self._params = Parameters(self._class_name, self._params)
 
-    def _to_yaml(self, n_indents=0):
+    def _pipeml_to_yaml(self, n_indents=0):
         r = f"{SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
-        r += self._params._to_yaml(n_indents=n_indents + 1)
+        r += self._params._pipeml_to_yaml(n_indents=n_indents + 1)
         return r
 
-    def _to_dict(self):
+    def _pipeml_to_dict(self):
         return {
-            f"obj:{self._module}.{self._class_name}": self._params._to_dict()
+            f"obj:{self._module}.{self._class_name}": self._params._pipeml_to_dict()
         }
         
     def __call__(self, **args):
@@ -218,16 +218,16 @@ class ObjectsList(Node):
         self._name = name
         self._objects = [SingleObject(name, obj_dict) for obj_dict in config_dict]
         
-    def _to_yaml(self, n_indents=0):
+    def _pipeml_to_yaml(self, n_indents=0):
         r = []
         for object in self._objects:
             el = "  " * (n_indents + 1)
-            el += f"- {object._to_yaml(n_indents=n_indents + 1)}"
+            el += f"- {object._pipeml_to_yaml(n_indents=n_indents + 1)}"
             r += [el]
         return "\n".join(r)
     
-    def _to_dict(self):
-        return [ obj._to_dict() for obj in self._objects ]
+    def _pipeml_to_dict(self):
+        return [ obj._pipeml_to_dict() for obj in self._objects ]
 
     def __getitem__(self, i):
         return self._objects[i]
