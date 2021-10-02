@@ -235,12 +235,17 @@ class ObjectsList(Node):
 
 
 def get_node_type(conf):
-    
-    if len(conf) == 1:
-        obj = list(conf.values())[0]
-        if isinstance(obj, variables.Variable):
-            # Return the builder class defined by the variable or None if none is needed
-            return getattr(obj.__class__, "builder_class", None)
+    """Detect the object that can build the tree
+
+    Args:
+        conf (dict): The configuration dictionary
+
+    Returns:
+        Node | Variable: The object type
+    """
+    if isinstance(conf, variables.Variable):
+        # Return the builder class defined by the variable or None if none is needed
+        return getattr(conf.__class__, "builder_class", None)
 
     # Note that the order of the checks is important
     builder_checkers = [

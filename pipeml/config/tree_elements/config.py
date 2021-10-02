@@ -17,6 +17,20 @@ def load_config(config_file : str, template=None):
         yaml_dict = yaml.safe_load(stream)
     return objects.Config("__root__", yaml_dict)
 
+def load_yaml(config_file : str):
+    """Loads a configuration file and return a Config Object which can instantiate the wanted objects.
+
+    Args:
+        config_file (str): The path of the yaml config file
+    
+    Returns:
+        Config: A Config object
+    """
+    Tags.save_tags(yaml) # Set tags constructors and representers
+    with open(config_file, "r") as stream:
+        yaml_dict = yaml.safe_load(stream)
+    return yaml_dict
+
 def load_config_from_str(conf: str):
     """Loads a configuration from a string and return a Config Object which can instantiate the wanted objects.
 
