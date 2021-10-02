@@ -111,12 +111,12 @@ class Parameters(Config):
 class IncludedParameters(Parameters):
 
     def __init__(self, class_name, param_dict):
-        super().__init__(class_name, param_dict)
+        super(IncludedParameters, self).__init__(class_name, param_dict)
 
     def _pipeml_construct(self, class_name, params_dict):
         conf = params_dict.load()
         self._pipeml_path = params_dict.path
-        return super()._pipeml_construct(class_name, conf)
+        return super(IncludedParameters, self)._pipeml_construct(class_name, conf)
 
 class SingleObject(Node):
     """Allow the instantiation of an object defined in a yaml configuration file.
