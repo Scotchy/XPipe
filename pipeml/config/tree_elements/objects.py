@@ -253,3 +253,23 @@ def get_node_type(conf):
         if can_build(conf):
             return node_type
     raise Exception(f"Configuration cannot be parsed: {conf}")
+
+def construct(name, config_dict):
+    """Build a tree from a dictionary
+
+    Args:
+        name (str): Name of the node
+        config_dict (dict): The dictionary
+
+    Returns:
+        Node | Variable: The build tree element
+    """
+    NodeType = get_node_type(config_dict)
+
+    if NodeType is not None: 
+        node = NodeType(name, config_dict)
+    else: 
+        # Node is already built by a yaml tag
+        node = config_dict
+        node.set_name(name)
+    return node
