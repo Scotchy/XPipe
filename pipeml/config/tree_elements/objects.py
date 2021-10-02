@@ -18,41 +18,9 @@ class Config(Node, Mapping):
 
     def _pipeml_construct(self, name, sub_config):
         for name, sub_config in sub_config.items():
-            self.set_node(name, sub_config)
-
-    def set_node(self, name, sub_config):
-        if is_list(sub_config): 
-            var = variables.ListVariable(name, sub_config)
-            self._pipeml_properties[name] = var
-            
-        elif is_var(sub_config):
-            var = variables.Variable(name, sub_config)
-            self._pipeml_properties[name] = var
-
-        elif is_object(sub_config):
-            obj = SingleObject(name, sub_config)
-            self._pipeml_properties[name] = obj
-
-        elif is_objects_list(sub_config):
-            obj_list = ObjectsList(name, sub_config)
-            self._pipeml_properties[name] = obj_list
-            
-        elif isinstance(sub_config, dict):
-            conf = Config(name, sub_config)
-            self._pipeml_properties[name] = conf
-
-        elif isinstance(sub_config, variables.Include):
-            conf = IncludedConfig(name, sub_config)
-            self._pipeml_properties[name] = conf
-            # Note that if some conf keys are present in an included file and in the current file
-            # They will overwrite each other (depending their order in the configuration file)
-        
-        elif isinstance(sub_config, variables.Variable):
-            sub_config.set_name(name) # Set variable name
-            self._pipeml_properties[name] = sub_config
-
-        else: 
-            raise ValueError(f"Yaml file format not supported ({name} : {type(sub_config)})")
+            # self.set_node(name, sub_config)
+            node = construct(name, sub_config)
+            self._pipeml_properties[name] = node
 
     def _pipeml_to_yaml(self, n_indents=0):
         r = []
