@@ -9,6 +9,7 @@ import pipeml.config.tree_elements.utils as utils
 
 __all__ = ["Variable", "EnvVariable", "Include", "FormatStrVariable", "SingleObjectTag"]
 
+
 class Variable(Node):
 
     def __init__(self, name, value):
@@ -34,8 +35,14 @@ class Variable(Node):
     def _pipeml_to_dict(self):
         return self.value
 
+    def __eq__(self, o) -> bool:
+        if not isinstance(o, Variable): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self.value == o.value
+
     def __repr__(self) -> str:
         return f"{self.name} = Variable({self.value})"
+
 
 class ListVariable(Variable):
 
@@ -59,7 +66,8 @@ class ListVariable(Variable):
 
     def __repr__(self) -> str:
         return f"{self.name} = List(len={len(self)})"
-        
+
+
 @Tags.register
 class EnvVariable(Variable): 
     yaml_tag = u"!env"
@@ -91,6 +99,7 @@ class EnvVariable(Variable):
     def __repr__(self) -> str:
         return f"EnvVariable(var={self.var_name}, value={self.value})"
     
+
 @Tags.register
 class Include(Variable):
     yaml_tag = u"!include"
@@ -120,9 +129,15 @@ class Include(Variable):
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
-        
+
+    def __eq__(self, o) -> bool:
+        if not isinstance(o, Include): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self.original_path == o.original_path
+
     def __repr__(self) -> str:
         return f"Include(path={self.path})"
+
 
 @Tags.register
 class FormatStrVariable(Variable):
@@ -148,9 +163,15 @@ class FormatStrVariable(Variable):
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
 
+    def __eq__(self, o) -> bool:
+        if not isinstance(o, FormatStrVariable): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self.original_str == o.original_str
+
     def __repr__(self) -> str:
         return f"FormatStrVariable(original={self.original_str}, output={self.value})"
     
+
 @Tags.register
 class SingleObjectTag(Variable):
     yaml_tag = u"!obj"
@@ -169,6 +190,9 @@ class SingleObjectTag(Variable):
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
+
+    def __hash__(self) -> int:
+        return hash(id(self))
 
     def __repr__(self) -> str:
         return f"SingleObjectTag(class_name={self.class_name})"
@@ -190,6 +214,11 @@ class ClassTag(Variable):
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
+
+    def __eq__(self, o) -> bool:
+        if not isinstance(o, ClassTag): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self.class_name == o.class_name
 
     def __repr__(self) -> str:
         return f"ClassTag(class_name={self.class_name})"

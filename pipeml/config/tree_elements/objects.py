@@ -58,6 +58,11 @@ class Config(Node, Mapping):
     def __contains__(self, prop):
         return prop in self._pipeml_properties
     
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, Config): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self._pipeml_properties == o._pipeml_properties
+
     def __len__(self):
         return len(self._pipeml_properties)
 
@@ -159,6 +164,11 @@ class SingleObject(Node):
         params = self._params.unwarp()
         return class_object(**params, **args)
 
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, SingleObject): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self._class_name == o._class_name and self._params == o._params
+
     def __repr__(self) -> str:
         return f"SingleObject(name={self._class_name})"
 
@@ -174,7 +184,7 @@ class ObjectsList(Node):
         super(ObjectsList, self).__init__(name, config_dict)
 
     def _pipeml_check_valid(self, name, config_dict): 
-        return True
+        super(ObjectsList, self)._pipeml_check_valid(name, config_dict)
 
     def _pipeml_construct(self, name, config_dict):
         self._name = name
@@ -190,6 +200,11 @@ class ObjectsList(Node):
     
     def _pipeml_to_dict(self):
         return [ obj._pipeml_to_dict() for obj in self._objects ]
+
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, ObjectsList): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self._objects == o._objects
 
     def __getitem__(self, i):
         return self._objects[i]
