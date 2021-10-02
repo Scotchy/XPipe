@@ -25,8 +25,7 @@ obj_test:
   !obj numpy.array : {"object": [1, 2]}
 
 obj_include: 
-  !obj numpy.array: 
-    params1: !include /home/jules/dev/PipeML/tests/resources/include_param.yaml
+  !obj numpy.array: !include /home/jules/dev/PipeML/tests/resources/include_param.yaml
     
 obj_config: 
   !obj test.ObjTest: 

@@ -45,7 +45,7 @@ class Config(Node, Mapping):
             try: 
                 return super(Node, self).__getattribute__(prop)
             except:
-                raise AttributeError(f"'{self._name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
+                raise AttributeError(f"'{self._pipeml_name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
 
     def __getitem__(self, prop):
         if prop in self._pipeml_properties:
@@ -95,26 +95,7 @@ class Parameters(Config):
         super(Parameters, self).__init__(class_name, param_dict)
         
     def _pipeml_construct(self, class_name, params_dict):
-        self._class_name = class_name
-        for k, param_dict in params_dict.items():
-            if is_var(param_dict):
-                var = variables.Variable(k, param_dict)
-                self._pipeml_properties[k] = var
-            elif is_object(param_dict):
-                so = SingleObject(k, param_dict)
-                self._pipeml_properties[k] = so
-            elif is_objects_list(param_dict):
-                ol = ObjectsList(class_name, param_dict)
-                self._pipeml_properties[k] = ol
-            elif isinstance(param_dict, variables.Include):
-                included_pipeml_properties = param_dict.load()
-                self._pipeml_construct(class_name, included_pipeml_properties) # Add loaded parameters
-                # Note that if some conf keys are present in an included file and in the current file
-                # They will overwrite each other (depending their order in the configuration file)
-            else:
-                # Parameter is a dictionary
-                conf = Config(class_name, param_dict)
-                self._pipeml_properties[k] = conf
+        super(Parameters, self)._pipeml_construct(class_name, params_dict)
 
     def _pipeml_check_valid(self, class_name, param_dict):
         return True
@@ -124,6 +105,16 @@ class Parameters(Config):
 
     def unwarp(self):
         return {param_name: (param_value() if not isinstance(param_value, Config) else param_value) for param_name, param_value in self._pipeml_properties.items()}
+
+class IncludedParameters(Parameters):
+
+    def __init__(self, class_name, param_dict):
+        super().__init__(class_name, param_dict)
+
+    def _pipeml_construct(self, class_name, params_dict):
+        conf = params_dict.load()
+        self._pipeml_path = params_dict.path
+        return super()._pipeml_construct(class_name, conf)
 
 class SingleObject(Node):
     """Allow the instantiation of an object defined in a yaml configuration file.
@@ -145,7 +136,10 @@ class SingleObject(Node):
         self._class_name = object.class_name
         split_index = len(self._class_name) - self._class_name[::-1].index(".") # Get index of the last point
         self._module, self._class_name = self._class_name[:split_index-1], self._class_name[split_index:]
-        self._params = Parameters(self._class_name, self._params)
+        if not isinstance(self._params, variables.Include):
+            self._params = Parameters(self._class_name, self._params)
+        else:
+            self._params = IncludedParameters(self._class_name, self._params)
 
     def _pipeml_to_yaml(self, n_indents=0):
         r = f"{variables.SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
@@ -215,7 +209,6 @@ def get_node_type(conf):
         # Return the builder class defined by the variable or None if none is needed
         return getattr(conf.__class__, "builder_class", None)
 
-    # Note that the order of the checks is important
     builder_checkers = [
         (SingleObject, is_object),
         (ObjectsList, is_objects_list),
