@@ -1,5 +1,3 @@
-
-from pipeml.config.tree_elements import config
 import pipeml.config.tree_elements.variables as variables
 
 
@@ -59,3 +57,24 @@ def is_list(config_dict):
 
 def is_config(config_dict):
     return isinstance(config_dict, dict)
+
+
+def valid_var_name(name : str):
+    """Raise an error if 'name' is not a valid Variable name.
+
+    Args:
+        name (str): Name of the variable
+
+    Raises:
+        ValueError: If name contains caracters that are not alphabetical or numerical
+        ValueError: If name begin with a number
+    """
+    if name == "":
+        return 
+    stripped_name = name.replace("_", "")
+    if stripped_name == "":
+        raise ValueError(f"Variable '{name}' cannot contain only underscores.")
+    if not stripped_name.isalnum():
+        raise ValueError(f"Variable '{name}' must contain alphabetical or numerical caracters or underscores.")
+    if not name[0].isalpha() or name[0] == "_":
+        raise ValueError(f"Variable '{name}' must begin with an alphabetical caracter or an underscore.")

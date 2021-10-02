@@ -14,6 +14,8 @@ class Config(Node, Mapping):
         Node.__init__(self, name, config_dict)
 
     def _pipeml_check_valid(self, name, config_dict):
+        if name != "__root__":
+            super(Config, self)._pipeml_check_valid(name, config_dict)
         return True
 
     def _pipeml_construct(self, name, sub_config):

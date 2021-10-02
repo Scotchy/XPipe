@@ -1,3 +1,4 @@
+import pipeml.config.tree_elements.utils as utils
 
 class Node():
     
@@ -11,4 +12,4 @@ class Node():
         raise NotImplementedError("This function has to be implemented")
 
     def _pipeml_check_valid(self, name, config_dict):
-        raise NotImplementedError("This function has to be implemented")
+        utils.valid_var_name(name)
