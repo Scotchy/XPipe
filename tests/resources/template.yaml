@@ -22,7 +22,7 @@ data:
 include: !include /home/jules/dev/PipeML/tests/resources/include.yaml
 
 obj_test: 
-  !obj numpy.array : {"object": [1, 2]}
+  !obj numpy.array: {object: [1, 2]}
 
 obj_include: 
   !obj numpy.array: !include /home/jules/dev/PipeML/tests/resources/include_param.yaml

@@ -11,6 +11,11 @@ class TestConfiguration(TestCase):
         dir_path = dirname(realpath(__file__))
         self.conf = load_config(join(dir_path, "./resources/template.yaml"))
 
+    def test_eq(self):
+        self.assertEqual(self.conf, self.conf)
+        self.assertEqual(self.conf.training, self.conf.training)
+        self.assertNotEqual(self.conf, self.conf.training)
+
     def test_get_integer(self):
         self.assertEqual(
             self.conf.training.batch_size(), 
