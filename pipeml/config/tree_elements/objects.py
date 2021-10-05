@@ -33,7 +33,7 @@ class Config(Node, Mapping):
                 el += "\n"
             el += f"{value._pipeml_to_yaml(n_indents=n_indents + 1)}"
             r += [el]
-        joiner = "\n\n" if self._name == "__root__" else "\n"
+        joiner = "\n\n" if self._pipeml_name == "__root__" else "\n"
         return joiner.join(r)
 
     def _pipeml_to_dict(self):
