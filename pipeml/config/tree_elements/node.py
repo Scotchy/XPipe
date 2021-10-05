@@ -13,3 +13,6 @@ class Node():
 
     def _pipeml_check_valid(self, name, config_dict):
         utils.valid_var_name(name)
+    
+    def __str__(self) -> str:
+        return self.__repr__()

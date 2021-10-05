@@ -39,33 +39,12 @@ class Variable(Node):
         if not isinstance(o, Variable): 
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
         return self.value == o.value
-
+    
+    def __str__(self) -> str:
+        return self.__repr__()
+        
     def __repr__(self) -> str:
         return f"{self.name} = Variable({self.value})"
-
-
-class ListVariable(Variable):
-
-    def __init__(self, name, value):
-        super().__init__(name, value)
-    
-    def __getitem__(self, index):
-        value = self.value[index]
-        if isinstance(value, Include): 
-            return value.load()
-        elif isinstance(value, Node):
-            return value()
-        else: 
-            return value
-    
-    def __len__(self):
-        return len(self.value)
-
-    def __call__(self):
-        return [el for el in self]
-
-    def __repr__(self) -> str:
-        return f"{self.name} = List(len={len(self)})"
 
 
 @Tags.register

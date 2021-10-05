@@ -69,9 +69,6 @@ class Config(Node, Mapping):
     def __iter__(self):
         for prop in self._pipeml_properties.keys():
             yield prop
-
-    def __str__(self):
-        raise NotImplementedError()
     
     def __repr__(self) -> str:
         return f"Config(len={len(self)})"
@@ -123,6 +120,49 @@ class IncludedParameters(Parameters):
         self._pipeml_path = params_dict.path
         return super(IncludedParameters, self)._pipeml_construct(class_name, conf)
 
+
+class List(Node):
+
+    def __init__(self, name, config_dict):
+        self._pipeml_elements = []
+        super(List, self).__init__(name, config_dict)
+    
+    def _pipeml_construct(self, name, config_dict):
+        for element in config_dict:
+            constructed_el = construct(name, element)
+            self._pipeml_elements += [constructed_el]
+
+    def _pipeml_check_valid(self, name, config_dict):
+        return True
+
+    def _pipeml_to_dict(self):
+        return [el._pipeml_to_dict() for el in self._pipeml_elements]
+
+    def _pipeml_to_yaml(self, n_indents=0):
+        r = "\n"
+        
+        for el in self._pipeml_elements:
+            indents = "  " * (n_indents + 1)
+            r += f"{indents}- {el._pipeml_to_yaml(n_indents = n_indents + 1)}\n"
+        return r
+
+    def __getitem__(self, index):
+        element = self._pipeml_elements[index]
+        if isinstance(element, variables.Variable):
+            return element()
+        else:
+            return element
+
+    def __len__(self):
+        return len(self._pipeml_elements)
+
+    def __call__(self):
+        return [el for el in self]
+
+    def __repr__(self) -> str:
+        return f"[{', '.join(map(lambda x: str(x), self))}]"
+    
+
 class SingleObject(Node):
     """Allow the instantiation of an object defined in a yaml configuration file.
 
@@ -171,6 +211,7 @@ class SingleObject(Node):
 
     def __repr__(self) -> str:
         return f"SingleObject(name={self._class_name})"
+
 
 class ObjectsList(Node):
     """Create a list of SingleObject from a yaml configuration file.
@@ -229,6 +270,7 @@ def get_node_type(conf):
     builder_checkers = [
         (SingleObject, is_object),
         (ObjectsList, is_objects_list),
+        (List, is_list), 
         (variables.Variable, is_var), 
         (Config, is_config)
     ]
@@ -236,6 +278,7 @@ def get_node_type(conf):
         if can_build(conf):
             return node_type
     raise Exception(f"Configuration cannot be parsed: {conf}")
+
 
 def construct(name, config_dict):
     """Build a tree from a dictionary
