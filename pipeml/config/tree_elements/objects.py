@@ -29,7 +29,7 @@ class Config(Node, Mapping):
         for key, value in self.items():
             el = "  " * n_indents
             el += f"{key}: "
-            if isinstance(value, Config) or isinstance(value, ObjectsList):
+            if isinstance(value, Config) or isinstance(value, ObjectsList) or isinstance(el, List):
                 el += "\n"
             el += f"{value._pipeml_to_yaml(n_indents=n_indents + 1)}"
             r += [el]
@@ -143,7 +143,10 @@ class List(Node):
         
         for el in self._pipeml_elements:
             indents = "  " * (n_indents + 1)
-            r += f"{indents}- {el._pipeml_to_yaml(n_indents = n_indents + 1)}\n"
+            yaml_el = el._pipeml_to_yaml(n_indents = n_indents + 2)
+            if isinstance(el, Config) or isinstance(el, ObjectsList) or isinstance(el, List):
+                yaml_el = f"\n{yaml_el}"
+            r += f"{indents}- {yaml_el}\n"
         return r
 
     def __getitem__(self, index):
@@ -189,7 +192,8 @@ class SingleObject(Node):
             self._params = IncludedParameters(self._class_name, self._params)
 
     def _pipeml_to_yaml(self, n_indents=0):
-        r = f"{variables.SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
+        indents = "  " * (n_indents)
+        r = f"{indents}{variables.SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
         r += self._params._pipeml_to_yaml(n_indents=n_indents + 1)
         return r
 
