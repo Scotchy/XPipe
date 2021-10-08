@@ -6,5 +6,6 @@ COPY ./ /pipeml
 RUN pip3 install /pipeml
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+RUN mkdir /artifacts
 
 ENTRYPOINT [ "/entrypoint.sh" ]
