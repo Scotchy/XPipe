@@ -21,6 +21,8 @@ from .utils import APISuccess, APIError, update
 from pipeml.config import load_config_from_str, to_dict
 
 from mongoengine import base, connect
+import signal
+from multiprocessing import Process
 
 dir_path = dirname(realpath(__file__))
 
@@ -31,8 +33,8 @@ dir_path = dirname(realpath(__file__))
 @click.option("--db-port", default=27017, help="Port of the MongoDB server")
 @click.option("--artifacts-dir", default="./artifacts", help="Folder to store artifacts")
 def run(host, port, db_host, db_port, artifacts_dir):
-    connect("pipeml", host=db_host, port=db_port) # Connect to mongodb
-    init_db() # Initialize models
+    # connect("pipeml", host=db_host, port=db_port) # Connect to mongodb
+    # init_db() # Initialize models
 
     artifacts_dir = os.path.join(os.getcwd(), artifacts_dir)
     static_dir = os.path.join(dir_path, "frontend/build")
@@ -430,7 +432,13 @@ def run(host, port, db_host, db_port, artifacts_dir):
         except Exception as e:
             return APIError(str(e)).json()
 
-    app.run(host=host, port=port, debug=True)
+    server = Process(target=app.run, kwargs={"host": host, "port": port, "debug": True})
+    def stop_server(*args, **kwargs):
+        server.terminate()
+
+    signal.signal(signal.SIGINT, stop_server)
+    server.start()
+    server.join()
 
 def prepare_bokeh_dependancies():
     try:
