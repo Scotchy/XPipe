@@ -1,44 +1,6 @@
+import pipeml.config.tree_elements.variables as variables
 
-from pipeml.config.tree_elements.variable import SingleObjectTag
 
-
-def get_statement(config_dict):
-    """Checks if 'config_dict' is a statement. A statement is a key in the configuration in the following format:
-    {
-    object:np.array: { "object": [1,2,3,4] }
-    }
-    Here 'object' is the statement and 'np.array' the argument. Both values are returned
-
-    Args:
-        config_dict (any): A configuration
-
-    Returns:
-        dict: {
-        "statement": The statement found (None if no statement found),
-        "Argument": The argument found (None if no statement found)
-        }
-    """
-    r = {
-        "statement": None,
-        "argument": None
-    }
-
-    if not isinstance(config_dict, dict): 
-        return r
-    if len(config_dict) != 1:
-        return r
-    key = list(config_dict.keys())[0]
-    if not isinstance(key, str):
-        return r
-    split_key = key.split(":")
-    if len(split_key) != 2:
-        return r
-    r = {
-        "statement": split_key[0],
-        "argument": split_key[1]
-    }
-    return r
-    
 def is_objects_list(config_dict):
     """Check if the given configuration is an objects list.
 
@@ -55,6 +17,7 @@ def is_objects_list(config_dict):
             return False
     return True
 
+
 def is_object(config_dict):
     """Checks if the given configuration defines an object.
 
@@ -67,7 +30,8 @@ def is_object(config_dict):
     if not isinstance(config_dict, dict):
         return False
     keys = list(config_dict.keys())
-    return len(keys) == 1 and isinstance(keys[0], SingleObjectTag)
+    return len(keys) == 1 and isinstance(keys[0], variables.SingleObjectTag)
+
 
 def is_var(config_dict):
     """Checks if the given configuration defines a variable
@@ -77,20 +41,33 @@ def is_var(config_dict):
 
     Returns:
         bool: True if 'config_dict' defines a variable
-    """
-    # A variable can be a list of int, float, str, but not objects instances
-    if is_objects_list(config_dict):
-        return False
-    return isinstance(config_dict, int) or isinstance(config_dict, float) or isinstance(config_dict, str) or isinstance(config_dict, list)
-    
-types_detectors = {
-    "object": is_object,
-    "objects_list": is_objects_list,
-    "var": is_var
-}
+    """  
+    return isinstance(config_dict, int) or isinstance(config_dict, float) or isinstance(config_dict, str)
 
-def get_type(config_dict):
-    for object_name, detect_object in types_detectors.items():
-        if detect_object(config_dict):
-            return object_name
-    return "config"
+
+def is_list(config_dict):
+    return not is_objects_list(config_dict) and isinstance(config_dict, list)
+
+def is_config(config_dict):
+    return isinstance(config_dict, dict)
+
+
+def valid_var_name(name : str):
+    """Raise an error if 'name' is not a valid Variable name.
+
+    Args:
+        name (str): Name of the variable
+
+    Raises:
+        ValueError: If name contains caracters that are not alphabetical or numerical
+        ValueError: If name begin with a number
+    """
+    if name == "":
+        return 
+    stripped_name = name.replace("_", "")
+    if stripped_name == "":
+        raise ValueError(f"Variable '{name}' cannot contain only underscores.")
+    if not stripped_name.isalnum():
+        raise ValueError(f"Variable '{name}' must contain alphabetical or numerical caracters or underscores.")
+    if not name[0].isalpha() or name[0] == "_":
+        raise ValueError(f"Variable '{name}' must begin with an alphabetical caracter or an underscore.")

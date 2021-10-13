@@ -3,33 +3,49 @@ import os
 import string
 from .tags import Tags
 import yaml
+import pipeml.config as conf
+import pipeml.config.tree_elements.objects as objects
+import pipeml.config.tree_elements.utils as utils
 
 __all__ = ["Variable", "EnvVariable", "Include", "FormatStrVariable", "SingleObjectTag"]
+
 
 class Variable(Node):
 
     def __init__(self, name, value):
         super(Variable, self).__init__(name, value)
 
-    def _construct(self, name, value):
+    def _pipeml_construct(self, name, value):
         self.name = name
         self.value = value
     
-    def _to_yaml(self, n_indents=0):
-        return self.value
-    
-    def _to_dict(self):
-        return self.value
-
-    def _check_valid(self, name, value):
-        valid_var_name(name)
+    def _pipeml_check_valid(self, name, value):
+        utils.valid_var_name(name)
         return True
 
     def set_name(self, name):
         self.name = name
-
+    
     def __call__(self):
         return self.value
+
+    def _pipeml_to_yaml(self, n_indents=0):
+        return self.value
+    
+    def _pipeml_to_dict(self):
+        return self.value
+
+    def __eq__(self, o) -> bool:
+        if not isinstance(o, Variable): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self.value == o.value
+    
+    def __str__(self) -> str:
+        return self.__repr__()
+        
+    def __repr__(self) -> str:
+        return f"{self.name} = Variable({self.value})"
+
 
 @Tags.register
 class EnvVariable(Variable): 
@@ -62,9 +78,12 @@ class EnvVariable(Variable):
     def __repr__(self) -> str:
         return f"EnvVariable(var={self.var_name}, value={self.value})"
     
+
 @Tags.register
 class Include(Variable):
     yaml_tag = u"!include"
+    builder_class = objects.IncludedConfig
+    
     """
     This class defines a yaml tag.
     It will include another yaml into the current configuration.
@@ -89,9 +108,15 @@ class Include(Variable):
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
-        
+
+    def __eq__(self, o) -> bool:
+        if not isinstance(o, Include): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self.original_path == o.original_path
+
     def __repr__(self) -> str:
         return f"Include(path={self.path})"
+
 
 @Tags.register
 class FormatStrVariable(Variable):
@@ -117,9 +142,15 @@ class FormatStrVariable(Variable):
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
 
+    def __eq__(self, o) -> bool:
+        if not isinstance(o, FormatStrVariable): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self.original_str == o.original_str
+
     def __repr__(self) -> str:
         return f"FormatStrVariable(original={self.original_str}, output={self.value})"
     
+
 @Tags.register
 class SingleObjectTag(Variable):
     yaml_tag = u"!obj"
@@ -131,10 +162,6 @@ class SingleObjectTag(Variable):
     def __init__(self, class_name):
         self.class_name = class_name
     
-    def load(self):
-        with open(self.path, "r") as f:
-            return yaml.safe_load(f)
-    
     @classmethod
     def from_yaml(cls, loader, node):
         return SingleObjectTag(node.value)
@@ -143,25 +170,34 @@ class SingleObjectTag(Variable):
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
 
+    def __hash__(self) -> int:
+        return hash(id(self))
+
     def __repr__(self) -> str:
         return f"SingleObjectTag(class_name={self.class_name})"
 
-def valid_var_name(name : str):
-    """Raise an error if 'name' is not a valid Variable name.
 
-    Args:
-        name (str): Name of the variable
+@Tags.register
+class ClassTag(Variable):
+    yaml_tag = u"!class"
+    """This class defines a yaml tag
+    It store a class (not an instance)"""
 
-    Raises:
-        ValueError: If name contains caracters that are not alphabetical or numerical
-        ValueError: If name begin with a number
-    """
-    if name == "":
-        return 
-    stripped_name = name.replace("_", "")
-    if stripped_name == "":
-        raise ValueError(f"Variable '{name}' cannot contain only underscores.")
-    if not stripped_name.isalnum():
-        raise ValueError(f"Variable '{name}' must contain alphabetical or numerical caracters or underscores.")
-    if not name[0].isalpha() or name[0] == "_":
-        raise ValueError(f"Variable '{name}' must begin with an alphabetical caracter or an underscore.")
+    def __init__(self, class_name):
+        self.class_name = class_name
+    
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return ClassTag(node.value)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_scalar(data)
+
+    def __eq__(self, o) -> bool:
+        if not isinstance(o, ClassTag): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self.class_name == o.class_name
+
+    def __repr__(self) -> str:
+        return f"ClassTag(class_name={self.class_name})"

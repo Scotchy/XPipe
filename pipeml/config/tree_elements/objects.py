@@ -1,9 +1,7 @@
-from os import path
-from pipeml import config
 from .node import Node
 import importlib
-from .utils import is_object, is_objects_list, is_var
-from .variable import Include, SingleObjectTag, Variable
+from .utils import is_object, is_objects_list, is_var, is_list, is_config
+import pipeml.config.tree_elements.variables as variables
 from collections.abc import Mapping
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
@@ -11,103 +9,79 @@ __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
 class Config(Node, Mapping):
 
     def __init__(self, name, config_dict):
-        self._config_dict = config_dict
-        self._properties = {}
+        self._pipeml_config_dict = config_dict
+        self._pipeml_properties = {}
         Node.__init__(self, name, config_dict)
 
-    def _check_valid(self, name, config_dict):
+    def _pipeml_check_valid(self, name, config_dict):
+        if name != "__root__":
+            super(Config, self)._pipeml_check_valid(name, config_dict)
         return True
 
-    def _construct(self, name, sub_config):
+    def _pipeml_construct(self, name, sub_config):
         for name, sub_config in sub_config.items():
-            self.set_node(name, sub_config)
+            # self.set_node(name, sub_config)
+            node = construct(name, sub_config)
+            self._pipeml_properties[name] = node
 
-    def set_node(self, name, sub_config):
-        if is_var(sub_config):
-            var = Variable(name, sub_config)
-            self._properties[name] = var
-
-        elif is_object(sub_config):
-            obj = SingleObject(name, sub_config)
-            self._properties[name] = obj
-
-        elif is_objects_list(sub_config):
-            obj_list = ObjectsList(name, sub_config)
-            self._properties[name] = obj_list
-            
-        elif isinstance(sub_config, dict):
-            conf = Config(name, sub_config)
-            self._properties[name] = conf
-
-        elif isinstance(sub_config, Include):
-            conf = sub_config.load()
-            conf = IncludedConfig(conf, name, path=sub_config.path)
-            self._properties[name] = conf
-            # Note that if some conf keys are present in an included file and in the current file
-            # They will overwrite each other (depending their order in the configuration file)
-
-        elif isinstance(sub_config, Variable):
-            sub_config.set_name(name) # Set variable name
-            self._properties[name] = sub_config
-
-        else: 
-            raise ValueError(f"Yaml file format not supported ({name} : {type(sub_config)})")
-
-    def _to_yaml(self, n_indents=0):
+    def _pipeml_to_yaml(self, n_indents=0):
         r = []
         for key, value in self.items():
             el = "  " * n_indents
             el += f"{key}: "
-            if isinstance(value, Config) or isinstance(value, ObjectsList):
+            if isinstance(value, Config) or isinstance(value, ObjectsList) or isinstance(el, List):
                 el += "\n"
-            el += f"{value._to_yaml(n_indents=n_indents + 1)}"
+            el += f"{value._pipeml_to_yaml(n_indents=n_indents + 1)}"
             r += [el]
-        joiner = "\n\n" if self._name == "__root__" else "\n"
+        joiner = "\n\n" if self._pipeml_name == "__root__" else "\n"
         return joiner.join(r)
 
-    def _to_dict(self):
-        return { k: v._to_dict() for k, v in self.items() }
+    def _pipeml_to_dict(self):
+        return { k: v._pipeml_to_dict() for k, v in self.items() }
     
     def __getattribute__(self, prop: str):
-        properties = super(Node, self).__getattribute__("_properties")
+        properties = super(Node, self).__getattribute__("_pipeml_properties")
         if prop in properties:
             return properties[prop]
         else:
             try: 
                 return super(Node, self).__getattribute__(prop)
             except:
-                raise AttributeError(f"'{self._name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
+                raise AttributeError(f"'{self._pipeml_name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
 
     def __getitem__(self, prop):
-        if prop in self._properties:
-            return self._properties[prop]
+        if prop in self._pipeml_properties:
+            return self._pipeml_properties[prop]
         else:
             raise AttributeError(f"'{self._name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
 
     def __contains__(self, prop):
-        return prop in self._properties
+        return prop in self._pipeml_properties
     
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, Config): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self._pipeml_properties == o._pipeml_properties
+
     def __len__(self):
-        return len(self._properties)
+        return len(self._pipeml_properties)
 
     def __iter__(self):
-        for prop in self._properties.keys():
+        for prop in self._pipeml_properties.keys():
             yield prop
-
-    def __str__(self):
-        raise NotImplementedError()
     
     def __repr__(self) -> str:
         return f"Config(len={len(self)})"
 
 class IncludedConfig(Config):
 
-    def __init__(self, config_dict, name, path=None):
-        self._path = path
-        super(IncludedConfig, self).__init__(name, config_dict)
+    def __init__(self, name, config_dict):
+        conf = config_dict.load()
+        self._pipeml_path = config_dict.path
+        super(IncludedConfig, self).__init__(name, conf)
     
     def __repr__(self) -> str:
-        return f"IncludedConfig(len={len(self)}, path={self._path})"
+        return f"IncludedConfig(len={len(self)}, path={self._pipeml_path})"
 
 class Parameters(Config):
     """Create parameters of an object from a dict 'param_dict' of format 
@@ -124,36 +98,73 @@ class Parameters(Config):
     def __init__(self, class_name, param_dict):
         super(Parameters, self).__init__(class_name, param_dict)
         
-    def _construct(self, class_name, params_dict):
-        self._class_name = class_name
-        for k, param_dict in params_dict.items():
-            if is_var(param_dict):
-                var = Variable(k, param_dict)
-                self._properties[k] = var
-            elif is_object(param_dict):
-                so = SingleObject(k, param_dict)
-                self._properties[k] = so
-            elif is_objects_list(param_dict):
-                ol = ObjectsList(class_name, param_dict)
-                self._properties[k] = ol
-            elif isinstance(param_dict, Include):
-                included_properties = param_dict.load()
-                self._construct(class_name, included_properties) # Add loaded parameters
-                # Note that if some conf keys are present in an included file and in the current file
-                # They will overwrite each other (depending their order in the configuration file)
-            else:
-                # Parameter is a dictionary
-                conf = Config(class_name, param_dict)
-                self._properties[k] = conf
+    def _pipeml_construct(self, class_name, params_dict):
+        super(Parameters, self)._pipeml_construct(class_name, params_dict)
 
-    def _check_valid(self, class_name, param_dict):
+    def _pipeml_check_valid(self, class_name, param_dict):
         return True
 
     def __repr__(self) -> str:
         return f"Parameters({len(self)})"
 
     def unwarp(self):
-        return {param_name: (param_value() if not isinstance(param_value, Config) else param_value) for param_name, param_value in self._properties.items()}
+        return {param_name: (param_value() if not isinstance(param_value, Config) else param_value) for param_name, param_value in self._pipeml_properties.items()}
+
+class IncludedParameters(Parameters):
+
+    def __init__(self, class_name, param_dict):
+        super(IncludedParameters, self).__init__(class_name, param_dict)
+
+    def _pipeml_construct(self, class_name, params_dict):
+        conf = params_dict.load()
+        self._pipeml_path = params_dict.path
+        return super(IncludedParameters, self)._pipeml_construct(class_name, conf)
+
+
+class List(Node):
+
+    def __init__(self, name, config_dict):
+        self._pipeml_elements = []
+        super(List, self).__init__(name, config_dict)
+    
+    def _pipeml_construct(self, name, config_dict):
+        for element in config_dict:
+            constructed_el = construct(name, element)
+            self._pipeml_elements += [constructed_el]
+
+    def _pipeml_check_valid(self, name, config_dict):
+        return True
+
+    def _pipeml_to_dict(self):
+        return [el._pipeml_to_dict() for el in self._pipeml_elements]
+
+    def _pipeml_to_yaml(self, n_indents=0):
+        r = "\n"
+        
+        for el in self._pipeml_elements:
+            indents = "  " * (n_indents + 1)
+            yaml_el = el._pipeml_to_yaml(n_indents = n_indents + 2)
+            if isinstance(el, Config) or isinstance(el, ObjectsList) or isinstance(el, List):
+                yaml_el = f"\n{yaml_el}"
+            r += f"{indents}- {yaml_el}\n"
+        return r
+
+    def __getitem__(self, index):
+        element = self._pipeml_elements[index]
+        if isinstance(element, variables.Variable):
+            return element()
+        else:
+            return element
+
+    def __len__(self):
+        return len(self._pipeml_elements)
+
+    def __call__(self):
+        return [el for el in self]
+
+    def __repr__(self) -> str:
+        return f"[{', '.join(map(lambda x: str(x), self))}]"
+    
 
 class SingleObject(Node):
     """Allow the instantiation of an object defined in a yaml configuration file.
@@ -166,25 +177,29 @@ class SingleObject(Node):
     def __init__(self, name, config_dict):
         super(SingleObject, self).__init__(name, config_dict)
 
-    def _check_valid(self, name, config_dict):
+    def _pipeml_check_valid(self, name, config_dict):
         return True
 
-    def _construct(self, name, config_dict):
+    def _pipeml_construct(self, name, config_dict):
         self._name = name
         object, self._params = list(config_dict.items())[0]
         self._class_name = object.class_name
         split_index = len(self._class_name) - self._class_name[::-1].index(".") # Get index of the last point
         self._module, self._class_name = self._class_name[:split_index-1], self._class_name[split_index:]
-        self._params = Parameters(self._class_name, self._params)
+        if not isinstance(self._params, variables.Include):
+            self._params = Parameters(self._class_name, self._params)
+        else:
+            self._params = IncludedParameters(self._class_name, self._params)
 
-    def _to_yaml(self, n_indents=0):
-        r = f"{SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
-        r += self._params._to_yaml(n_indents=n_indents + 1)
+    def _pipeml_to_yaml(self, n_indents=0):
+        indents = "  " * (n_indents)
+        r = f"{indents}{variables.SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
+        r += self._params._pipeml_to_yaml(n_indents=n_indents + 1)
         return r
 
-    def _to_dict(self):
+    def _pipeml_to_dict(self):
         return {
-            f"obj:{self._module}.{self._class_name}": self._params._to_dict()
+            f"obj:{self._module}.{self._class_name}": self._params._pipeml_to_dict()
         }
         
     def __call__(self, **args):
@@ -193,8 +208,14 @@ class SingleObject(Node):
         params = self._params.unwarp()
         return class_object(**params, **args)
 
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, SingleObject): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self._class_name == o._class_name and self._params == o._params
+
     def __repr__(self) -> str:
         return f"SingleObject(name={self._class_name})"
+
 
 class ObjectsList(Node):
     """Create a list of SingleObject from a yaml configuration file.
@@ -207,26 +228,78 @@ class ObjectsList(Node):
     def __init__(self, name, config_dict):
         super(ObjectsList, self).__init__(name, config_dict)
 
-    def _check_valid(self, name, config_dict): 
-        return True
+    def _pipeml_check_valid(self, name, config_dict): 
+        super(ObjectsList, self)._pipeml_check_valid(name, config_dict)
 
-    def _construct(self, name, config_dict):
+    def _pipeml_construct(self, name, config_dict):
         self._name = name
         self._objects = [SingleObject(name, obj_dict) for obj_dict in config_dict]
         
-    def _to_yaml(self, n_indents=0):
+    def _pipeml_to_yaml(self, n_indents=0):
         r = []
         for object in self._objects:
             el = "  " * (n_indents + 1)
-            el += f"- {object._to_yaml(n_indents=n_indents + 1)}"
+            el += f"- {object._pipeml_to_yaml(n_indents=n_indents + 1)}"
             r += [el]
         return "\n".join(r)
     
-    def _to_dict(self):
-        return [ obj._to_dict() for obj in self._objects ]
+    def _pipeml_to_dict(self):
+        return [ obj._pipeml_to_dict() for obj in self._objects ]
+
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, ObjectsList): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self._objects == o._objects
 
     def __getitem__(self, i):
         return self._objects[i]
 
     def __call__(self, **args):
         return [obj(**args) for obj in self._objects]
+
+
+def get_node_type(conf):
+    """Detect the object that can build the tree
+
+    Args:
+        conf (dict): The configuration dictionary
+
+    Returns:
+        Node | Variable: The object type
+    """
+    if isinstance(conf, variables.Variable):
+        # Return the builder class defined by the variable or None if none is needed
+        return getattr(conf.__class__, "builder_class", None)
+
+    builder_checkers = [
+        (SingleObject, is_object),
+        (ObjectsList, is_objects_list),
+        (List, is_list), 
+        (variables.Variable, is_var), 
+        (Config, is_config)
+    ]
+    for node_type, can_build in builder_checkers:
+        if can_build(conf):
+            return node_type
+    raise Exception(f"Configuration cannot be parsed: {conf}")
+
+
+def construct(name, config_dict):
+    """Build a tree from a dictionary
+
+    Args:
+        name (str): Name of the node
+        config_dict (dict): The dictionary
+
+    Returns:
+        Node | Variable: The build tree element
+    """
+    NodeType = get_node_type(config_dict)
+
+    if NodeType is not None: 
+        node = NodeType(name, config_dict)
+    else: 
+        # Node is already built by a yaml tag
+        node = config_dict
+        node.set_name(name)
+    return node

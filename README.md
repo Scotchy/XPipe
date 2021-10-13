@@ -58,3 +58,17 @@ scheduler = params.training.scheduler(optimizer=optimizer)
 ```
 
 ## Experiment tracking
+
+You have two options to start the server:
+
+1. Run the server from the commandline. You must host a MongoDB server instance.
+
+```
+pipeml --db_host <db_ip_address> --db_port <db_port> --port <server_port> --artifacts_dir <artifacts_dir>
+```
+
+2. Run directly the docker image (no other dependancies needed) 
+
+```
+docker run pipeml -v <artifacts_dir>:/artifacts -p <server_port>:80
+```
