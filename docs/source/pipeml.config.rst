@@ -1,7 +1,16 @@
+pipeml.config package
+=====================
 
+Subpackages
+-----------
 
-PipeML Configuration
-====================
+.. toctree::
+   :maxdepth: 4
+
+   pipeml.config.tree_elements
+
+Module contents
+---------------
 
 .. automodule:: pipeml.config
    :members:

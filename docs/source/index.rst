@@ -11,6 +11,7 @@
    install
    pipeml.config
    pipeml.client
+   build
 
 Welcome to PipeML's documentation !
 ===================================
