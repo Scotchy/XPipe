@@ -70,5 +70,7 @@ pipeml --db_host <db_ip_address> --db_port <db_port> --port <server_port> --arti
 2. Run directly the docker image (no other dependancies needed) 
 
 ```
-docker run pipeml -v <database_dir>:/data -v <artifacts_dir>:/artifacts -p <server_port>:80
+docker run -v <data_dir>:/data -v <artifacts_dir>:/artifacts -p <server_port>:80
 ```
+
+The `<data_dir>` directory will contain the mongodb database and artifacts.
