@@ -1,4 +1,4 @@
-import pipeml.config.tree_elements.utils as utils
+from . import utils as utils
 
 class Node():
     
@@ -13,6 +13,7 @@ class Node():
 
     def _pipeml_check_valid(self, name, config_dict):
         utils.valid_var_name(name)
+        return True
     
     def __str__(self) -> str:
         return self.__repr__()

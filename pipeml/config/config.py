@@ -1,4 +1,4 @@
-import pipeml.config.tree_elements.objects as objects
+from . import objects as objects
 import yaml
 from .tags import Tags
 import yaml

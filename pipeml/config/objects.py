@@ -1,7 +1,7 @@
 from .node import Node
 import importlib
 from .utils import is_object, is_objects_list, is_var, is_list, is_config
-import pipeml.config.tree_elements.variables as variables
+from . import variables as variables
 from collections.abc import Mapping
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
@@ -150,8 +150,9 @@ class List(Node):
         return r
 
     def __getitem__(self, index):
+        from .variables import Variable
         element = self._pipeml_elements[index]
-        if isinstance(element, variables.Variable):
+        if isinstance(element, Variable):
             return element()
         else:
             return element
@@ -269,7 +270,8 @@ def get_node_type(conf):
     """
     if isinstance(conf, variables.Variable):
         # Return the builder class defined by the variable or None if none is needed
-        return getattr(conf.__class__, "builder_class", None)
+        builder_name = getattr(conf.__class__, "builder_class_name", None)
+        return globals()[builder_name] if builder_name is not None else None
 
     builder_checkers = [
         (SingleObject, is_object),

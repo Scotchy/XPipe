@@ -1,11 +1,9 @@
 from .node import Node
+from .tags import Tags
+
 import os
 import string
-from .tags import Tags
 import yaml
-import pipeml.config as conf
-import pipeml.config.tree_elements.objects as objects
-import pipeml.config.tree_elements.utils as utils
 
 __all__ = ["Variable", "EnvVariable", "Include", "FormatStrVariable", "SingleObjectTag"]
 
@@ -18,10 +16,6 @@ class Variable(Node):
     def _pipeml_construct(self, name, value):
         self.name = name
         self.value = value
-    
-    def _pipeml_check_valid(self, name, value):
-        utils.valid_var_name(name)
-        return True
 
     def set_name(self, name):
         self.name = name
@@ -82,7 +76,7 @@ class EnvVariable(Variable):
 @Tags.register
 class Include(Variable):
     yaml_tag = u"!include"
-    builder_class = objects.IncludedConfig
+    builder_class_name = "IncludedConfig"
     
     """
     This class defines a yaml tag.

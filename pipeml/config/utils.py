@@ -1,5 +1,3 @@
-import pipeml.config.tree_elements.variables as variables
-
 
 def is_objects_list(config_dict):
     """Check if the given configuration is an objects list.
@@ -27,10 +25,11 @@ def is_object(config_dict):
     Returns:
         bool: True if 'config_dict' is a dictionary that defines an object
     """
+    from .variables import SingleObjectTag
     if not isinstance(config_dict, dict):
         return False
     keys = list(config_dict.keys())
-    return len(keys) == 1 and isinstance(keys[0], variables.SingleObjectTag)
+    return len(keys) == 1 and isinstance(keys[0], SingleObjectTag)
 
 
 def is_var(config_dict):
