@@ -59,6 +59,8 @@ scheduler = params.training.scheduler(optimizer=optimizer)
 
 ## Experiment tracking
 
+This feature is still experimental.
+
 You have two options to start the server:
 
 1. Run the server from the commandline. You must host a MongoDB server instance.
@@ -70,7 +72,15 @@ pipeml --db_host <db_ip_address> --db_port <db_port> --port <server_port> --arti
 2. Run directly the docker image (no other dependancies needed) 
 
 ```
-docker run -v <data_dir>:/data -v <artifacts_dir>:/artifacts -p <server_port>:80 pipeml:latest
+docker run -v <data_dir>:/data -p <server_port>:80 pipeml:latest
 ```
 
 The `<data_dir>` directory will contain the mongodb database and artifacts.
+
+Then you can connect to http://127.0.0.1:<server_port> to access the web interface.
+
+![webui1](https://github.com/Scotchy/PipeML/blob/main/docs/images/gui1.png)
+
+If you open an experiment, you can get some details and results:
+
+![webui2](https://github.com/Scotchy/PipeML/blob/main/docs/images/gui2.png)
