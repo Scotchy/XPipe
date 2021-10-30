@@ -1,29 +1,29 @@
-pipeml.client package
+xpipe.client package
 =====================
 
 Submodules
 ----------
 
-pipeml.client.client module
+xpipe.client.client module
 ---------------------------
 
-.. automodule:: pipeml.client.client
+.. automodule:: xpipe.client.client
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.client.experiment module
+xpipe.client.experiment module
 -------------------------------
 
-.. automodule:: pipeml.client.experiment
+.. automodule:: xpipe.client.experiment
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.client.session module
+xpipe.client.session module
 ----------------------------
 
-.. automodule:: pipeml.client.session
+.. automodule:: xpipe.client.session
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ pipeml.client.session module
 Module contents
 ---------------
 
-.. automodule:: pipeml.client
+.. automodule:: xpipe.client
    :members:
    :undoc-members:
    :show-inheritance:

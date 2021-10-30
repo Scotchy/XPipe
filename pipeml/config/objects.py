@@ -9,65 +9,65 @@ __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
 class Config(Node, Mapping):
 
     def __init__(self, name, config_dict):
-        self._pipeml_config_dict = config_dict
-        self._pipeml_properties = {}
+        self._xpipe_config_dict = config_dict
+        self._xpipe_properties = {}
         Node.__init__(self, name, config_dict)
 
-    def _pipeml_check_valid(self, name, config_dict):
+    def _xpipe_check_valid(self, name, config_dict):
         if name != "__root__":
-            super(Config, self)._pipeml_check_valid(name, config_dict)
+            super(Config, self)._xpipe_check_valid(name, config_dict)
         return True
 
-    def _pipeml_construct(self, name, sub_config):
+    def _xpipe_construct(self, name, sub_config):
         for name, sub_config in sub_config.items():
             # self.set_node(name, sub_config)
             node = construct(name, sub_config)
-            self._pipeml_properties[name] = node
+            self._xpipe_properties[name] = node
 
-    def _pipeml_to_yaml(self, n_indents=0):
+    def _xpipe_to_yaml(self, n_indents=0):
         r = []
         for key, value in self.items():
             el = "  " * n_indents
             el += f"{key}: "
             if isinstance(value, Config) or isinstance(value, ObjectsList) or isinstance(el, List):
                 el += "\n"
-            el += f"{value._pipeml_to_yaml(n_indents=n_indents + 1)}"
+            el += f"{value._xpipe_to_yaml(n_indents=n_indents + 1)}"
             r += [el]
-        joiner = "\n\n" if self._pipeml_name == "__root__" else "\n"
+        joiner = "\n\n" if self._xpipe_name == "__root__" else "\n"
         return joiner.join(r)
 
-    def _pipeml_to_dict(self):
-        return { k: v._pipeml_to_dict() for k, v in self.items() }
+    def _xpipe_to_dict(self):
+        return { k: v._xpipe_to_dict() for k, v in self.items() }
     
     def __getattribute__(self, prop: str):
-        properties = super(Node, self).__getattribute__("_pipeml_properties")
+        properties = super(Node, self).__getattribute__("_xpipe_properties")
         if prop in properties:
             return properties[prop]
         else:
             try: 
                 return super(Node, self).__getattribute__(prop)
             except:
-                raise AttributeError(f"'{self._pipeml_name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
+                raise AttributeError(f"'{self._xpipe_name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
 
     def __getitem__(self, prop):
-        if prop in self._pipeml_properties:
-            return self._pipeml_properties[prop]
+        if prop in self._xpipe_properties:
+            return self._xpipe_properties[prop]
         else:
             raise AttributeError(f"'{self._name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
 
     def __contains__(self, prop):
-        return prop in self._pipeml_properties
+        return prop in self._xpipe_properties
     
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, Config): 
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
-        return self._pipeml_properties == o._pipeml_properties
+        return self._xpipe_properties == o._xpipe_properties
 
     def __len__(self):
-        return len(self._pipeml_properties)
+        return len(self._xpipe_properties)
 
     def __iter__(self):
-        for prop in self._pipeml_properties.keys():
+        for prop in self._xpipe_properties.keys():
             yield prop
     
     def __repr__(self) -> str:
@@ -77,11 +77,11 @@ class IncludedConfig(Config):
 
     def __init__(self, name, config_dict):
         conf = config_dict.load()
-        self._pipeml_path = config_dict.path
+        self._xpipe_path = config_dict.path
         super(IncludedConfig, self).__init__(name, conf)
     
     def __repr__(self) -> str:
-        return f"IncludedConfig(len={len(self)}, path={self._pipeml_path})"
+        return f"IncludedConfig(len={len(self)}, path={self._xpipe_path})"
 
 class Parameters(Config):
     """Create parameters of an object from a dict 'param_dict' of format 
@@ -98,52 +98,52 @@ class Parameters(Config):
     def __init__(self, class_name, param_dict):
         super(Parameters, self).__init__(class_name, param_dict)
         
-    def _pipeml_construct(self, class_name, params_dict):
-        super(Parameters, self)._pipeml_construct(class_name, params_dict)
+    def _xpipe_construct(self, class_name, params_dict):
+        super(Parameters, self)._xpipe_construct(class_name, params_dict)
 
-    def _pipeml_check_valid(self, class_name, param_dict):
+    def _xpipe_check_valid(self, class_name, param_dict):
         return True
 
     def __repr__(self) -> str:
         return f"Parameters({len(self)})"
 
     def unwarp(self):
-        return {param_name: (param_value() if not isinstance(param_value, Config) else param_value) for param_name, param_value in self._pipeml_properties.items()}
+        return {param_name: (param_value() if not isinstance(param_value, Config) else param_value) for param_name, param_value in self._xpipe_properties.items()}
 
 class IncludedParameters(Parameters):
 
     def __init__(self, class_name, param_dict):
         super(IncludedParameters, self).__init__(class_name, param_dict)
 
-    def _pipeml_construct(self, class_name, params_dict):
+    def _xpipe_construct(self, class_name, params_dict):
         conf = params_dict.load()
-        self._pipeml_path = params_dict.path
-        return super(IncludedParameters, self)._pipeml_construct(class_name, conf)
+        self._xpipe_path = params_dict.path
+        return super(IncludedParameters, self)._xpipe_construct(class_name, conf)
 
 
 class List(Node):
 
     def __init__(self, name, config_dict):
-        self._pipeml_elements = []
+        self._xpipe_elements = []
         super(List, self).__init__(name, config_dict)
     
-    def _pipeml_construct(self, name, config_dict):
+    def _xpipe_construct(self, name, config_dict):
         for element in config_dict:
             constructed_el = construct(name, element)
-            self._pipeml_elements += [constructed_el]
+            self._xpipe_elements += [constructed_el]
 
-    def _pipeml_check_valid(self, name, config_dict):
+    def _xpipe_check_valid(self, name, config_dict):
         return True
 
-    def _pipeml_to_dict(self):
-        return [el._pipeml_to_dict() for el in self._pipeml_elements]
+    def _xpipe_to_dict(self):
+        return [el._xpipe_to_dict() for el in self._xpipe_elements]
 
-    def _pipeml_to_yaml(self, n_indents=0):
+    def _xpipe_to_yaml(self, n_indents=0):
         r = "\n"
         
-        for el in self._pipeml_elements:
+        for el in self._xpipe_elements:
             indents = "  " * (n_indents + 1)
-            yaml_el = el._pipeml_to_yaml(n_indents = n_indents + 2)
+            yaml_el = el._xpipe_to_yaml(n_indents = n_indents + 2)
             if isinstance(el, Config) or isinstance(el, ObjectsList) or isinstance(el, List):
                 yaml_el = f"\n{yaml_el}"
             r += f"{indents}- {yaml_el}\n"
@@ -151,14 +151,14 @@ class List(Node):
 
     def __getitem__(self, index):
         from .variables import Variable
-        element = self._pipeml_elements[index]
+        element = self._xpipe_elements[index]
         if isinstance(element, Variable):
             return element()
         else:
             return element
 
     def __len__(self):
-        return len(self._pipeml_elements)
+        return len(self._xpipe_elements)
 
     def __call__(self):
         return [el for el in self]
@@ -178,10 +178,10 @@ class SingleObject(Node):
     def __init__(self, name, config_dict):
         super(SingleObject, self).__init__(name, config_dict)
 
-    def _pipeml_check_valid(self, name, config_dict):
+    def _xpipe_check_valid(self, name, config_dict):
         return True
 
-    def _pipeml_construct(self, name, config_dict):
+    def _xpipe_construct(self, name, config_dict):
         self._name = name
         object, self._params = list(config_dict.items())[0]
         self._class_name = object.class_name
@@ -192,15 +192,15 @@ class SingleObject(Node):
         else:
             self._params = IncludedParameters(self._class_name, self._params)
 
-    def _pipeml_to_yaml(self, n_indents=0):
+    def _xpipe_to_yaml(self, n_indents=0):
         indents = "  " * (n_indents)
         r = f"{indents}{variables.SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
-        r += self._params._pipeml_to_yaml(n_indents=n_indents + 1)
+        r += self._params._xpipe_to_yaml(n_indents=n_indents + 1)
         return r
 
-    def _pipeml_to_dict(self):
+    def _xpipe_to_dict(self):
         return {
-            f"obj:{self._module}.{self._class_name}": self._params._pipeml_to_dict()
+            f"obj:{self._module}.{self._class_name}": self._params._xpipe_to_dict()
         }
         
     def __call__(self, **args):
@@ -229,23 +229,23 @@ class ObjectsList(Node):
     def __init__(self, name, config_dict):
         super(ObjectsList, self).__init__(name, config_dict)
 
-    def _pipeml_check_valid(self, name, config_dict): 
-        super(ObjectsList, self)._pipeml_check_valid(name, config_dict)
+    def _xpipe_check_valid(self, name, config_dict): 
+        super(ObjectsList, self)._xpipe_check_valid(name, config_dict)
 
-    def _pipeml_construct(self, name, config_dict):
+    def _xpipe_construct(self, name, config_dict):
         self._name = name
         self._objects = [SingleObject(name, obj_dict) for obj_dict in config_dict]
         
-    def _pipeml_to_yaml(self, n_indents=0):
+    def _xpipe_to_yaml(self, n_indents=0):
         r = []
         for object in self._objects:
             el = "  " * (n_indents + 1)
-            el += f"- {object._pipeml_to_yaml(n_indents=n_indents + 1)}"
+            el += f"- {object._xpipe_to_yaml(n_indents=n_indents + 1)}"
             r += [el]
         return "\n".join(r)
     
-    def _pipeml_to_dict(self):
-        return [ obj._pipeml_to_dict() for obj in self._objects ]
+    def _xpipe_to_dict(self):
+        return [ obj._xpipe_to_dict() for obj in self._objects ]
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, ObjectsList): 

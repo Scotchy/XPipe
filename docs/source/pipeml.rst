@@ -1,4 +1,4 @@
-pipeml package
+xpipe package
 ==============
 
 Subpackages
@@ -7,15 +7,15 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   pipeml.client
-   pipeml.config
-   pipeml.server
-   pipeml.template
+   xpipe.client
+   xpipe.config
+   xpipe.server
+   xpipe.template
 
 Module contents
 ---------------
 
-.. automodule:: pipeml
+.. automodule:: xpipe
    :members:
    :undoc-members:
    :show-inheritance:

@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'PipeML'
+project = 'XPipe'
 copyright = '2021, Jules Tevissen'
 author = 'Jules Tevissen'
 

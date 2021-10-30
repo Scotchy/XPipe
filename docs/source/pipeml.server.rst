@@ -1,37 +1,37 @@
-pipeml.server package
+xpipe.server package
 =====================
 
 Submodules
 ----------
 
-pipeml.server.models module
+xpipe.server.models module
 ---------------------------
 
-.. automodule:: pipeml.server.models
+.. automodule:: xpipe.server.models
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.server.run\_server module
+xpipe.server.run\_server module
 --------------------------------
 
-.. automodule:: pipeml.server.run_server
+.. automodule:: xpipe.server.run_server
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.server.search module
+xpipe.server.search module
 ---------------------------
 
-.. automodule:: pipeml.server.search
+.. automodule:: xpipe.server.search
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.server.utils module
+xpipe.server.utils module
 --------------------------
 
-.. automodule:: pipeml.server.utils
+.. automodule:: xpipe.server.utils
    :members:
    :undoc-members:
    :show-inheritance:
@@ -39,7 +39,7 @@ pipeml.server.utils module
 Module contents
 ---------------
 
-.. automodule:: pipeml.server
+.. automodule:: xpipe.server
    :members:
    :undoc-members:
    :show-inheritance:

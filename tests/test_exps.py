@@ -1,7 +1,7 @@
 import unittest
 
-from pipeml.client import connect
-import pipeml
+from xpipe.client import connect
+import xpipe
 unittest.TestLoader.sortTestMethodsUsing = None
 
 class TestExp(unittest.TestCase): 

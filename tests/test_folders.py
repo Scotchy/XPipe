@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from pipeml.client import connect
+from xpipe.client import connect
 
 class TestFolders(TestCase):
 

@@ -53,7 +53,7 @@ def to_yaml(conf):
     Returns:
         str: The corresponding yaml string
     """
-    return conf._pipeml_to_yaml()
+    return conf._xpipe_to_yaml()
 
 def to_dict(conf):
     """Converts a Config object to a dictionary.
@@ -64,4 +64,4 @@ def to_dict(conf):
     Returns:
         dict: A multi-level dictionary containing a representation ogf the configuration.
     """
-    return conf._pipeml_to_dict()
+    return conf._xpipe_to_dict()

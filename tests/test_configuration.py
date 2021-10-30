@@ -1,7 +1,7 @@
 from unittest import TestCase, mock
 
 from os.path import dirname, realpath, join
-from pipeml.config import load_config
+from xpipe.config import load_config
 import numpy as np
 import os
 

@@ -4,7 +4,7 @@ Build
 Build the web interface
 -----------------------
 
-To build the frontend, cd to `pipeml/server/frontend` (from the root folder of the project). 
+To build the frontend, cd to `xpipe/server/frontend` (from the root folder of the project). 
 Then open `src/config.ts` and change the `ENV` var from "dev" to "prod". Then build:  
 
 .. code:: bash
@@ -19,7 +19,7 @@ From the root folder of the project:
 
 .. code:: bash
 
-   sudo docker build -f docker/Dockerfile -t pipeml .
+   sudo docker build -f docker/Dockerfile -t xpipe .
 
 Build the documentation
 -----------------------

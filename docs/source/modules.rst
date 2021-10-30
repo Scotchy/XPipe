@@ -1,7 +1,7 @@
-pipeml
+xpipe
 ======
 
 .. toctree::
    :maxdepth: 4
 
-   pipeml
+   xpipe

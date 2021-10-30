@@ -1,53 +1,53 @@
-pipeml.config.tree\_elements package
+xpipe.config.tree\_elements package
 ====================================
 
 Submodules
 ----------
 
-pipeml.config.tree\_elements.config module
+xpipe.config.tree\_elements.config module
 ------------------------------------------
 
-.. automodule:: pipeml.config.tree_elements.config
+.. automodule:: xpipe.config.tree_elements.config
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.config.tree\_elements.node module
+xpipe.config.tree\_elements.node module
 ----------------------------------------
 
-.. automodule:: pipeml.config.tree_elements.node
+.. automodule:: xpipe.config.tree_elements.node
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.config.tree\_elements.objects module
+xpipe.config.tree\_elements.objects module
 -------------------------------------------
 
-.. automodule:: pipeml.config.tree_elements.objects
+.. automodule:: xpipe.config.tree_elements.objects
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.config.tree\_elements.tags module
+xpipe.config.tree\_elements.tags module
 ----------------------------------------
 
-.. automodule:: pipeml.config.tree_elements.tags
+.. automodule:: xpipe.config.tree_elements.tags
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.config.tree\_elements.utils module
+xpipe.config.tree\_elements.utils module
 -----------------------------------------
 
-.. automodule:: pipeml.config.tree_elements.utils
+.. automodule:: xpipe.config.tree_elements.utils
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.config.tree\_elements.variable module
+xpipe.config.tree\_elements.variable module
 --------------------------------------------
 
-.. automodule:: pipeml.config.tree_elements.variable
+.. automodule:: xpipe.config.tree_elements.variable
    :members:
    :undoc-members:
    :show-inheritance:
@@ -55,7 +55,7 @@ pipeml.config.tree\_elements.variable module
 Module contents
 ---------------
 
-.. automodule:: pipeml.config.tree_elements
+.. automodule:: xpipe.config.tree_elements
    :members:
    :undoc-members:
    :show-inheritance:

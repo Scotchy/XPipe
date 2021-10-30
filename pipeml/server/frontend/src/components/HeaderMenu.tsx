@@ -21,7 +21,7 @@ export function HeaderMenu() : React.ReactElement {
     return (
         <div style={{height: "60px"}}>
             <nav className="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
-                <a className="navbar-brand" href="/index">PipeML</a>
+                <a className="navbar-brand" href="/index">XPipe</a>
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>

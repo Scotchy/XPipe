@@ -13,7 +13,7 @@ class Variable(Node):
     def __init__(self, name, value):
         super(Variable, self).__init__(name, value)
 
-    def _pipeml_construct(self, name, value):
+    def _xpipe_construct(self, name, value):
         self.name = name
         self.value = value
 
@@ -23,10 +23,10 @@ class Variable(Node):
     def __call__(self):
         return self.value
 
-    def _pipeml_to_yaml(self, n_indents=0):
+    def _xpipe_to_yaml(self, n_indents=0):
         return self.value
     
-    def _pipeml_to_dict(self):
+    def _xpipe_to_dict(self):
         return self.value
 
     def __eq__(self, o) -> bool:

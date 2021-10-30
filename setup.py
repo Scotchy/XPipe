@@ -10,11 +10,11 @@ def package_files(directory):
             paths.append(os.path.join("..", path, filename))
     return paths
 
-template_files = package_files("pipeml/server/frontend/build")
-static_files = package_files("pipeml/server/frontend/public")
+template_files = package_files("xpipe/server/frontend/build")
+static_files = package_files("xpipe/server/frontend/public")
 
 setup(
-    name="PipeML",
+    name="XPipe",
     packages=find_packages(),
     version="0.1.1",
     description="Standardize your ML projects",
@@ -23,10 +23,10 @@ setup(
     install_requires=[
         "numpy", "bokeh", "mongoengine", "Flask", "flask-cors", "pyyaml", "click"
     ],
-    package_data={"pipeml": template_files + static_files}, 
+    package_data={"xpipe": template_files + static_files}, 
     entry_points={
         "console_scripts": [
-            "pipeml=pipeml.server.run_server:run"
+            "xpipe=xpipe.server.run_server:run"
         ]
     }
 )

@@ -1,7 +1,7 @@
 #define numpy np
 
 a: 
-- !include /home/jules/dev/PipeML/tests/resources/include.yaml
+- !include /home/jules/dev/XPipe/tests/resources/include.yaml
 
 training:
   batch_size: 10
@@ -19,13 +19,13 @@ data:
     - !obj numpy.array : {"object": [1, 2]}
     - !obj numpy.array : {"object": [1, 2]}
 
-include: !include /home/jules/dev/PipeML/tests/resources/include.yaml
+include: !include /home/jules/dev/XPipe/tests/resources/include.yaml
 
 obj_test: 
   !obj numpy.array: {object: [1, 2]}
 
 obj_include: 
-  !obj numpy.array: !include /home/jules/dev/PipeML/tests/resources/include_param.yaml
+  !obj numpy.array: !include /home/jules/dev/XPipe/tests/resources/include_param.yaml
     
 obj_config: 
   !obj test.ObjTest: 
@@ -35,4 +35,4 @@ obj_config:
   
 user: !env USER
 str_fmt: !f "$USER home dir is $HOME"
-inc: !include "/home/jules/dev/PipeML/tests/resources/include.yaml"
+inc: !include "/home/jules/dev/XPipe/tests/resources/include.yaml"

@@ -1,5 +1,5 @@
 """
-:mod:`pipeml.client` contains functions and classes needed to interface with the PipeML server API.
+:mod:`xpipe.client` contains functions and classes needed to interface with the XPipe server API.
 It can carry operations like creating/getting an experiment, logging metrics/artefacts/graphs or managing folders. 
 """
 

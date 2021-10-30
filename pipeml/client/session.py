@@ -19,7 +19,7 @@ class Session():
         return urljoin(self.url, path)
     
     def api_call(self, func_name, data=None, file=None):
-        """Carry an API call to the pipeml server.
+        """Carry an API call to the xpipe server.
 
         Args:
             func_name (str): Function to execute

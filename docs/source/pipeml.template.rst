@@ -1,29 +1,29 @@
-pipeml.template package
+xpipe.template package
 =======================
 
 Submodules
 ----------
 
-pipeml.template.parameter module
+xpipe.template.parameter module
 --------------------------------
 
-.. automodule:: pipeml.template.parameter
+.. automodule:: xpipe.template.parameter
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.template.template module
+xpipe.template.template module
 -------------------------------
 
-.. automodule:: pipeml.template.template
+.. automodule:: xpipe.template.template
    :members:
    :undoc-members:
    :show-inheritance:
 
-pipeml.template.utils module
+xpipe.template.utils module
 ----------------------------
 
-.. automodule:: pipeml.template.utils
+.. automodule:: xpipe.template.utils
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ pipeml.template.utils module
 Module contents
 ---------------
 
-.. automodule:: pipeml.template
+.. automodule:: xpipe.template
    :members:
    :undoc-members:
    :show-inheritance:

@@ -18,7 +18,7 @@ from os.path import dirname, basename, realpath, join
 
 from .models import Project, Folder, Experiment, init_db
 from .utils import APISuccess, APIError, update
-from pipeml.config import load_config_from_str, to_dict
+from xpipe.config import load_config_from_str, to_dict
 
 from mongoengine import base, connect
 import signal
@@ -33,7 +33,7 @@ dir_path = dirname(realpath(__file__))
 @click.option("--db-port", default=27017, help="Port of the MongoDB server")
 @click.option("--artifacts-dir", default="./artifacts", help="Folder to store artifacts")
 def run(host, port, db_host, db_port, artifacts_dir):
-    connect("pipeml", host=db_host, port=db_port) # Connect to mongodb
+    connect("xpipe", host=db_host, port=db_port) # Connect to mongodb
     init_db() # Initialize models
 
     artifacts_dir = os.path.join(os.getcwd(), artifacts_dir)
@@ -61,7 +61,7 @@ def run(host, port, db_host, db_port, artifacts_dir):
     @app.route("/explorer/<path:path>")
     @app.route("/experiment")
     @app.route("/experiment/<path:path>")
-    def pipeml(path=None):
+    def xpipe(path=None):
         return render_template("index.html")
     
     @app.route('/artifacts/<path:filename>')
