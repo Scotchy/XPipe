@@ -7,13 +7,19 @@ As it might be useful for other people, I decided to publish the code as an open
 
 XPipe focuses on two principal components to make Data Science easier: *configuration files* and *experiment tracking*.
 
-- Configuration files are a big concern in data science field. It can become a true nightmare as you probably want to handle traceability and adopt a clean approach while dealing with a lot of configuration files. But there is no standard today. XPipe facilitates your work by automatically loading python objects from a yaml configuration. You can also easily include other yaml files into another for instance.
+- Configuration files are a big concern in data science field. It can become a true nightmare as you probably want to handle traceability and adopt a clean approach while dealing with a lot of configuration files. But there is no standard today. XPipe facilitates your work by automatically loading python objects from a yaml configuration. You can also easily include other yaml files into another.
 
-- The web interface will enable you to easily organize your experiments into folder, filter them and to plot different kind of graphs. You would particularly appreciate the library if you need to have an overview of a lot of your experiments.
+- The web interface enable you to easily organize your experiments into folders, to filter them and to plot different kind of graphs. You would particularly appreciate the library if you need to have an overview of a lot of your experiments.
 
 The philosophy behind the project is to be simple and customizable.
 
 As a team, you can run a single XPipe server for everyone. It will promote exchange as everyone can easily share their work with others.
+
+## Getting started
+
+```bash
+pip install xpipe
+```
 
 ## Configuration files
 
