@@ -1,0 +1,17 @@
+check: "/api/check"
+
+# Folders
+new_folder: "/api/folder/new"
+delete_folder: "/api/folder/delete"
+rename_folder: "/api/folder/rename"
+list_folders: "/api/folder/list"
+
+# Runs
+new_run: "/api/run/new"
+get_run: "/api/run/get"
+delete_run: "/api/run/delete"
+log_param: "/api/run/log_param"
+log_metric: "/api/run/log_metric"
+log_artifact: "/api/run/log_artifact"
+log_graph: "/api/run/log_graph"
+list_runs: "/api/run/list"
