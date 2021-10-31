@@ -16,10 +16,10 @@ static_files = package_files("xpipe/server/frontend/public")
 setup(
     name="XPipe",
     packages=find_packages(),
-    version="0.1.1",
+    version="0.1.2",
     description="Standardize your ML projects",
     author="Jules Tevissen",
-    license="GNU GPLv3",
+    license="MIT",
     install_requires=[
         "numpy", "bokeh", "mongoengine", "Flask", "flask-cors", "pyyaml", "click"
     ],
