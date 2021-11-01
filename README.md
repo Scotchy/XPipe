@@ -3,13 +3,13 @@
 ## Introduction
 
 XPipe is a library that I started developping in December 2020 for my personal use.
-As it might be useful for other people, I decided to publish the code as an open source project on Github.
+As it might be useful for other people, I decided to publish the code as an open source project.
 
 XPipe focuses on two principal components to make Data Science easier: *configuration files* and *experiment tracking*.
 
-- Configuration files are a big concern in data science field. It can become a true nightmare as you probably want to handle traceability and adopt a clean approach while dealing with a lot of configuration files. But there is no standard today. XPipe facilitates your work by automatically loading python objects from a yaml configuration. You can also easily include other yaml files into another.
+- Configuration files are a big concern in data science field and there is no standard today. XPipe facilitates your work by automatically loading python objects from a yaml configuration. You can also easily include other yaml files into another.
 
-- The web interface enable you to easily organize your experiments into folders, to filter them and to plot different kind of graphs. You would particularly appreciate the library if you need to have an overview of a lot of your experiments.
+- The web interface enables you to easily organize your experiments into folders, to filter them and to plot different kind of graphs. You will particularly appreciate the library if you deal with a lot of experiments.
 
 The philosophy behind the project is to be simple and customizable.
 
@@ -23,7 +23,7 @@ pip install xpipe
 
 ## Configuration files
 
-Here is a simple example of how to use yaml configuration file to seamlessly load objects needed to run your experiments.
+Here is a simple example of how to use yaml configuration files to seamlessly load needed objects to run your experiments.
   
 ```yaml
 training:
@@ -75,7 +75,7 @@ You have two options to start the server:
 xpipe --db_host <db_ip_address> --db_port <db_port> --port <server_port> --artifacts-dir <artifacts_dir>
 ```
 
-2. Run directly the docker image (no other dependancies needed) 
+2. Run directly the docker image (no other dependancies needed)
 
 ```
 docker run -v <data_dir>:/data -p <server_port>:80 xpipe:latest
