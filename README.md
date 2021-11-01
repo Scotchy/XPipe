@@ -21,6 +21,8 @@ As a team, you can run a single XPipe server for everyone. It will promote excha
 pip install xpipe
 ```
 
+Documentation (work in progress): https://x-pipe.readthedocs.io/en/latest/#
+
 ## Configuration files
 
 Here is a simple example of how to use yaml configuration files to seamlessly load needed objects to run your experiments.
