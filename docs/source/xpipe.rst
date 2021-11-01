@@ -1,5 +1,5 @@
 xpipe package
-==============
+=============
 
 Subpackages
 -----------

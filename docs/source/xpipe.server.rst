@@ -1,11 +1,11 @@
 xpipe.server package
-=====================
+====================
 
 Submodules
 ----------
 
 xpipe.server.models module
----------------------------
+--------------------------
 
 .. automodule:: xpipe.server.models
    :members:
@@ -13,7 +13,7 @@ xpipe.server.models module
    :show-inheritance:
 
 xpipe.server.run\_server module
---------------------------------
+-------------------------------
 
 .. automodule:: xpipe.server.run_server
    :members:
@@ -21,7 +21,7 @@ xpipe.server.run\_server module
    :show-inheritance:
 
 xpipe.server.search module
----------------------------
+--------------------------
 
 .. automodule:: xpipe.server.search
    :members:
@@ -29,7 +29,7 @@ xpipe.server.search module
    :show-inheritance:
 
 xpipe.server.utils module
---------------------------
+-------------------------
 
 .. automodule:: xpipe.server.utils
    :members:

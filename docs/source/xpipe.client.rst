@@ -1,11 +1,11 @@
 xpipe.client package
-=====================
+====================
 
 Submodules
 ----------
 
 xpipe.client.client module
----------------------------
+--------------------------
 
 .. automodule:: xpipe.client.client
    :members:
@@ -13,7 +13,7 @@ xpipe.client.client module
    :show-inheritance:
 
 xpipe.client.experiment module
--------------------------------
+------------------------------
 
 .. automodule:: xpipe.client.experiment
    :members:
@@ -21,7 +21,7 @@ xpipe.client.experiment module
    :show-inheritance:
 
 xpipe.client.session module
-----------------------------
+---------------------------
 
 .. automodule:: xpipe.client.session
    :members:

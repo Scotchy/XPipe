@@ -1,11 +1,11 @@
 xpipe.template package
-=======================
+======================
 
 Submodules
 ----------
 
 xpipe.template.parameter module
---------------------------------
+-------------------------------
 
 .. automodule:: xpipe.template.parameter
    :members:
@@ -13,7 +13,7 @@ xpipe.template.parameter module
    :show-inheritance:
 
 xpipe.template.template module
--------------------------------
+------------------------------
 
 .. automodule:: xpipe.template.template
    :members:
@@ -21,7 +21,7 @@ xpipe.template.template module
    :show-inheritance:
 
 xpipe.template.utils module
-----------------------------
+---------------------------
 
 .. automodule:: xpipe.template.utils
    :members:

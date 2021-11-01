@@ -1,5 +1,5 @@
 xpipe
-======
+=====
 
 .. toctree::
    :maxdepth: 4
