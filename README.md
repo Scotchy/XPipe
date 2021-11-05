@@ -1,15 +1,17 @@
 # Welcome to XPipe's documentation !
 
+![python](https://img.shields.io/badge/python-%3E%3D%203.5-blue)
+  
 ## Introduction
 
 XPipe is a library that I started developping in December 2020 for my personal use.
 As it might be useful for other people, I decided to publish the code as an open source project.
 
-XPipe focuses on two principal components to make Data Science easier: *configuration files* and *experiment tracking*.
+XPipe focuses on two principal components to make Data Science easier:
 
-- Configuration files are a big concern in data science field and there is no standard today. XPipe facilitates your work by automatically loading python objects from a yaml configuration. You can also easily include other yaml files into another.
+- **Configuration files** are a big concern in data science field and there is no standard today. XPipe facilitates your work by automatically loading python objects from a yaml configuration. You can also easily include other yaml files into another.
 
-- The web interface enables you to easily organize your experiments into folders, to filter them and to plot different kind of graphs. You will particularly appreciate the library if you deal with a lot of experiments.
+- **Experiment tracking**: The web interface enables you to easily organize your experiments into folders, to filter them and to plot different kind of graphs. You will particularly appreciate the library if you deal with a lot of experiments.
 
 The philosophy behind the project is to be simple and customizable.
 
