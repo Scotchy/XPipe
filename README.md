@@ -41,7 +41,7 @@ training:
 
   loss: !obj torch.nnBCELoss : {}
 
-model: !include "./models/my_models.yaml"
+model: !include "./models/my_model.yaml"
 
 transforms:
   !obj transforms.Normalize : {}
@@ -58,8 +58,8 @@ from xpipe.config import load_config
 conf = load_config("my_config.yaml")
 epochs = conf.training.epochs() # 18
 
-# Define your model
-# ...
+# Instantiate your model defined in models/my_model.yaml
+my_model = params.model()
 
 # Directly instantiate your optimizer and scheduler from configuration
 # Note that you can add argument that are not in the configuration file
