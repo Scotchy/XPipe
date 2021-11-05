@@ -16,7 +16,7 @@ static_files = package_files("xpipe/server/frontend/public")
 setup(
     name="XPipe",
     packages=find_packages(),
-    version="0.1.2",
+    version = "0.1.2",
     description="Standardize your ML projects",
     author="Jules Tevissen",
     license="MIT",
