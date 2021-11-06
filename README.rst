@@ -88,8 +88,8 @@ You have two options to start the server:
 2. Run directly the docker image (no other dependancies needed)
 
 .. code-block:: bash
-
-  docker run -v <data_dir>:/data -p <server_port>:80 xpipe:latest
+  docker pull drosos/xpipe:0.1.2
+  docker run -v <data_dir>:/data -p <server_port>:80 drosos/xpipe:0.1.2
 
 The `<data_dir>` directory will contain the mongodb database and artifacts.
 
