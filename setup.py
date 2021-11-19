@@ -13,10 +13,15 @@ def package_files(directory):
 template_files = package_files("xpipe/server/frontend/build")
 static_files = package_files("xpipe/server/frontend/public")
 
+with open("README.rst", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name="XPipe",
+    long_description=long_description,
+    long_description_content_type='text/x-rst',
     packages=find_packages(),
-    version = "0.1.2",
+    version = "0.1.3",
     description="Standardize your ML projects",
     author="Jules Tevissen",
     license="MIT",

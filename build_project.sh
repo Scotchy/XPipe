@@ -9,4 +9,7 @@ npm run build
 # Build python package
 cd $project_dir
 echo "Building python package"
-python setup.py bdist
+python -m build
+
+echo "Checking long description syntax for Pypi"
+twine check dist/*
