@@ -1,6 +1,6 @@
 from .node import Node
 import importlib
-from .utils import is_object, is_objects_list, is_var, is_list, is_config
+from .utils import is_object, is_objects_list, is_var, is_list, is_config, is_from
 from . import variables as variables
 from collections.abc import Mapping
 
@@ -14,15 +14,23 @@ class Config(Node, Mapping):
         Node.__init__(self, name, config_dict)
 
     def _xpipe_check_valid(self, name, config_dict):
-        if name != "__root__":
+        if not isinstance(name, str) or name != "__root__":
             super(Config, self)._xpipe_check_valid(name, config_dict)
         return True
 
     def _xpipe_construct(self, name, sub_config):
         for name, sub_config in sub_config.items():
-            # self.set_node(name, sub_config)
             node = construct(name, sub_config)
-            self._xpipe_properties[name] = node
+            
+            if not isinstance(node, FromIncludes):
+                self._xpipe_properties[name] = node
+            else:
+                # Import all includes and set properties
+                already_loaded_properties = set(self._xpipe_properties.keys())
+                for include in node.includes: 
+                    for k, v in include.items():
+                        if k not in already_loaded_properties:
+                            self._xpipe_properties[k] = v
 
     def _xpipe_to_yaml(self, n_indents=0):
         r = []
@@ -120,6 +128,24 @@ class IncludedParameters(Parameters):
         self._xpipe_path = params_dict.path
         return super(IncludedParameters, self)._xpipe_construct(class_name, conf)
 
+class FromIncludes(Node):
+
+    def __init__(self, name, config_dict):
+        super(FromIncludes, self).__init__(name, config_dict)
+    
+    def _xpipe_check_valid(self, name, config_dict):
+        
+        if not isinstance(config_dict, list):
+            raise Exception(f"{name} must be a list")
+        
+        # for include in config_dict:
+        #     if not isinstance(include, Include):
+        #         raise Exception(f"{name} must be a list of includes")
+        
+        return True
+
+    def _xpipe_construct(self, name, config_dict):
+        self.includes = [construct("", sub_config_dict) for sub_config_dict in config_dict]
 
 class List(Node):
 
@@ -183,8 +209,8 @@ class SingleObject(Node):
 
     def _xpipe_construct(self, name, config_dict):
         self._name = name
-        object, self._params = list(config_dict.items())[0]
-        self._class_name = object.class_name
+        obj, self._params = list(config_dict.items())[0]
+        self._class_name = obj.class_name
         split_index = len(self._class_name) - self._class_name[::-1].index(".") # Get index of the last point
         self._module, self._class_name = self._class_name[:split_index-1], self._class_name[split_index:]
         if not isinstance(self._params, variables.Include):
@@ -259,7 +285,7 @@ class ObjectsList(Node):
         return [obj(**args) for obj in self._objects]
 
 
-def get_node_type(conf):
+def get_node_type(name, conf):
     """Detect the object that can build the tree
 
     Args:
@@ -274,14 +300,15 @@ def get_node_type(conf):
         return globals()[builder_name] if builder_name is not None else None
 
     builder_checkers = [
+        (FromIncludes, is_from),
         (SingleObject, is_object),
         (ObjectsList, is_objects_list),
         (List, is_list), 
-        (variables.Variable, is_var), 
+        (variables.Variable, is_var),
         (Config, is_config)
     ]
     for node_type, can_build in builder_checkers:
-        if can_build(conf):
+        if can_build(name, conf):
             return node_type
     raise Exception(f"Configuration cannot be parsed: {conf}")
 
@@ -296,7 +323,7 @@ def construct(name, config_dict):
     Returns:
         Node | Variable: The build tree element
     """
-    NodeType = get_node_type(config_dict)
+    NodeType = get_node_type(name, config_dict)
 
     if NodeType is not None: 
         node = NodeType(name, config_dict)

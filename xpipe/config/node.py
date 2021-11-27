@@ -12,7 +12,8 @@ class Node():
         raise NotImplementedError("This function has to be implemented")
 
     def _xpipe_check_valid(self, name, config_dict):
-        utils.valid_var_name(name)
+        if isinstance(name, str):
+            utils.valid_var_name(name)
         return True
     
     def __str__(self) -> str:

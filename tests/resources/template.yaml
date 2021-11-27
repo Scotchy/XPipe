@@ -1,5 +1,7 @@
 #define numpy np
-
+!from :
+  - !include "/home/jules/dev/XPipe/tests/resources/include.yaml"
+  
 a: 
 - !include /home/jules/dev/XPipe/tests/resources/include.yaml
 

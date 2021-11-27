@@ -1,5 +1,5 @@
 
-def is_objects_list(config_dict):
+def is_objects_list(name, config_dict):
     """Check if the given configuration is an objects list.
 
     Args:
@@ -11,12 +11,12 @@ def is_objects_list(config_dict):
     if not isinstance(config_dict, list) or len(config_dict) == 0:
         return False
     for obj in config_dict:
-        if not is_object(obj):
+        if not is_object("", obj):
             return False
     return True
 
 
-def is_object(config_dict):
+def is_object(name, config_dict):
     """Checks if the given configuration defines an object.
 
     Args:
@@ -32,7 +32,7 @@ def is_object(config_dict):
     return len(keys) == 1 and isinstance(keys[0], SingleObjectTag)
 
 
-def is_var(config_dict):
+def is_var(name, config_dict):
     """Checks if the given configuration defines a variable
 
     Args:
@@ -44,12 +44,15 @@ def is_var(config_dict):
     return isinstance(config_dict, int) or isinstance(config_dict, float) or isinstance(config_dict, str)
 
 
-def is_list(config_dict):
-    return not is_objects_list(config_dict) and isinstance(config_dict, list)
+def is_list(name, config_dict):
+    return not is_objects_list(name, config_dict) and isinstance(config_dict, list)
 
-def is_config(config_dict):
+def is_config(name, config_dict):
     return isinstance(config_dict, dict)
 
+def is_from(name, config_dict):
+    from .variables import FromTag
+    return isinstance(name, FromTag)
 
 def valid_var_name(name : str):
     """Raise an error if 'name' is not a valid Variable name.

@@ -111,7 +111,33 @@ class Include(Variable):
     def __repr__(self) -> str:
         return f"Include(path={self.path})"
 
+@Tags.register 
+class FromTag(Variable):
+    yaml_tag = u"!from"
+    builder_class_name = "FromIncludes"
+    
+    """This class defines a yaml tag.
+    It will include another yaml into the current configuration.
+    The difference between Include and From is that From can only be added at the beginning of the configuration.
+    """
+    
+    def __init__(self):
+        pass
 
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return FromTag()
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_scalar(data)
+    
+    def __repr__(self) -> str:
+        return f"From()"
+
+    def __hash__(self) -> int:
+        return hash(id(self))
+        
 @Tags.register
 class FormatStrVariable(Variable):
     yaml_tag = u"!f"
