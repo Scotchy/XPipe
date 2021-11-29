@@ -3,15 +3,16 @@ import importlib
 from .utils import is_object, is_objects_list, is_var, is_list, is_config, is_from
 from . import variables as variables
 from collections.abc import Mapping
+import copy 
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
 
 class Config(Node, Mapping):
 
     def __init__(self, name, config_dict):
-        self._xpipe_config_dict = config_dict
-        self._xpipe_properties = {}
-        Node.__init__(self, name, config_dict)
+        object.__setattr__(self, "_xpipe_properties", {})
+        # self._xpipe_config_dict = config_dict
+        super(Config, self).__init__(name, config_dict)
 
     def _xpipe_check_valid(self, name, config_dict):
         if not isinstance(name, str) or name != "__root__":
@@ -48,20 +49,29 @@ class Config(Node, Mapping):
         return { k: v._xpipe_to_dict() for k, v in self.items() }
     
     def __getattribute__(self, prop: str):
-        properties = super(Node, self).__getattribute__("_xpipe_properties")
-        if prop in properties:
-            return properties[prop]
-        else:
-            try: 
-                return super(Node, self).__getattribute__(prop)
-            except:
-                raise AttributeError(f"'{self._xpipe_name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
+        try:
+            properties = super(Config, self).__getattribute__("_xpipe_properties")
+            if prop in properties:
+                return properties[prop]
+        except AttributeError:
+            pass
+
+        try: 
+            return super(Config, self).__getattribute__(prop)
+        except:
+            raise AttributeError(f"'{self._xpipe_name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
+
+    def __setattr__(self, key, value):
+        self._xpipe_properties[key] = value
+
+    def __setitem__(self, key, value):
+        self._xpipe_properties[key] = value
 
     def __getitem__(self, prop):
         if prop in self._xpipe_properties:
             return self._xpipe_properties[prop]
         else:
-            raise AttributeError(f"'{self._name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
+            raise AttributeError(f"'{self._xpipe_name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
 
     def __contains__(self, prop):
         return prop in self._xpipe_properties
@@ -80,14 +90,27 @@ class Config(Node, Mapping):
     
     def __repr__(self) -> str:
         return f"Config(len={len(self)})"
+    
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            object.__setattr__(result, k, copy.deepcopy(v, memo))
+        return result
 
 class IncludedConfig(Config):
 
     def __init__(self, name, config_dict):
         conf = config_dict.load()
-        self._xpipe_path = config_dict.path
+        object.__setattr__(self, "_xpipe_path", config_dict.path)
         super(IncludedConfig, self).__init__(name, conf)
     
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, IncludedConfig): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self._xpipe_path == o._xpipe_path
+
     def __repr__(self) -> str:
         return f"IncludedConfig(len={len(self)}, path={self._xpipe_path})"
 
@@ -122,11 +145,16 @@ class IncludedParameters(Parameters):
 
     def __init__(self, class_name, param_dict):
         super(IncludedParameters, self).__init__(class_name, param_dict)
-
+    
     def _xpipe_construct(self, class_name, params_dict):
         conf = params_dict.load()
         self._xpipe_path = params_dict.path
         return super(IncludedParameters, self)._xpipe_construct(class_name, conf)
+    
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, IncludedParameters): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        return self._xpipe_path == o._xpipe_path
 
 class FromIncludes(Node):
 
@@ -138,9 +166,9 @@ class FromIncludes(Node):
         if not isinstance(config_dict, list):
             raise Exception(f"{name} must be a list")
         
-        # for include in config_dict:
-        #     if not isinstance(include, Include):
-        #         raise Exception(f"{name} must be a list of includes")
+        for include in config_dict:
+            if not isinstance(include, variables.Include):
+                raise Exception(f"{name} must be a list of includes")
         
         return True
 
@@ -182,6 +210,15 @@ class List(Node):
             return element()
         else:
             return element
+
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, List): 
+            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+        
+        for el1, el2 in zip(self, o):
+            if el1 != el2:
+                return False
+        return True
 
     def __len__(self):
         return len(self._xpipe_elements)
