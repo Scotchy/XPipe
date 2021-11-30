@@ -1,6 +1,7 @@
 from .node import Node
 import importlib
 from .utils import is_object, is_objects_list, is_var, is_list, is_config, is_from
+from . import config as config
 from . import variables as variables
 from collections.abc import Mapping
 import copy 
@@ -23,15 +24,10 @@ class Config(Node, Mapping):
         for name, sub_config in sub_config.items():
             node = construct(name, sub_config)
             
-            if not isinstance(node, FromIncludes):
-                self._xpipe_properties[name] = node
+            if isinstance(node, FromIncludes):
+                config.merge(self, node.includes, inplace=True)
             else:
-                # Import all includes and set properties
-                already_loaded_properties = set(self._xpipe_properties.keys())
-                for include in node.includes: 
-                    for k, v in include.items():
-                        if k not in already_loaded_properties:
-                            self._xpipe_properties[k] = v
+                self._xpipe_properties[name] = node
 
     def _xpipe_to_yaml(self, n_indents=0):
         r = []
@@ -148,7 +144,7 @@ class IncludedParameters(Parameters):
     
     def _xpipe_construct(self, class_name, params_dict):
         conf = params_dict.load()
-        self._xpipe_path = params_dict.path
+        object.__setattr__(self, "_xpipe_path", params_dict.path)
         return super(IncludedParameters, self)._xpipe_construct(class_name, conf)
     
     def __eq__(self, o: object) -> bool:
@@ -173,12 +169,12 @@ class FromIncludes(Node):
         return True
 
     def _xpipe_construct(self, name, config_dict):
-        self.includes = [construct("", sub_config_dict) for sub_config_dict in config_dict]
+        self.includes = config.multi_merge(*[construct("", sub_config_dict) for sub_config_dict in config_dict], inplace=True)
 
 class List(Node):
 
     def __init__(self, name, config_dict):
-        self._xpipe_elements = []
+        object.__setattr__(self, "_xpipe_elements", [])
         super(List, self).__init__(name, config_dict)
     
     def _xpipe_construct(self, name, config_dict):
@@ -245,7 +241,7 @@ class SingleObject(Node):
         return True
 
     def _xpipe_construct(self, name, config_dict):
-        self._name = name
+        self._xpipe_name = name
         obj, self._params = list(config_dict.items())[0]
         self._class_name = obj.class_name
         split_index = len(self._class_name) - self._class_name[::-1].index(".") # Get index of the last point
@@ -296,7 +292,7 @@ class ObjectsList(Node):
         super(ObjectsList, self)._xpipe_check_valid(name, config_dict)
 
     def _xpipe_construct(self, name, config_dict):
-        self._name = name
+        self._xpipe_name = name
         self._objects = [SingleObject(name, obj_dict) for obj_dict in config_dict]
         
     def _xpipe_to_yaml(self, n_indents=0):

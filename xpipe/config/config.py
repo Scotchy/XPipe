@@ -67,7 +67,7 @@ def to_dict(conf):
     """
     return conf._xpipe_to_dict()
 
-def merge(default_config, overwrite_config):
+def merge(default_config, overwrite_config, inplace=False):
     """Merges two configurations.
 
     Args:
@@ -77,15 +77,18 @@ def merge(default_config, overwrite_config):
     Returns:
         Config: The merged configuration
     """
-    default_config = copy.deepcopy(default_config)
-    for def_key, overwite_key in zip(default_config.keys(), overwrite_config.keys()):
-        if isinstance(default_config[def_key], objects.Config) and isinstance(overwrite_config[overwite_key], objects.Config):
-            default_config[def_key] = merge(default_config[def_key], overwrite_config[overwite_key])
+    if not inplace:
+        default_config = copy.deepcopy(default_config)
+
+    for key, value in overwrite_config.items():
+        if key in default_config and isinstance(default_config[key], objects.Config) and isinstance(value, objects.Config):
+            default_config[key] = merge(default_config[key], value, inplace=inplace)
         else:
-            default_config[def_key] = overwrite_config[overwite_key]
+            default_config[key] = value
+
     return default_config
 
-def multi_merge(*confs):
+def multi_merge(*confs, inplace=False):
     """Merges multiple configurations.
 
     Args:
@@ -101,6 +104,6 @@ def multi_merge(*confs):
     
     merged_conf = None
     for conf in confs[1:]:
-        merged_conf = merge(confs[0], conf)
+        merged_conf = merge(confs[0], conf, inplace=inplace)
     
     return merged_conf
