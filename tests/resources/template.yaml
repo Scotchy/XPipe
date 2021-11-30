@@ -35,6 +35,6 @@ obj_config:
       a: 1
       b: 2
   
-user: !env USER
+# user: !env USER
 str_fmt: !f "$USER home dir is $HOME"
 inc: !include "/home/jules/dev/XPipe/tests/resources/include.yaml"
