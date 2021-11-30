@@ -21,13 +21,19 @@ class Config(Node, Mapping):
         return True
 
     def _xpipe_construct(self, name, sub_config):
+        from_node = None
+
         for name, sub_config in sub_config.items():
             node = construct(name, sub_config)
             
             if isinstance(node, FromIncludes):
-                config.merge(self, node.includes, inplace=True)
+                from_node = node
             else:
                 self._xpipe_properties[name] = node
+        
+        if from_node is not None:
+            r = config.merge(from_node.includes, self)
+            object.__setattr__(self, "_xpipe_properties", r._xpipe_properties)
 
     def _xpipe_to_yaml(self, n_indents=0):
         r = []
@@ -46,14 +52,14 @@ class Config(Node, Mapping):
     
     def __getattribute__(self, prop: str):
         try:
-            properties = super(Config, self).__getattribute__("_xpipe_properties")
+            properties = object.__getattribute__(self, "_xpipe_properties")
             if prop in properties:
                 return properties[prop]
         except AttributeError:
             pass
 
         try: 
-            return super(Config, self).__getattribute__(prop)
+            return object.__getattribute__(self, prop)
         except:
             raise AttributeError(f"'{self._xpipe_name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
 
