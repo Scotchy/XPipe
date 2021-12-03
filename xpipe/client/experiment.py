@@ -38,7 +38,11 @@ class Experiment():
         folder = dirname(script_name)
         if folder != "":
             os.chdir(folder)
-        commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip("\n")
+        try:
+            commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip("\n")
+        except:
+            commit_hash = "None"
+
         os.chdir(tmp_folder)
         r = self.session.api_call(
             "new_run", 
