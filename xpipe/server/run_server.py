@@ -444,10 +444,10 @@ def prepare_bokeh_dependancies():
     try:
         print("Loading Bokeh javascript dependancies.")
         base_dir = bokeh.resources.INLINE.base_dir
-        sh.copyfile(join(base_dir, "js/bokeh.min.js"), join(dir_path, "frontend/public/bokeh.min.js"))
-        sh.copyfile(join(base_dir, "js/bokeh-widgets.min.js"), join(dir_path, "frontend/public/bokeh-widgets.min.js"))
-        sh.copyfile(join(base_dir, "js/bokeh-tables.min.js"), join(dir_path, "frontend/public/bokeh-tables.min.js"))
-        sh.copyfile(join(base_dir, "js/bokeh-api.min.js"), join(dir_path, "frontend/public/bokeh-api.min.js"))
+        sh.copyfile(join(base_dir, "js/bokeh.min.js"), join(dir_path, "frontend/build/bokeh.min.js"))
+        sh.copyfile(join(base_dir, "js/bokeh-widgets.min.js"), join(dir_path, "frontend/build/bokeh-widgets.min.js"))
+        sh.copyfile(join(base_dir, "js/bokeh-tables.min.js"), join(dir_path, "frontend/build/bokeh-tables.min.js"))
+        sh.copyfile(join(base_dir, "js/bokeh-api.min.js"), join(dir_path, "frontend/build/bokeh-api.min.js"))
     except:
         raise Exception("Can't load Bokeh javascript dependancies.")
 
