@@ -10,7 +10,7 @@ def package_files(directory):
             paths.append(os.path.join("..", path, filename))
     return paths
 
-template_files = package_files("xpipe/server/frontend/build")
+template_files = package_files("xpipe/server/frontend/build") + ["client/api_calls.yaml"]
 static_files = package_files("xpipe/server/frontend/public")
 
 with open("README.rst", "r") as fh:
