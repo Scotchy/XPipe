@@ -54,6 +54,7 @@ def run(host, port, db_host, db_port, artifacts_dir):
      ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝     ╚══════╝""")
 
     @app.route("/")
+    @app.route("/index")
     def index():
         return render_template("index.html")
 
