@@ -107,3 +107,25 @@ def multi_merge(*confs, inplace=False):
         merged_conf = merge(confs[0], conf, inplace=inplace)
     
     return merged_conf
+
+def get_node(config, path, delimiter="."):
+    """Gets a node from a configuration.
+
+    Args:
+        config (Config): The configuration
+        path (str): The path of the node to get
+        delimiter (str): The delimiter used to separate the path
+
+    Returns:
+        Config: The node
+    """
+    if path == "":
+        return config
+    path = path.split(delimiter)
+    node = config
+    for p in path:
+        if p in node:
+            node = node[p]
+        else:
+            raise ValueError("Path not found: {}".format(path))
+    return node

@@ -5,6 +5,7 @@ from . import config as config
 from . import variables as variables
 from collections.abc import Mapping
 import copy 
+from .loader import parse_path
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
 
@@ -247,7 +248,6 @@ class SingleObject(Node):
         return True
 
     def _xpipe_construct(self, name, config_dict):
-        self._xpipe_name = name
         obj, self._params = list(config_dict.items())[0]
         self._class_name = obj.class_name
         split_index = len(self._class_name) - self._class_name[::-1].index(".") # Get index of the last point
