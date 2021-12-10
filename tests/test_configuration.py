@@ -69,3 +69,7 @@ class TestConfiguration(TestCase):
     def test_str_fmt(self):
         a = self.conf.str_fmt()
         self.assertTrue(len(a))
+    
+    def test_class(self):
+        c = self.conf.np_array()
+        self.assertEqual(c, np.array)

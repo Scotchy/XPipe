@@ -4,6 +4,7 @@ from .tags import Tags
 import os
 import string
 import yaml
+from .loader import load_class
 
 __all__ = ["Variable", "EnvVariable", "Include", "FormatStrVariable", "SingleObjectTag"]
 
@@ -203,8 +204,10 @@ class ClassTag(Variable):
     """This class defines a yaml tag
     It store a class (not an instance)"""
 
-    def __init__(self, class_name):
-        self.class_name = class_name
+    def __init__(self, class_path):
+        self.class_path = class_path
+        value = load_class(class_path)
+        super().__init__("", value)
     
     @classmethod
     def from_yaml(cls, loader, node):
@@ -217,7 +220,7 @@ class ClassTag(Variable):
     def __eq__(self, o) -> bool:
         if not isinstance(o, ClassTag): 
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
-        return self.class_name == o.class_name
+        return self.class_path == o.class_path
 
     def __repr__(self) -> str:
-        return f"ClassTag(class_name={self.class_name})"
+        return f"ClassTag(class_name={self.class_path})"
