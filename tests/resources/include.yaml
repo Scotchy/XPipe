@@ -1,3 +1,4 @@
 a: 1
 user: !env USER
 inc: !include /home/jules/dev/XPipe/tests/resources/include_param.yaml
+ref: !ref user

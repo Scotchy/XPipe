@@ -11,10 +11,10 @@ __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
 
 class Config(Node, Mapping):
 
-    def __init__(self, name, config_dict):
+    def __init__(self, name, config_dict, parent=None):
         object.__setattr__(self, "_xpipe_properties", {})
         # self._xpipe_config_dict = config_dict
-        super(Config, self).__init__(name, config_dict)
+        super(Config, self).__init__(name, config_dict, parent)
 
     def _xpipe_check_valid(self, name, config_dict):
         if not isinstance(name, str) or name != "__root__":
@@ -25,7 +25,7 @@ class Config(Node, Mapping):
         from_node = None
 
         for name, sub_config in sub_config.items():
-            node = construct(name, sub_config)
+            node = construct(name, sub_config, parent=self)
             
             if isinstance(node, FromIncludes):
                 from_node = node
@@ -101,18 +101,24 @@ class Config(Node, Mapping):
         for k, v in self.__dict__.items():
             object.__setattr__(result, k, copy.deepcopy(v, memo))
         return result
+    
+    def __hash__(self) -> int:
+        return hash(id(self))
 
 class IncludedConfig(Config):
 
-    def __init__(self, name, config_dict):
+    def __init__(self, name, config_dict, parent=None):
         conf = config_dict.load()
         object.__setattr__(self, "_xpipe_path", config_dict.path)
-        super(IncludedConfig, self).__init__(name, conf)
+        super(IncludedConfig, self).__init__(name, conf, parent)
     
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, IncludedConfig): 
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
         return self._xpipe_path == o._xpipe_path
+
+    def __hash__(self) -> int:
+        return hash(id(self))
 
     def __repr__(self) -> str:
         return f"IncludedConfig(len={len(self)}, path={self._xpipe_path})"
@@ -129,8 +135,8 @@ class Parameters(Config):
         param_dict (dict): Dictionary of the parameters
     """
 
-    def __init__(self, class_name, param_dict):
-        super(Parameters, self).__init__(class_name, param_dict)
+    def __init__(self, class_name, param_dict, parent=None):
+        super(Parameters, self).__init__(class_name, param_dict, parent)
         
     def _xpipe_construct(self, class_name, params_dict):
         super(Parameters, self)._xpipe_construct(class_name, params_dict)
@@ -146,8 +152,8 @@ class Parameters(Config):
 
 class IncludedParameters(Parameters):
 
-    def __init__(self, class_name, param_dict):
-        super(IncludedParameters, self).__init__(class_name, param_dict)
+    def __init__(self, class_name, param_dict, parent=None):
+        super(IncludedParameters, self).__init__(class_name, param_dict, parent)
     
     def _xpipe_construct(self, class_name, params_dict):
         conf = params_dict.load()
@@ -158,11 +164,14 @@ class IncludedParameters(Parameters):
         if not isinstance(o, IncludedParameters): 
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
         return self._xpipe_path == o._xpipe_path
+    
+    def __hash__(self) -> int:
+        return hash(id(self))
 
 class FromIncludes(Node):
 
-    def __init__(self, name, config_dict):
-        super(FromIncludes, self).__init__(name, config_dict)
+    def __init__(self, name, config_dict, parent=None):
+        super(FromIncludes, self).__init__(name, config_dict, parent)
     
     def _xpipe_check_valid(self, name, config_dict):
         
@@ -176,17 +185,17 @@ class FromIncludes(Node):
         return True
 
     def _xpipe_construct(self, name, config_dict):
-        self.includes = config.multi_merge(*[construct("", sub_config_dict) for sub_config_dict in config_dict], inplace=True)
+        self.includes = config.multi_merge(*[construct("", sub_config_dict, parent=self) for sub_config_dict in config_dict], inplace=True)
 
 class List(Node):
 
-    def __init__(self, name, config_dict):
+    def __init__(self, name, config_dict, parent=None):
         object.__setattr__(self, "_xpipe_elements", [])
-        super(List, self).__init__(name, config_dict)
+        super(List, self).__init__(name, config_dict, parent)
     
     def _xpipe_construct(self, name, config_dict):
         for element in config_dict:
-            constructed_el = construct(name, element)
+            constructed_el = construct(name, element, self)
             self._xpipe_elements += [constructed_el]
 
     def _xpipe_check_valid(self, name, config_dict):
@@ -223,6 +232,9 @@ class List(Node):
                 return False
         return True
 
+    def __hash__(self) -> int:
+        return hash(id(self))
+
     def __len__(self):
         return len(self._xpipe_elements)
 
@@ -241,8 +253,8 @@ class SingleObject(Node):
         config_dict (dict): A dictionary defining the object (class name and parameters).
     """
 
-    def __init__(self, name, config_dict):
-        super(SingleObject, self).__init__(name, config_dict)
+    def __init__(self, name, config_dict, parent=None):
+        super(SingleObject, self).__init__(name, config_dict, parent)
 
     def _xpipe_check_valid(self, name, config_dict):
         return True
@@ -253,9 +265,9 @@ class SingleObject(Node):
         split_index = len(self._class_name) - self._class_name[::-1].index(".") # Get index of the last point
         self._module, self._class_name = self._class_name[:split_index-1], self._class_name[split_index:]
         if not isinstance(self._params, variables.Include):
-            self._params = Parameters(self._class_name, self._params)
+            self._params = Parameters(self._class_name, self._params, parent=self)
         else:
-            self._params = IncludedParameters(self._class_name, self._params)
+            self._params = IncludedParameters(self._class_name, self._params, parent=self)
 
     def _xpipe_to_yaml(self, n_indents=0):
         indents = "  " * (n_indents)
@@ -279,6 +291,9 @@ class SingleObject(Node):
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
         return self._class_name == o._class_name and self._params == o._params
 
+    def __hash__(self) -> int:
+        return hash(id(self))
+
     def __repr__(self) -> str:
         return f"SingleObject(name={self._class_name})"
 
@@ -291,15 +306,15 @@ class ObjectsList(Node):
         config_dict (list<dict>): A list of dictionaries which defines the objects list.
     """
     
-    def __init__(self, name, config_dict):
-        super(ObjectsList, self).__init__(name, config_dict)
+    def __init__(self, name, config_dict, parent=None):
+        super(ObjectsList, self).__init__(name, config_dict, parent)
 
     def _xpipe_check_valid(self, name, config_dict): 
         super(ObjectsList, self)._xpipe_check_valid(name, config_dict)
 
     def _xpipe_construct(self, name, config_dict):
         self._xpipe_name = name
-        self._objects = [SingleObject(name, obj_dict) for obj_dict in config_dict]
+        self._objects = [SingleObject(name, obj_dict, parent=self) for obj_dict in config_dict]
         
     def _xpipe_to_yaml(self, n_indents=0):
         r = []
@@ -317,6 +332,9 @@ class ObjectsList(Node):
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
         return self._objects == o._objects
 
+    def __hash__(self) -> int:
+        return hash(id(self))
+        
     def __getitem__(self, i):
         return self._objects[i]
 
@@ -352,7 +370,7 @@ def get_node_type(name, conf):
     raise Exception(f"Configuration cannot be parsed: {conf}")
 
 
-def construct(name, config_dict):
+def construct(name, config_dict, parent=None):
     """Build a tree from a dictionary
 
     Args:
@@ -363,11 +381,14 @@ def construct(name, config_dict):
         Node | Variable: The build tree element
     """
     NodeType = get_node_type(name, config_dict)
-
-    if NodeType is not None: 
-        node = NodeType(name, config_dict)
-    else: 
-        # Node is already built by a yaml tag
-        node = config_dict
-        node.set_name(name)
+    try:
+        if NodeType is not None: 
+            node = NodeType(name, config_dict, parent)
+        else: 
+            # Node is already built by a yaml tag
+            node = config_dict
+            node.set_parent(parent)
+            node.set_name(name)
+    except:
+        raise ValueError(f"Error while building {name}, {NodeType}")
     return node

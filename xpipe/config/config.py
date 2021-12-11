@@ -124,8 +124,23 @@ def get_node(config, path, delimiter="."):
     path = path.split(delimiter)
     node = config
     for p in path:
+        if node is None:
+            import pdb; pdb.set_trace()
         if p in node:
             node = node[p]
         else:
             raise ValueError("Path not found: {}".format(path))
     return node
+
+def get_base(node):
+
+    def aux(node, children=None):
+        children = children or set()
+        if node in children:
+            raise ValueError("Circular reference detected")
+        if node._xpipe_parent is None or isinstance(node, objects.IncludedConfig):
+            return node
+        children.add(node)
+        return aux(node._xpipe_parent, children)
+    return aux(node)
+        

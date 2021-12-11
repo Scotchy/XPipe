@@ -73,3 +73,11 @@ class TestConfiguration(TestCase):
     def test_class(self):
         c = self.conf.np_array()
         self.assertEqual(c, np.array)
+    
+    def test_ref(self):
+        a = self.conf.test_ref()
+        self.assertEqual(a, self.conf.training.batch_size())
+    
+    def test_included_ref(self):
+        ref = self.conf.include.ref()
+        self.assertEqual(ref, self.conf.include.user())

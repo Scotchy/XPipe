@@ -11,8 +11,8 @@ __all__ = ["Variable", "EnvVariable", "Include", "FormatStrVariable", "SingleObj
 
 class Variable(Node):
 
-    def __init__(self, name, value):
-        super(Variable, self).__init__(name, value)
+    def __init__(self, name, value, parent=None):
+        super(Variable, self).__init__(name, value, parent)
 
     def _xpipe_construct(self, name, value):
         self.name = name
@@ -20,6 +20,9 @@ class Variable(Node):
 
     def set_name(self, name):
         self.name = name
+    
+    def set_parent(self, parent):
+        self._xpipe_parent = parent
     
     def __call__(self):
         return self.value
@@ -40,6 +43,9 @@ class Variable(Node):
         
     def __repr__(self) -> str:
         return f"{self.name} = Variable({self.value})"
+    
+    def __hash__(self) -> int:
+        return hash(id(self))
 
 
 @Tags.register
@@ -73,6 +79,36 @@ class EnvVariable(Variable):
     def __repr__(self) -> str:
         return f"EnvVariable(var={self.var_name}, value={self.value})"
     
+@Tags.register
+class ReferenceVariable(Variable):
+    yaml_tag = u"!ref"
+    """This class defines a yaml tag.
+    It is a reference to another node.
+    """
+
+    def __init__(self, value):
+        if not isinstance(value, str):
+            raise ValueError("Reference variable name must be a string.")
+        super().__init__("", value)
+    
+    def __call__(self):
+        from .config import get_base, get_node
+        base_node = get_base(self)
+        node = get_node(base_node, self.value)
+        if isinstance(node, Variable):
+            return node()
+        return node
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return ReferenceVariable(node.value)
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_scalar(data)
+
+    def __repr__(self) -> str:
+        return f"ReferenceVariable(var={self.var_name}, value={self.value})"
 
 @Tags.register
 class Include(Variable):

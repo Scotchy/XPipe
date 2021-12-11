@@ -2,9 +2,10 @@ from . import utils as utils
 
 class Node(object):
     
-    def __init__(self, name, config_dict):
+    def __init__(self, name, config_dict, parent=None):
         object.__setattr__(self, "_xpipe_name", name)
         object.__setattr__(self, "_xpipe_config_dict", config_dict)
+        object.__setattr__(self, "_xpipe_parent", parent)
         self._xpipe_construct(name, config_dict)
 
     def _xpipe_construct(self, name, config_dict):
