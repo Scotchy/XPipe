@@ -6,7 +6,7 @@ Installation
 
 .. code:: bash
 
-   pip install pipe-ml
+   pip install xpipe
 
 Write a configuration file
 --------------------------
