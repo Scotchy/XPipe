@@ -32,18 +32,12 @@ dir_path = dirname(realpath(__file__))
 @click.option("--db-host", default="127.0.0.1", help="IP Address of the MongoDB server")
 @click.option("--db-port", default=27017, help="Port of the MongoDB server")
 @click.option("--artifacts-dir", default="./artifacts", help="Folder to store artifacts")
-def run(host, port, db_host, db_port, artifacts_dir):
+@click.option("--workers", default=1, help="Number of gunicorn workers")
+@click.option("--gunicorn", default=False, help="Whether to use gunicorn or not")
+def run(host, port, db_host, db_port, artifacts_dir, workers, gunicorn):
     connect("xpipe", host=db_host, port=db_port) # Connect to mongodb
     init_db() # Initialize models
-
-    artifacts_dir = os.path.join(os.getcwd(), artifacts_dir)
-    static_dir = os.path.join(dir_path, "frontend/build")
-    app = Flask(__name__, 
-        static_url_path="/", 
-        static_folder=static_dir,
-        template_folder=static_dir)
-    CORS(app)
-    prepare_bokeh_dependancies() # Copy bokeh js dependancies into ./frontend/public
+    prepare_bokeh_dependencies() # Copy bokeh js dependencies into ./frontend/public
 
     print("""
      ██╗  ██╗██████╗ ██╗██████╗ ███████╗
@@ -52,6 +46,23 @@ def run(host, port, db_host, db_port, artifacts_dir):
       ██╔██╗ ██╔═══╝ ██║██╔═══╝ ██╔══╝  
      ██╔╝ ██╗██║     ██║██║     ███████╗
      ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝     ╚══════╝""")
+
+    if not gunicorn:
+        app = get_app(artifacts_dir)
+        run_process(app, host, port)
+    else: 
+        from ..utils import exec_cmd
+        exec_cmd(f"gunicorn -w {workers} -b {host}:{port} wsgi:app")
+        raise NotImplementedError("Gunicorn is not implemented yet.")
+
+def get_app(artifacts_dir):
+    artifacts_dir = os.path.join(os.getcwd(), artifacts_dir)
+    static_dir = os.path.join(dir_path, "frontend/build")
+    app = Flask(__name__, 
+        static_url_path="/", 
+        static_folder=static_dir,
+        template_folder=static_dir)
+    CORS(app)
 
     @app.route("/")
     @app.route("/index")
@@ -433,6 +444,9 @@ def run(host, port, db_host, db_port, artifacts_dir):
         except Exception as e:
             return APIError(str(e)).json()
 
+    return app
+
+def run_process(app, host, port):
     server = Process(target=app.run, kwargs={"host": host, "port": port, "debug": True})
     def stop_server(*args, **kwargs):
         server.terminate()
@@ -441,15 +455,16 @@ def run(host, port, db_host, db_port, artifacts_dir):
     server.start()
     server.join()
 
-def prepare_bokeh_dependancies():
+def prepare_bokeh_dependencies():
     try:
-        print("Loading Bokeh javascript dependancies.")
+        print("Loading Bokeh javascript dependencies.")
         base_dir = bokeh.resources.INLINE.base_dir
         sh.copyfile(join(base_dir, "js/bokeh.min.js"), join(dir_path, "frontend/build/bokeh.min.js"))
         sh.copyfile(join(base_dir, "js/bokeh-widgets.min.js"), join(dir_path, "frontend/build/bokeh-widgets.min.js"))
         sh.copyfile(join(base_dir, "js/bokeh-tables.min.js"), join(dir_path, "frontend/build/bokeh-tables.min.js"))
         sh.copyfile(join(base_dir, "js/bokeh-api.min.js"), join(dir_path, "frontend/build/bokeh-api.min.js"))
     except:
-        raise Exception("Can't load Bokeh javascript dependancies.")
+        raise Exception("Can't load Bokeh javascript dependencies.")
 
-run()
+if __name__ == "__main__":
+    run()
