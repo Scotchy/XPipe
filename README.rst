@@ -65,12 +65,12 @@ Then you can load the configuration file:
   epochs = conf.training.epochs() # 18
 
   # Instantiate your model defined in models/my_model.yaml
-  my_model = params.model()
+  my_model = conf.model()
 
   # Directly instantiate your optimizer and scheduler from configuration
   # Note that you can add argument that are not in the configuration file
-  optimizer = params.training.optimizer(params=my_model.parameters()) 
-  scheduler = params.training.scheduler(optimizer=optimizer)
+  optimizer = conf.training.optimizer(params=my_model.parameters()) 
+  scheduler = conf.training.scheduler(optimizer=optimizer)
 
 Experiment tracking
 *******************
