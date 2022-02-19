@@ -9,9 +9,9 @@ port = os.environ.get("PORT", None)
 db_host = os.environ.get("DB_HOST", None)
 db_port = os.environ.get("DB_PORT", None)
 
-connect("xpipe", host=db_host, port=db_port) # Connect to mongodb
+connect("xpipe", host=db_host, port=int(db_port)) # Connect to mongodb
 init_db() # Initialize models
-prepare_bokeh_dependancies() # Copy bokeh js dependancies into ./frontend/public
+prepare_bokeh_dependencies() # Copy bokeh js dependancies into ./frontend/public
 
 print("""
      ██╗  ██╗██████╗ ██╗██████╗ ███████╗

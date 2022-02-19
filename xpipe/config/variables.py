@@ -31,7 +31,7 @@ class Variable(Node):
         return self.value
     
     def _xpipe_to_dict(self):
-        return self.value
+        return self()
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, Variable): 

@@ -26,7 +26,7 @@ setup(
     author="Jules Tevissen",
     license="MIT",
     install_requires=[
-        "numpy", "bokeh", "mongoengine", "Flask", "flask-cors", "pyyaml", "click"
+        "numpy", "bokeh", "mongoengine", "Flask", "flask-cors", "pyyaml", "click", "gunicorn"
     ],
     package_data={"xpipe": template_files + static_files}, 
     entry_points={

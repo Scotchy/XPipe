@@ -33,7 +33,7 @@ dir_path = dirname(realpath(__file__))
 @click.option("--db-port", default=27017, help="Port of the MongoDB server")
 @click.option("--artifacts-dir", default="./artifacts", help="Folder to store artifacts")
 @click.option("--workers", default=1, help="Number of gunicorn workers")
-@click.option("--gunicorn", default=False, help="Whether to use gunicorn or not")
+@click.option("--gunicorn", is_flag=True, help="Whether to use gunicorn or not")
 def run(host, port, db_host, db_port, artifacts_dir, workers, gunicorn):
     connect("xpipe", host=db_host, port=db_port) # Connect to mongodb
     init_db() # Initialize models
@@ -48,12 +48,17 @@ def run(host, port, db_host, db_port, artifacts_dir, workers, gunicorn):
      ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝     ╚══════╝""")
 
     if not gunicorn:
+        if workers > 1:
+            raise Exception("Please use gunicorn to run the server with multiple workers.")
+
         app = get_app(artifacts_dir)
         run_process(app, host, port)
     else: 
-        from ..utils import exec_cmd
-        exec_cmd(f"gunicorn -w {workers} -b {host}:{port} wsgi:app")
-        raise NotImplementedError("Gunicorn is not implemented yet.")
+        from ..utils.process import exec_cmd
+        exec_cmd(
+            ["gunicorn", f"-w {workers}", f"-b {host}:{port}", "xpipe.server.wsgi:app"],
+            env={"ARTIFACTS_DIR": str(artifacts_dir), "DB_HOST": str(db_host), "DB_PORT": str(db_port), "HOST": str(host), "PORT": str(port)}
+        )
 
 def get_app(artifacts_dir):
     artifacts_dir = os.path.join(os.getcwd(), artifacts_dir)

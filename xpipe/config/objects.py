@@ -187,27 +187,27 @@ class FromIncludes(Node):
     def _xpipe_construct(self, name, config_dict):
         self.includes = config.multi_merge(*[construct("", sub_config_dict, parent=self) for sub_config_dict in config_dict], inplace=True)
 
-class List(Node):
+class List(Node, list):
 
     def __init__(self, name, config_dict, parent=None):
-        object.__setattr__(self, "_xpipe_elements", [])
         super(List, self).__init__(name, config_dict, parent)
     
     def _xpipe_construct(self, name, config_dict):
-        for element in config_dict:
-            constructed_el = construct(name, element, self)
-            self._xpipe_elements += [constructed_el]
+        for i, element in enumerate(config_dict):
+            var_name = f"{name}[{i}]"
+            constructed_el = construct(var_name, element, self)
+            self.append(constructed_el)
 
     def _xpipe_check_valid(self, name, config_dict):
         return True
 
     def _xpipe_to_dict(self):
-        return [el._xpipe_to_dict() for el in self._xpipe_elements]
+        return [el._xpipe_to_dict() for el in self]
 
     def _xpipe_to_yaml(self, n_indents=0):
         r = "\n"
         
-        for el in self._xpipe_elements:
+        for el in self:
             indents = "  " * (n_indents + 1)
             yaml_el = el._xpipe_to_yaml(n_indents = n_indents + 2)
             if isinstance(el, Config) or isinstance(el, ObjectsList) or isinstance(el, List):
@@ -217,27 +217,19 @@ class List(Node):
 
     def __getitem__(self, index):
         from .variables import Variable
-        element = self._xpipe_elements[index]
+        element = list.__getitem__(self, index)
         if isinstance(element, Variable):
             return element()
         else:
             return element
 
-    def __eq__(self, o: object) -> bool:
-        if not isinstance(o, List): 
-            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
-        
-        for el1, el2 in zip(self, o):
-            if el1 != el2:
-                return False
-        return True
+    def __iter__(self):
+        for i in range(len(self)):
+            yield self[i]
 
     def __hash__(self) -> int:
         return hash(id(self))
-
-    def __len__(self):
-        return len(self._xpipe_elements)
-
+        
     def __call__(self):
         return [el for el in self]
 
