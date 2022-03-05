@@ -1,4 +1,5 @@
 from . import utils as utils
+import copy
 
 class Node(object):
     

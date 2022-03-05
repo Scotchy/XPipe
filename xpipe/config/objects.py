@@ -9,12 +9,11 @@ from .loader import parse_path
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
 
-class Config(Node, Mapping):
+
+class Config(Node, dict):
 
     def __init__(self, name, config_dict, parent=None):
-        object.__setattr__(self, "_xpipe_properties", {})
-        # self._xpipe_config_dict = config_dict
-        super(Config, self).__init__(name, config_dict, parent)
+        Node.__init__(self, name, config_dict, parent)
 
     def _xpipe_check_valid(self, name, config_dict):
         if not isinstance(name, str) or name != "__root__":
@@ -28,13 +27,16 @@ class Config(Node, Mapping):
             node = construct(name, sub_config, parent=self)
             
             if isinstance(node, FromIncludes):
+                if from_node is not None:
+                    raise Exception("Only one !from per node is allowed")
                 from_node = node
             else:
-                self._xpipe_properties[name] = node
+                dict.__setitem__(self, name, node)
         
         if from_node is not None:
             r = config.merge(from_node.includes, self)
-            object.__setattr__(self, "_xpipe_properties", r._xpipe_properties)
+            dict.clear(self)
+            dict.update(self, r)
 
     def _xpipe_to_yaml(self, n_indents=0):
         r = []
@@ -53,10 +55,8 @@ class Config(Node, Mapping):
     
     def __getattribute__(self, prop: str):
         try:
-            properties = object.__getattribute__(self, "_xpipe_properties")
-            if prop in properties:
-                return properties[prop]
-        except AttributeError:
+            return dict.__getitem__(self, prop)
+        except KeyError:
             pass
 
         try: 
@@ -65,45 +65,42 @@ class Config(Node, Mapping):
             raise AttributeError(f"'{self._xpipe_name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
 
     def __setattr__(self, key, value):
-        self._xpipe_properties[key] = value
-
-    def __setitem__(self, key, value):
-        self._xpipe_properties[key] = value
+        dict.__setitem__(self, key, value)
 
     def __getitem__(self, prop):
-        if prop in self._xpipe_properties:
-            return self._xpipe_properties[prop]
+        if dict.__contains__(self, prop):
+            return dict.__getitem__(self, prop)
         else:
             raise AttributeError(f"'{self._xpipe_name}' ({self.__class__.__name__}) does not have an attribute '{prop}'")
-
-    def __contains__(self, prop):
-        return prop in self._xpipe_properties
-    
-    def __eq__(self, o: object) -> bool:
-        if not isinstance(o, Config): 
-            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
-        return self._xpipe_properties == o._xpipe_properties
-
-    def __len__(self):
-        return len(self._xpipe_properties)
-
-    def __iter__(self):
-        for prop in self._xpipe_properties.keys():
-            yield prop
     
     def __repr__(self) -> str:
         return f"Config(len={len(self)})"
     
     def __deepcopy__(self, memo):
         cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            object.__setattr__(result, k, copy.deepcopy(v, memo))
-        return result
-    
+        copy_instance = cls.__new__(cls)
+        memo[id(self)] = copy_instance # Add the object to memo to avoid infinite recursion (the object is referenced by its children)
+
+        dict_values = set(self.keys()) 
+        attributes_name = set(self.__dict__.keys()) - dict_values
+
+        # copy attributes
+        for name in attributes_name:
+            attr_value = object.__getattribute__(self, name)
+            copied_attr_value = copy.deepcopy(attr_value, memo)
+            object.__setattr__(copy_instance, name, copied_attr_value)
+
+        # copy dict
+        for name in dict_values:
+            dict_value = dict.__getitem__(self, name)
+            copied_dict_value = copy.deepcopy(dict_value, memo)
+            dict.__setitem__(copy_instance, name, copied_dict_value)
+
+        return copy_instance
+
     def __hash__(self) -> int:
         return hash(id(self))
+
 
 class IncludedConfig(Config):
 
@@ -122,6 +119,7 @@ class IncludedConfig(Config):
 
     def __repr__(self) -> str:
         return f"IncludedConfig(len={len(self)}, path={self._xpipe_path})"
+
 
 class Parameters(Config):
     """Create parameters of an object from a dict 'param_dict' of format 
@@ -148,7 +146,8 @@ class Parameters(Config):
         return f"Parameters({len(self)})"
 
     def unwarp(self):
-        return {param_name: (param_value() if not isinstance(param_value, Config) else param_value) for param_name, param_value in self._xpipe_properties.items()}
+        return {param_name: (param_value() if not isinstance(param_value, Config) else param_value) for param_name, param_value in self.items()}
+
 
 class IncludedParameters(Parameters):
 
@@ -168,6 +167,7 @@ class IncludedParameters(Parameters):
     def __hash__(self) -> int:
         return hash(id(self))
 
+
 class FromIncludes(Node):
 
     def __init__(self, name, config_dict, parent=None):
@@ -186,6 +186,7 @@ class FromIncludes(Node):
 
     def _xpipe_construct(self, name, config_dict):
         self.includes = config.multi_merge(*[construct("", sub_config_dict, parent=self) for sub_config_dict in config_dict], inplace=True)
+
 
 class List(Node, list):
 
