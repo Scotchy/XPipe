@@ -66,7 +66,7 @@ class EnvVariable(Variable):
         else:
             raise EnvironmentError(f"Environment variable '{value}' is not defined.")
         self.value = value
-        super().__init__("", value)
+        super(EnvVariable, self).__init__("", value)
     
     @classmethod
     def from_yaml(cls, loader, node):
@@ -89,9 +89,10 @@ class ReferenceVariable(Variable):
     def __init__(self, value):
         if not isinstance(value, str):
             raise ValueError("Reference variable name must be a string.")
-        super().__init__("", value)
-    
-    def __call__(self):
+        self.var_name = value
+
+    @property
+    def value(self):
         from .config import get_base, get_node
         base_node = get_base(self)
         node = get_node(base_node, self.value)
