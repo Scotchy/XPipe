@@ -89,13 +89,21 @@ class ReferenceVariable(Variable):
     def __init__(self, value):
         if not isinstance(value, str):
             raise ValueError("Reference variable name must be a string.")
-        self.var_name = value
+        self.var_path = value
 
     @property
     def value(self):
         from .config import get_base, get_node
-        base_node = get_base(self)
-        node = get_node(base_node, self.value)
+        if self.var_path.startswith("/"):
+            # Absolute path
+            base_node = get_base(self)
+            path = self.var_path[1:]
+        else:
+            # Relative path
+            base_node = self._xpipe_parent
+            path = self.var_path
+
+        node = get_node(base_node, path)
         if isinstance(node, Variable):
             return node()
         return node
@@ -109,7 +117,7 @@ class ReferenceVariable(Variable):
         return dumper.represent_scalar(data)
 
     def __repr__(self) -> str:
-        return f"ReferenceVariable(var={self.var_name}, value={self.value})"
+        return f"ReferenceVariable(var={self.var_path}, value={self.value})"
 
 @Tags.register
 class Include(Variable):

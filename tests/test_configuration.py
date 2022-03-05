@@ -78,6 +78,16 @@ class TestConfiguration(TestCase):
         a = self.conf.test_ref()
         self.assertEqual(a, self.conf.training.batch_size())
     
+    def test_ref_relative(self):
+        a = self.conf.ref_relative.ref_relative1.ref_relative2.value()
+        value = self.conf.ref_relative.value()
+        self.assertEqual(a, value)
+    
+    def test_ref_attr(self):
+        a = self.conf.ref_attr.conf_a()
+        value = self.conf.obj_config._params.conf.a()
+        self.assertEqual(a, value)
+    
     def test_included_ref(self):
         ref = self.conf.include.ref()
         self.assertEqual(ref, self.conf.include.user())

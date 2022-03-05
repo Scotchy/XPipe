@@ -109,7 +109,7 @@ def multi_merge(*confs, inplace=False):
     
     return merged_conf
 
-def get_node(config, path, delimiter="."):
+def get_node(config, path, delimiter="/", parent="..", attribute="."):
     """Gets a node from a configuration.
 
     Args:
@@ -122,15 +122,40 @@ def get_node(config, path, delimiter="."):
     """
     if path == "":
         return config
-    path = path.split(delimiter)
+    split_path = path.split(delimiter)
     node = config
-    for p in path:
-        if node is None:
-            import pdb; pdb.set_trace()
-        if p in node:
-            node = node[p]
+
+    def get_attr(node, attr_list):
+        for attr in attr_list:
+            try:
+                node = getattr(node, attr)
+            except AttributeError:
+                raise AttributeError(f"Node does not have an attribute {attr}")
+            return node
+
+    for p in split_path:
+        
+        if p is not None and p[:len(parent) + 1] == parent:
+            node = node._xpipe_parent
+            p = p[len(parent) + 1:]
+            if len(p) > 0:
+                attrs = p.split(attribute)
+                if len(attrs[0]) > 0:
+                    raise ValueError(f"Invalid path {path}") 
+                node = get_attr(node, attrs[1:])
+
+        elif p is not None:
+            split = p.split(attribute)
+            node_name, attrs = split[0], split[1:]
+
+            if node_name in node:
+                node = node[node_name]
+            else:
+                raise ValueError(f"Path not found: {path}")
+            if len(attrs) > 0:
+                node = get_attr(node, attrs)
         else:
-            raise ValueError("Path not found: {}".format(path))
+            raise ValueError(f"Path not found: {path}")
     return node
 
 def get_base(node):
