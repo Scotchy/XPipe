@@ -1,4 +1,5 @@
 import collections.abc
+from flask import jsonify
 
 def update(d, u):
     for k, v in u.items():
@@ -14,7 +15,7 @@ class APISuccess():
         self.d.update({"success": True})
     
     def json(self):
-        return self.d
+        return jsonify(self.d)
     
 class APIError():
     def __init__(self, message=""):
@@ -24,4 +25,4 @@ class APIError():
         }
     
     def json(self):
-        return self.d
+        return jsonify(self.d)
