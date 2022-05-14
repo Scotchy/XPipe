@@ -7,9 +7,6 @@ a:
 
 training:
   batch_size: 10
-  
-  obj:
-    !obj numpy.array : {"object": [1, 2]}
 
   lr: 0.01
   classes: [0,1,2,3,4]
