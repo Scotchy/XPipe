@@ -4,6 +4,22 @@ from .tags import Tags
 import yaml
 import copy
 
+
+def load_yaml(config_file : str):
+    """Loads a configuration file and return a dictionary. This loader is able to load custom tags.
+
+    Args:
+        config_file (str): The path of the yaml config file
+    
+    Returns:
+        dict: A dictionary containing a representation of the configuration.
+    """
+    Tags.save_tags(yaml) # Set tags constructors and representers
+    with open(config_file, "r") as stream:
+        yaml_dict = yaml.safe_load(stream)
+    return yaml_dict
+
+
 def load_config(config_file : str, template=None):
     """Loads a configuration file and return a Config Object which can instantiate the wanted objects.
 
@@ -13,25 +29,12 @@ def load_config(config_file : str, template=None):
     Returns:
         Config: A Config object
     """
-    Tags.save_tags(yaml) # Set tags constructors and representers
-    with open(config_file, "r") as stream:
-        yaml_dict = yaml.safe_load(stream)
-    return objects.Config("__root__", yaml_dict)
-
-
-def load_yaml(config_file : str):
-    """Loads a configuration file and return a Config Object which can instantiate the wanted objects.
-
-    Args:
-        config_file (str): The path of the yaml config file
-    
-    Returns:
-        Config: A Config object
-    """
-    Tags.save_tags(yaml) # Set tags constructors and representers
-    with open(config_file, "r") as stream:
-        yaml_dict = yaml.safe_load(stream)
-    return yaml_dict
+    yaml_dict = load_yaml(config_file)
+    return objects.Config(
+        "__root__", 
+        yaml_dict, 
+        path=config_file
+    )
 
 
 def load_config_from_str(conf: str):
@@ -45,7 +48,7 @@ def load_config_from_str(conf: str):
     """
     Tags.save_tags(yaml) # Set tags constructors and representers
     yaml_dict = yaml.safe_load(conf)
-    return objects.Config("__root__", yaml_dict)
+    return objects.Config("__root__", yaml_dict, path=None)
 
 
 def to_yaml(conf):

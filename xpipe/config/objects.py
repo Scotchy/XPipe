@@ -4,13 +4,15 @@ from .utils import is_object, is_objects_list, is_var, is_list, is_config, is_fr
 from . import config as config
 from . import variables as variables
 import copy
+import os
 
 __all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
 
 
 class Config(Node, dict):
 
-    def __init__(self, name, config_dict, parent=None):
+    def __init__(self, name, config_dict, parent=None, path=None):
+        object.__setattr__(self, "_xpipe_path", path)
         Node.__init__(self, name, config_dict, parent)
 
     def _xpipe_check_valid(self, name, config_dict):
@@ -102,10 +104,11 @@ class Config(Node, dict):
 
 class IncludedConfig(Config):
 
-    def __init__(self, name, config_dict, parent=None):
-        conf = config_dict.load()
-        object.__setattr__(self, "_xpipe_path", config_dict.path)
-        super(IncludedConfig, self).__init__(name, conf, parent)
+    def __init__(self, name, config_dict, parent=None, path=None):
+        base_path = config.get_base(parent)._xpipe_path or "" if parent is not None else ""
+        base_path = os.path.dirname(base_path)
+        conf = config_dict.load(base_path)
+        super(IncludedConfig, self).__init__(name, conf, parent, path=path)
     
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, IncludedConfig): 
@@ -150,12 +153,10 @@ class Parameters(Config):
 class IncludedParameters(Parameters):
 
     def __init__(self, class_name, param_dict, parent=None):
-        super(IncludedParameters, self).__init__(class_name, param_dict, parent)
-    
-    def _xpipe_construct(self, class_name, params_dict):
-        conf = params_dict.load()
-        object.__setattr__(self, "_xpipe_path", params_dict.path)
-        return super(IncludedParameters, self)._xpipe_construct(class_name, conf)
+        base_path = config.get_base(parent)._xpipe_path or "" if parent is not None else ""
+        base_path = os.path.dirname(base_path)
+        conf = param_dict.load(base_path)
+        super(IncludedParameters, self).__init__(class_name, conf, parent)
     
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, IncludedParameters): 

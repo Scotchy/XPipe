@@ -137,8 +137,12 @@ class Include(Variable):
             raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in include statement.")
         self.path = path
     
-    def load(self):
-        with open(self.path, "r") as f:
+    def load(self, base_path):
+        path = os.path.expanduser(self.path)
+        if not os.path.isabs(path):
+            path = os.path.join(base_path, self.path)
+        
+        with open(path, "r") as f:
             return yaml.safe_load(f)
     
     @classmethod
