@@ -183,7 +183,7 @@ class FromIncludes(Node):
         return True
 
     def _xpipe_construct(self, name, config_dict):
-        self.includes = config.multi_merge(*[construct("", sub_config_dict, parent=self) for sub_config_dict in config_dict], inplace=True)
+        self.includes = config.merge(*[construct("", sub_config_dict, parent=self) for sub_config_dict in config_dict], inplace=True)
 
 
 class List(Node, list):
