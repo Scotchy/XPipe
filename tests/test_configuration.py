@@ -1,7 +1,7 @@
 from unittest import TestCase, mock
 
 from os.path import dirname, realpath, join
-from xpipe.config import load_config
+from xpipe.config import load_config, to_yaml, to_dict, load_config_from_str
 import numpy as np
 import os
 
@@ -91,3 +91,9 @@ class TestConfiguration(TestCase):
     def test_included_ref(self):
         ref = self.conf.include.ref()
         self.assertEqual(ref, self.conf.include.user())
+    
+    def test_yaml(self):
+        yaml = to_yaml(self.conf)
+        conf = load_config_from_str(yaml)
+        self.assertEqual(self.conf.training, conf.training)
+        self.assertEqual(self.conf.data, conf.data)
