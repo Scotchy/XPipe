@@ -16,6 +16,9 @@ static_files = package_files("xpipe/server/frontend/public")
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
+config_extra_requirements = ["pyyaml"]
+server_extra_requirements = ["numpy", "bokeh", "mongoengine", "Flask", "flask-cors", "pyyaml", "click", "gunicorn"]
+
 setup(
     name="XPipe",
     long_description=long_description,
@@ -25,13 +28,25 @@ setup(
     description="Standardize your ML projects",
     author="Jules Tevissen",
     license="MIT",
-    install_requires=[
-        "numpy", "bokeh", "mongoengine", "Flask", "flask-cors", "pyyaml", "click", "gunicorn"
-    ],
+    install_requires=[],
+    extras_require={
+        "config": config_extra_requirements,
+        "server": server_extra_requirements,
+        "all": config_extra_requirements + server_extra_requirements
+    },
     package_data={"xpipe": template_files + static_files}, 
     entry_points={
         "console_scripts": [
             "xpipe=xpipe.server.run_server:run"
         ]
-    }
+    },
+    python_requires=">=3.6",
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+    ],
 )
