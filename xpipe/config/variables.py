@@ -262,6 +262,9 @@ class ClassTag(Variable):
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
 
+    def _xpipe_to_yaml(self, n_indents=0):
+        return f"{self.yaml_tag} {self.class_path}"
+
     def __eq__(self, o) -> bool:
         if not isinstance(o, ClassTag): 
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
