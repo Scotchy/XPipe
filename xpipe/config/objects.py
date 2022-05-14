@@ -1,3 +1,4 @@
+from numpy import isin
 from .node import Node
 import importlib
 from .utils import is_object, is_objects_list, is_var, is_list, is_config, is_from
@@ -43,7 +44,7 @@ class Config(Node, dict):
         for key, value in self.items():
             el = "  " * n_indents
             el += f"{key}: "
-            if isinstance(value, Config) or isinstance(value, ObjectsList) or isinstance(el, List):
+            if not isinstance(value, variables.Variable):
                 el += "\n"
             el += f"{value._xpipe_to_yaml(n_indents=n_indents + 1)}"
             r += [el]
@@ -196,23 +197,25 @@ class List(Node, list):
     def _xpipe_construct(self, name, config_dict):
         for i, element in enumerate(config_dict):
             var_name = f"{name}[{i}]"
-            constructed_el = construct(var_name, element, self)
+            constructed_el = construct(var_name, element, parent=self)
             self.append(constructed_el)
 
     def _xpipe_check_valid(self, name, config_dict):
         return True
 
     def _xpipe_to_dict(self):
-        return [el._xpipe_to_dict() for el in self]
+        return [el._xpipe_to_dict() if isinstance(el, Node) else el for el in self]
 
     def _xpipe_to_yaml(self, n_indents=0):
-        r = "\n"
+        r = ""
         
         for el in self:
             indents = "  " * (n_indents + 1)
-            yaml_el = el._xpipe_to_yaml(n_indents = n_indents + 2)
+            yaml_el = el._xpipe_to_yaml(n_indents = n_indents + 2) if isinstance(el, Node) else el
             if isinstance(el, Config) or isinstance(el, ObjectsList) or isinstance(el, List):
                 yaml_el = f"\n{yaml_el}"
+            if isinstance(el, SingleObject):
+                yaml_el = yaml_el.lstrip()
             r += f"{indents}- {yaml_el}\n"
         return r
 
@@ -291,7 +294,7 @@ class SingleObject(Node):
         return f"SingleObject(name={self._class_name})"
 
 
-class ObjectsList(Node):
+class ObjectsList(List):
     """Create a list of SingleObject from a yaml configuration file.
 
     Args:
@@ -305,34 +308,8 @@ class ObjectsList(Node):
     def _xpipe_check_valid(self, name, config_dict): 
         super(ObjectsList, self)._xpipe_check_valid(name, config_dict)
 
-    def _xpipe_construct(self, name, config_dict):
-        self._xpipe_name = name
-        self._objects = [SingleObject(name, obj_dict, parent=self) for obj_dict in config_dict]
-        
-    def _xpipe_to_yaml(self, n_indents=0):
-        r = []
-        for object in self._objects:
-            el = "  " * (n_indents + 1)
-            el += f"- {object._xpipe_to_yaml(n_indents=n_indents + 1)}"
-            r += [el]
-        return "\n".join(r)
-    
-    def _xpipe_to_dict(self):
-        return [ obj._xpipe_to_dict() for obj in self._objects ]
-
-    def __eq__(self, o: object) -> bool:
-        if not isinstance(o, ObjectsList): 
-            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
-        return self._objects == o._objects
-
-    def __hash__(self) -> int:
-        return hash(id(self))
-        
-    def __getitem__(self, i):
-        return self._objects[i]
-
     def __call__(self, **args):
-        return [obj(**args) for obj in self._objects]
+        return [obj(**args) for obj in self]
 
 
 def get_node_type(name, conf):
@@ -382,6 +359,6 @@ def construct(name, config_dict, parent=None):
             node = config_dict
             node.set_parent(parent)
             node.set_name(name)
-    except:
-        raise ValueError(f"Error while building {name}, {NodeType}")
+    except Exception as e:
+        raise ValueError(f"Error while building {name}, {NodeType}") from e
     return node
