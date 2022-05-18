@@ -45,7 +45,7 @@ Here is a simple example of how to use yaml configuration files to seamlessly lo
 
     scheduler: !obj torch.optim.lr_scheduler.MultiStepLR : {milestones: [2, 6, 10, 14]}
 
-    loss: !obj torch.nnBCELoss : {}
+    loss: !obj torch.nn.BCELoss : {}
 
   model: !include "./models/my_model.yaml"
 
