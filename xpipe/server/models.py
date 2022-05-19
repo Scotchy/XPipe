@@ -153,7 +153,7 @@ class Experiment(Document):
 
     @property 
     def start_date_str(self):
-        return self.start_date.strftime("%d/%m/%y %H:%M") if self.start_date is not None else ""
+        return self.start_date.strftime("%d/%m/%y %H:%M:%S") if self.start_date is not None else ""
     
 class Folder(Document):
     name = StringField()
