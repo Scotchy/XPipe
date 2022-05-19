@@ -72,12 +72,11 @@ export class Node {
         }
 
         var nodes = [];
-        var children_sorted_names = Object.keys(this.children).sort((n1, n2) => 2 * (Number(n2 < n1) - 0.5));
+        var children_sorted_names = Object.keys(this.children); // .sort((n1, n2) => 2 * (Number(n2 < n1) - 0.5));
         for (var i in children_sorted_names) {
             const name = children_sorted_names[i];
             const child = this.children[name];
             var new_nodes = child.getNodesAtDepth(depth);
-            // new_nodes.sort((n1, n2) => 2 * (Number(n1.name < n2.name) - 0.5));
             nodes.push(new_nodes);
         }
         var c : Array<Node> = [];

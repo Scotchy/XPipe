@@ -3,8 +3,9 @@ import { Experiment } from "../type";
 import { API } from "../api";
 import { Link } from "react-router-dom";
 import { Form } from "react-bootstrap";
-import { ParamsMetricsSelector } from ".";
 import { Node } from "./utils";
+
+const PARAM_PREFIX = "parameters.";
 
 interface ExperimentItemProps {
     exp : Experiment, 
@@ -34,7 +35,7 @@ class ExperimentItem extends React.Component<ExperimentItemProps, ExperimentItem
                 <th><Link to={"/experiment/"+this.props.exp.id}>{this.props.exp.name}</Link></th>
                 <th>{this.props.exp.start_date}</th>
                 {this.props.params.map( (param) => (
-                    <th>{this.props.exp.params[param]}</th>
+                    <th>{this.props.exp.params[param.slice(PARAM_PREFIX.length)]}</th>
                 ))}
                 {this.props.metrics.map( (metric) => (
                     <th>{this.props.exp.metrics[metric]}</th>
@@ -104,11 +105,12 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
             
             var tree = new Node("root");
             
-            tree.insert("-Name")
-            tree.insert("-date")
             
+            
+            tree.insert("name");
+            tree.insert("date");
             params.map( (param) => {
-                tree.insert("Parameters." + param);
+                tree.insert(PARAM_PREFIX + param);
             });
 
             this.setState({
