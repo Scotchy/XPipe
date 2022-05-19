@@ -271,7 +271,7 @@ class SingleObject(Node):
 
     def _xpipe_to_dict(self):
         return {
-            f"obj:{self._module}.{self._class_name}": self._params._xpipe_to_dict()
+            f"{variables.SingleObjectTag.yaml_tag} {self._module}.{self._class_name}": self._params._xpipe_to_dict()
         }
         
     def __call__(self, **args):
