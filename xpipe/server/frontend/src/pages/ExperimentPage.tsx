@@ -1,5 +1,3 @@
-
-import { DocumentEventBatch } from "@bokeh/bokehjs/build/js/types/document";
 import React from "react";
 import { Accordion, Button, Card, Col, Container, Nav, Row, Tab, Tabs } from "react-bootstrap";
 import { withRouter, RouteComponentProps } from "react-router-dom";
