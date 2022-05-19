@@ -31,7 +31,7 @@ class Variable(Node):
         return self.value
     
     def _xpipe_to_dict(self):
-        return self()
+        return str(self())
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, Variable): 
@@ -267,6 +267,9 @@ class ClassTag(Variable):
         return dumper.represent_scalar(data)
 
     def _xpipe_to_yaml(self, n_indents=0):
+        return f"{self.yaml_tag} {self.class_path}"
+
+    def _xpipe_to_dict(self):
         return f"{self.yaml_tag} {self.class_path}"
 
     def __eq__(self, o) -> bool:
