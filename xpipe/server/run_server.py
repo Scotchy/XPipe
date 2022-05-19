@@ -366,19 +366,21 @@ def get_app(artifacts_dir):
 
     @app.route("/api/run/log_param", methods=["GET", "POST"])
     def log_param():
-        try: 
-            data = json.load(request.json)
+        try:
+            data = request.json
             exp_id = data["id"]
             exp = Experiment.get(exp_id)
 
-            if "params_file" not in data:
-                raise Exception("No file provided.")
+            if "params_dict" not in data:
+                raise Exception("No parameters provided.")
 
-            parsed_file = load_config_from_str(data["params_file"])
-            params_dict = to_dict(parsed_file)
+            params_dict = json.loads(data["params_dict"])
             exp.update(set__configuration=params_dict)
             return APISuccess().json()
         except Exception as e:
+            # print traceback
+            import traceback
+            traceback.print_exc()
             return APIError(str(e)).json()
 
     @app.route("/api/run/log_metric", methods=["GET", "POST"])

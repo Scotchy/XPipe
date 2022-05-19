@@ -92,21 +92,20 @@ class Experiment():
         self.id = id_exp
         self.name = r["name"]
     
-    def log_param_file(self, file):
+    def log_params(self, params):
         """Log a yaml configuration file to the experiment
 
         Args:
-            file (str): Path to the yaml configuration file
+            params (dict): Dictionary of parameters
 
         Returns:
             dict: Server response
         """
-        parameters = to_yaml(load_config(file))
         return self.session.api_call(
             "log_param",
             data={
                 "id": self.id,
-                "params_file": parameters
+                "params_dict": json.dumps(params)
             }
         )
 
