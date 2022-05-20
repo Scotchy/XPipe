@@ -365,6 +365,8 @@ def get_app(artifacts_dir):
 
             return APISuccess({
                 "name": exp.name,
+                "user": exp.user,
+                "script": exp.script,
                 "configuration": exp.to_mongo()["configuration"],
                 "metrics": exp.get_metrics(), 
                 "path": exp.parent_folder.get_full_path(), 
