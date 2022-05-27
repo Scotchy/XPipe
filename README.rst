@@ -50,9 +50,9 @@ Here is a simple example of how to use yaml configuration files to seamlessly lo
   model: !include "./models/my_model.yaml"
 
   transforms:
-    !obj transforms.Normalize : {}
-    !obj transforms.Noise : {}
-    !obj transforms.RandomFlip : {probability: 0.5}
+    - !obj transforms.Normalize : {}
+    - !obj transforms.Noise : {}
+    - !obj transforms.RandomFlip : {probability: 0.5}
 
 
 Then you can load the configuration file:
