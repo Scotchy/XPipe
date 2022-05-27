@@ -27,6 +27,8 @@ class TestConfiguration(TestCase):
         self.assertIsInstance(l, list)
         self.assertListEqual(l, [0,1,2,3,4])
 
+    # ---------- Test objects ----------
+    
     def test_instantiate_object(self):
         ar = self.conf.training.obj()
         self.assertIsInstance(ar, np.ndarray)
@@ -44,6 +46,7 @@ class TestConfiguration(TestCase):
         self.assertListEqual(list(objects_list[1]), [2, 3])
         self.assertEqual(len(objects_list), 4)
     
+    # ---------- Test includes ----------
     def test_include(self):
         a = self.conf.inc.a()
         self.assertEqual(a, 1)
@@ -54,7 +57,7 @@ class TestConfiguration(TestCase):
     def test_include_obj(self):
         a = self.conf.obj_include()
         self.assertListEqual(list(a), [1,2,3,4])
-
+    
     def test_double_star(self):
         def test(batch_size, obj, classes, **kwargs):
             self.assertEqual(batch_size(), 10)
@@ -74,6 +77,8 @@ class TestConfiguration(TestCase):
         c = self.conf.np_array()
         self.assertEqual(c, np.array)
     
+    # ---------- test references ----------
+
     def test_ref(self):
         a = self.conf.test_ref()
         self.assertEqual(a, self.conf.training.batch_size())
@@ -87,7 +92,12 @@ class TestConfiguration(TestCase):
         a = self.conf.ref_attr.conf_a()
         value = self.conf.obj_config._params.conf.a()
         self.assertEqual(a, value)
-    
+
+    def test_ref_in_include_to_include(self):
+        a = self.conf.include.ref_to_inc()
+        value = self.conf.include.inc.object()
+        np.testing.assert_almost_equal(a, value)
+
     def test_included_ref(self):
         ref = self.conf.include.ref()
         self.assertEqual(ref, self.conf.include.user())
