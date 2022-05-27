@@ -7,9 +7,6 @@ a:
 
 training:
   batch_size: 10
-  
-  obj:
-    !obj numpy.array : {"object": [1, 2]}
 
   lr: 0.01
   classes: [0,1,2,3,4]
@@ -37,7 +34,12 @@ obj_config:
   
 # user: !env USER
 str_fmt: !f "$USER home dir is $HOME"
+
 inc: !include "/home/jules/dev/XPipe/tests/resources/include.yaml"
+
+relative_inc: !include "./include.yaml"
+
+user_relative_inc: !include "~/dev/XPipe/tests/resources/include.yaml"
 
 np_array: !class numpy.array
 

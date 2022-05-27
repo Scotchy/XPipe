@@ -45,7 +45,7 @@ Here is a simple example of how to use yaml configuration files to seamlessly lo
 
     scheduler: !obj torch.optim.lr_scheduler.MultiStepLR : {milestones: [2, 6, 10, 14]}
 
-    loss: !obj torch.nnBCELoss : {}
+    loss: !obj torch.nn.BCELoss : {}
 
   model: !include "./models/my_model.yaml"
 
@@ -89,8 +89,8 @@ You have two options to start the server:
 
 .. code-block:: bash
 
-  docker pull drosos/xpipe:0.1.4
-  docker run -v <data_dir>:/data -p <server_port>:80 drosos/xpipe:0.1.4
+  docker pull drosos/xpipe:0.1.5
+  docker run -v <data_dir>:/data -p <server_port>:80 drosos/xpipe:0.1.5
 
 The `<data_dir>` directory will contain the mongodb database and artifacts.
 

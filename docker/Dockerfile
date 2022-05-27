@@ -1,5 +1,7 @@
 FROM mongo:4.4.3
 
+EXPOSE 5000:80
+
 RUN mkdir /xpipe
 RUN apt update && apt install python3.8 python3-pip -y
 RUN pip3 install --upgrade pip

@@ -4,6 +4,22 @@ from .tags import Tags
 import yaml
 import copy
 
+
+def load_yaml(config_file : str):
+    """Loads a configuration file and return a dictionary. This loader is able to load custom tags.
+
+    Args:
+        config_file (str): The path of the yaml config file
+    
+    Returns:
+        dict: A dictionary containing a representation of the configuration.
+    """
+    Tags.save_tags(yaml) # Set tags constructors and representers
+    with open(config_file, "r") as stream:
+        yaml_dict = yaml.safe_load(stream)
+    return yaml_dict
+
+
 def load_config(config_file : str, template=None):
     """Loads a configuration file and return a Config Object which can instantiate the wanted objects.
 
@@ -13,24 +29,13 @@ def load_config(config_file : str, template=None):
     Returns:
         Config: A Config object
     """
-    Tags.save_tags(yaml) # Set tags constructors and representers
-    with open(config_file, "r") as stream:
-        yaml_dict = yaml.safe_load(stream)
-    return objects.Config("__root__", yaml_dict)
+    yaml_dict = load_yaml(config_file)
+    return objects.Config(
+        "__root__", 
+        yaml_dict, 
+        path=config_file
+    )
 
-def load_yaml(config_file : str):
-    """Loads a configuration file and return a Config Object which can instantiate the wanted objects.
-
-    Args:
-        config_file (str): The path of the yaml config file
-    
-    Returns:
-        Config: A Config object
-    """
-    Tags.save_tags(yaml) # Set tags constructors and representers
-    with open(config_file, "r") as stream:
-        yaml_dict = yaml.safe_load(stream)
-    return yaml_dict
 
 def load_config_from_str(conf: str):
     """Loads a configuration from a string and return a Config Object which can instantiate the wanted objects.
@@ -43,7 +48,8 @@ def load_config_from_str(conf: str):
     """
     Tags.save_tags(yaml) # Set tags constructors and representers
     yaml_dict = yaml.safe_load(conf)
-    return objects.Config("__root__", yaml_dict)
+    return objects.Config("__root__", yaml_dict, path=None)
+
 
 def to_yaml(conf):
     """Converts a Config object to a yaml string
@@ -56,6 +62,7 @@ def to_yaml(conf):
     """
     return conf._xpipe_to_yaml()
 
+
 def to_dict(conf):
     """Converts a Config object to a dictionary.
 
@@ -67,7 +74,8 @@ def to_dict(conf):
     """
     return conf._xpipe_to_dict()
 
-def merge(default_config, overwrite_config, inplace=False):
+
+def _merge_aux(default_config, overwrite_config, inplace=False):
     """Merges two configurations.
 
     Args:
@@ -83,13 +91,14 @@ def merge(default_config, overwrite_config, inplace=False):
     
     for key, value in overwrite_config.items():
         if key in default_config and isinstance(default_config[key], objects.Config) and isinstance(value, objects.Config):
-            merge(default_config[key], value, inplace=True)
+            _merge_aux(default_config[key], value, inplace=True)
         else:
             default_config[key] = value
 
     return default_config
 
-def multi_merge(*confs, inplace=False):
+
+def merge(*confs, inplace=False):
     """Merges multiple configurations.
 
     Args:
@@ -105,9 +114,10 @@ def multi_merge(*confs, inplace=False):
     
     merged_conf = None
     for conf in confs[1:]:
-        merged_conf = merge(confs[0], conf, inplace=inplace)
+        merged_conf = _merge_aux(confs[0], conf, inplace=inplace)
     
     return merged_conf
+
 
 def get_node(config, path, delimiter="/", parent="..", attribute="."):
     """Gets a node from a configuration.
@@ -157,6 +167,7 @@ def get_node(config, path, delimiter="/", parent="..", attribute="."):
         else:
             raise ValueError(f"Path not found: {path}")
     return node
+
 
 def get_base(node):
 

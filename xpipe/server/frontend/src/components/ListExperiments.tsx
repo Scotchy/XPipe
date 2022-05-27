@@ -3,8 +3,9 @@ import { Experiment } from "../type";
 import { API } from "../api";
 import { Link } from "react-router-dom";
 import { Form } from "react-bootstrap";
-import { ParamsMetricsSelector } from ".";
 import { Node } from "./utils";
+
+const PARAM_PREFIX = "parameters.";
 
 interface ExperimentItemProps {
     exp : Experiment, 
@@ -33,8 +34,10 @@ class ExperimentItem extends React.Component<ExperimentItemProps, ExperimentItem
                 <th><Form.Check checked={this.props.selected} onChange={this.handleOnToggle} /></th>
                 <th><Link to={"/experiment/"+this.props.exp.id}>{this.props.exp.name}</Link></th>
                 <th>{this.props.exp.start_date}</th>
+                <th>{this.props.exp.user}</th>
+                <th>{this.props.exp.script}</th>
                 {this.props.params.map( (param) => (
-                    <th>{this.props.exp.params[param]}</th>
+                    <th>{this.props.exp.params[param.slice(PARAM_PREFIX.length)]}</th>
                 ))}
                 {this.props.metrics.map( (metric) => (
                     <th>{this.props.exp.metrics[metric]}</th>
@@ -104,11 +107,13 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
             
             var tree = new Node("root");
             
-            tree.insert("-Name")
-            tree.insert("-date")
-            
+            tree.insert("name");
+            tree.insert("date");
+            tree.insert("user");
+            tree.insert("script");
+
             params.map( (param) => {
-                tree.insert("Parameters." + param);
+                tree.insert(PARAM_PREFIX + param);
             });
 
             this.setState({
@@ -143,6 +148,8 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
             tab.push(this.state.params_tree.getNodesAtDepth(i));
         }
 
+        const skip_columns : number = 4; // skip first 4 columns (checkbox, name, date, user)
+
         return (
             <table id="experiments" className="experiment-tab table-bordered table-sm borderless-cell" style={{marginTop: "10px", fontSize: "0.9rem"}}>
                 <thead>
@@ -176,7 +183,7 @@ export class ListExperiments extends React.Component<ListExperimentsProps, ListE
                             selected={this.state.checkedExp[exp.id]} 
                             onToggle={this.handleOnToggle} 
                             exp={exp} key={exp.id} 
-                            params={this.state.params_tree.getParameters().slice(2)} 
+                            params={this.state.params_tree.getParameters().slice(skip_columns)} 
                             metrics={this.state.metrics} />
                     ))}
                 </tbody>

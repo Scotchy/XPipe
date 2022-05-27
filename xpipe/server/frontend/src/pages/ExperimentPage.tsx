@@ -1,5 +1,3 @@
-
-import { DocumentEventBatch } from "@bokeh/bokehjs/build/js/types/document";
 import React from "react";
 import { Accordion, Button, Card, Col, Container, Nav, Row, Tab, Tabs } from "react-bootstrap";
 import { withRouter, RouteComponentProps } from "react-router-dom";
@@ -100,6 +98,8 @@ interface ExperimentInfosProps extends RouteComponentProps<{}> {
 interface ExperimentInfosState {
     run_name: string,
     commit_hash: string,
+    user: string,
+    script: string,
     path: string,
     start_date: string
 }
@@ -110,6 +110,8 @@ class ExperimentInfosWithoutRouter extends React.Component<ExperimentInfosProps,
         this.state = {
             run_name: "",
             commit_hash: "",
+            user: "",
+            script: "",
             path: "",
             start_date: ""
         }
@@ -120,6 +122,8 @@ class ExperimentInfosWithoutRouter extends React.Component<ExperimentInfosProps,
             this.setState({
                 run_name: resp.name,
                 commit_hash: resp.commit_hash,
+                user: resp.user,
+                script: resp.script,
                 path: resp.path,
                 start_date: resp.start_date
             });
@@ -135,8 +139,10 @@ class ExperimentInfosWithoutRouter extends React.Component<ExperimentInfosProps,
             <div>
                 <table style={{margin: "10px 0px 10px 0px"}}>
                     <tr><td><b>Run id</b></td><td>{this.props.exp_id}</td></tr>
-                    <tr><td><b>Commit hash</b></td><td>{this.state.commit_hash}</td></tr>
                     <tr><td><b>Run name</b></td><td>{this.state.run_name}</td></tr>
+                    <tr><td><b>Commit hash</b></td><td>{this.state.commit_hash}</td></tr>
+                    <tr><td><b>User</b></td><td>{this.state.user}</td></tr>
+                    <tr><td><b>Script</b></td><td>{this.state.script}</td></tr>
                     <tr><td><b>Start date</b></td><td>{this.state.start_date}</td></tr>
                 </table>
                 <ShowPath path={this.state.path} onClick={this.handleOnOpenFolder} />

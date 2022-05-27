@@ -160,12 +160,16 @@ def get_app(artifacts_dir):
         experiments = Experiment.list(data["folder"], order_by="start_date")
         experiments = [
             {
-                **{"id": str(e.pk), "name": e.name},
-                **{"params": {param_name: e.get_param(param_name) for param_name in data["params"]}},
-                **{"metrics": {metric_name: e.get_metric(metric_name) for metric_name in data["metrics"]}},
-                **{"commit_hash": e.commit_hash}, 
-                **{"start_date": e.start_date_str}
-            } for e in experiments
+                "id": str(e.pk), 
+                "name": e.name,
+                "commit_hash": e.commit_hash,
+                "start_date": e.start_date_str,
+                "user": e.user,
+                "script": e.script,
+                "params": {param_name: e.get_param(param_name) for param_name in data["params"]},
+                "metrics": {metric_name: e.get_metric(metric_name) for metric_name in data["metrics"]}
+            }
+            for e in experiments
         ]
         return APISuccess({
             "experiments": experiments
@@ -309,11 +313,17 @@ def get_app(artifacts_dir):
             data = request.json
             name = data["name"]
             folder = data["folder"]
+            commit_hash = data.get("commit_hash", "")
+            user = data.get("user", "")
+            script = data.get("script", "")
+            
             exp = Experiment.new(
                 folder, 
                 name, 
-                commit_hash=(data["commit_hash"] if "commit_hash" in data else "")
-            )
+                user=user,
+                script=script,
+                commit_hash=commit_hash)
+            
             return APISuccess({"id": str(exp.pk)}).json()
         except Exception as e:
             return APIError(str(e)).json()
@@ -355,6 +365,8 @@ def get_app(artifacts_dir):
 
             return APISuccess({
                 "name": exp.name,
+                "user": exp.user,
+                "script": exp.script,
                 "configuration": exp.to_mongo()["configuration"],
                 "metrics": exp.get_metrics(), 
                 "path": exp.parent_folder.get_full_path(), 
@@ -366,19 +378,21 @@ def get_app(artifacts_dir):
 
     @app.route("/api/run/log_param", methods=["GET", "POST"])
     def log_param():
-        try: 
-            data = json.load(request.json)
+        try:
+            data = request.json
             exp_id = data["id"]
             exp = Experiment.get(exp_id)
 
-            if "params_file" not in data:
-                raise Exception("No file provided.")
+            if "params_dict" not in data:
+                raise Exception("No parameters provided.")
 
-            parsed_file = load_config_from_str(data["params_file"])
-            params_dict = to_dict(parsed_file)
+            params_dict = json.loads(data["params_dict"])
             exp.update(set__configuration=params_dict)
             return APISuccess().json()
         except Exception as e:
+            # print traceback
+            import traceback
+            traceback.print_exc()
             return APIError(str(e)).json()
 
     @app.route("/api/run/log_metric", methods=["GET", "POST"])

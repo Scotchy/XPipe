@@ -15,6 +15,8 @@ class TimeSerie(Document):
 
 class Experiment(Document): 
     name = StringField()
+    user = StringField()
+    script = StringField()
     duration = IntField()
     start_date = DateTimeField()
     configuration = DictField()
@@ -33,10 +35,12 @@ class Experiment(Document):
         return experiments
     
     @staticmethod
-    def new(folder, name, commit_hash=""):
+    def new(folder, name, user="", script="", commit_hash=""):
         if (Folder.exists(folder)):
             exp = Experiment()
             exp.name = name
+            exp.user = user
+            exp.script = script
             exp.commit_hash = commit_hash
             exp.start_date = datetime.now()
             exp.parent_folder = Folder.get_folder(folder)
@@ -153,7 +157,7 @@ class Experiment(Document):
 
     @property 
     def start_date_str(self):
-        return self.start_date.strftime("%d/%m/%y %H:%M") if self.start_date is not None else ""
+        return self.start_date.strftime("%d/%m/%y %H:%M:%S") if self.start_date is not None else ""
     
 class Folder(Document):
     name = StringField()

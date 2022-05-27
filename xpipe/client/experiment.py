@@ -1,11 +1,11 @@
-from os.path import basename, dirname
+from os.path import dirname
 import sys
 import os
 import subprocess
-from ..config import load_config, to_yaml
 
 from bokeh.embed import json_item
 import json
+import psutil
 
 class Experiment():
 
@@ -34,7 +34,12 @@ class Experiment():
             str: The id of the created experiment
         """
         tmp_folder = os.getcwd()
-        script_name = sys.argv[0]
+
+        try:
+            script_name = psutil.Process().cmdline()[1]
+        except:
+            script_name = ""
+            
         folder = dirname(script_name)
         if folder != "":
             os.chdir(folder)
@@ -44,11 +49,15 @@ class Experiment():
             commit_hash = "None"
 
         os.chdir(tmp_folder)
+        
+        print("OHOH", os.getlogin(), script_name)
         r = self.session.api_call(
             "new_run", 
             data={
                 "folder": path,
                 "name": name,
+                "user": os.getlogin(),
+                "script": script_name,
                 "commit_hash": commit_hash
             })
 
@@ -92,21 +101,20 @@ class Experiment():
         self.id = id_exp
         self.name = r["name"]
     
-    def log_param_file(self, file):
+    def log_params(self, params):
         """Log a yaml configuration file to the experiment
 
         Args:
-            file (str): Path to the yaml configuration file
+            params (dict): Dictionary of parameters
 
         Returns:
             dict: Server response
         """
-        parameters = to_yaml(load_config(file))
         return self.session.api_call(
             "log_param",
             data={
                 "id": self.id,
-                "params_file": parameters
+                "params_dict": json.dumps(params)
             }
         )
 

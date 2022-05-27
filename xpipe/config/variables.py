@@ -31,7 +31,7 @@ class Variable(Node):
         return self.value
     
     def _xpipe_to_dict(self):
-        return self()
+        return str(self())
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, Variable): 
@@ -137,8 +137,12 @@ class Include(Variable):
             raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in include statement.")
         self.path = path
     
-    def load(self):
-        with open(self.path, "r") as f:
+    def load(self, base_path):
+        path = os.path.expanduser(self.path)
+        if not os.path.isabs(path):
+            path = os.path.join(base_path, self.path)
+        
+        with open(path, "r") as f:
             return yaml.safe_load(f)
     
     @classmethod
@@ -261,6 +265,12 @@ class ClassTag(Variable):
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
+
+    def _xpipe_to_yaml(self, n_indents=0):
+        return f"{self.yaml_tag} {self.class_path}"
+
+    def _xpipe_to_dict(self):
+        return f"{self.yaml_tag} {self.class_path}"
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, ClassTag): 
