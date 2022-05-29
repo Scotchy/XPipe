@@ -5,6 +5,7 @@ import subprocess
 
 from bokeh.embed import json_item
 import json
+import getpass
 import psutil
 
 class Experiment():
@@ -50,13 +51,12 @@ class Experiment():
 
         os.chdir(tmp_folder)
         
-        print("OHOH", os.getlogin(), script_name)
         r = self.session.api_call(
             "new_run", 
             data={
                 "folder": path,
                 "name": name,
-                "user": os.getlogin(),
+                "user": getpass.getuser(),
                 "script": script_name,
                 "commit_hash": commit_hash
             })
