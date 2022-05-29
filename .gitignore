@@ -6,10 +6,7 @@ build
 dist
 make.bat
 .empty
-template2.yaml
-test.py
 nohup.out
 .vscode
-new_exp.py
 node_modules
 artifacts

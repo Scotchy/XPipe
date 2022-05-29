@@ -3,15 +3,6 @@ import os
 
 # Source : MLflow repository https://github.com/mlflow/mlflow/blob/master/setup.py
 # Get a list of all files in the JS directory to include in our module
-def package_files(directory):
-    paths = []
-    for (path, _, filenames) in os.walk(directory):
-        for filename in filenames:
-            paths.append(os.path.join("..", path, filename))
-    return paths
-
-template_files = package_files("xpipe/server/frontend/build") + ["client/api_calls.yaml"]
-static_files = package_files("xpipe/server/frontend/public")
 
 with open("README.rst", "r") as fh:
     long_description = fh.read()
@@ -24,22 +15,13 @@ setup(
     long_description=long_description,
     long_description_content_type='text/x-rst',
     packages=find_packages(),
-    version = "0.1.5",
+    version = "0.2.0",
     description="Standardize your ML projects",
     author="Jules Tevissen",
     license="MIT",
-    install_requires=[],
-    extras_require={
-        "config": config_extra_requirements,
-        "server": server_extra_requirements,
-        "all": config_extra_requirements + server_extra_requirements
-    },
-    package_data={"xpipe": template_files + static_files}, 
-    entry_points={
-        "console_scripts": [
-            "xpipe=xpipe.server.run_server:run"
-        ]
-    },
+    install_requires=[
+        "pyyaml"
+    ],
     python_requires=">=3.6",
     classifiers=[
         "Programming Language :: Python :: 3",
