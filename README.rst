@@ -41,18 +41,21 @@ Here is a simple example of how to use yaml configuration files to seamlessly lo
     epochs: 18
     batch_size: 100
 
-    optimizer: !obj torch.optimSGD : {lr : 0.001}
+    optimizer: 
+      !obj torch.optimSGD : {lr : 0.001}
 
-    scheduler: !obj torch.optim.lr_scheduler.MultiStepLR : {milestones: [2, 6, 10, 14]}
+    scheduler: 
+      !obj torch.optim.lr_scheduler.MultiStepLR : {milestones: [2, 6, 10, 14]}
 
-    loss: !obj torch.nn.BCELoss : {}
+    loss: 
+      !obj torch.nn.BCELoss : {}
 
   model: !include "./models/my_model.yaml"
 
   transforms:
-    !obj transforms.Normalize : {}
-    !obj transforms.Noise : {}
-    !obj transforms.RandomFlip : {probability: 0.5}
+    - !obj transforms.Normalize : {}
+    - !obj transforms.Noise : {}
+    - !obj transforms.RandomFlip : {probability: 0.5}
 
 
 Then you can load the configuration file:
