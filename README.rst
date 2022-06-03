@@ -74,33 +74,3 @@ Then you can load the configuration file:
   # Note that you can add argument that are not in the configuration file
   optimizer = conf.training.optimizer(params=my_model.parameters()) 
   scheduler = conf.training.scheduler(optimizer=optimizer)
-
-Experiment tracking
-*******************
-
-This feature is still experimental.
-
-You have two options to start the server:
-
-1. Run the server from the commandline. You must host a MongoDB server instance.
-
-.. code-block:: bash
-
-  xpipe --db_host <db_ip_address> --db_port <db_port> --port <server_port> --artifacts-dir <artifacts_dir>
-
-2. Run directly the docker image (no other dependancies needed)
-
-.. code-block:: bash
-
-  docker pull drosos/xpipe:0.1.5
-  docker run -v <data_dir>:/data -p <server_port>:80 drosos/xpipe:0.1.5
-
-The `<data_dir>` directory will contain the mongodb database and artifacts.
-
-Then you can connect to http://127.0.0.1:<server_port> to access the web interface.
-
-.. image:: https://raw.githubusercontent.com/Scotchy/XPipe/main/docs/images/gui1.png
-
-If you open an experiment, you can get some details and results:
-
-.. image:: https://raw.githubusercontent.com/Scotchy/XPipe/main/docs/images/gui2.png
