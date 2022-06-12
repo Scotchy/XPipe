@@ -11,39 +11,58 @@ __all__ = ["Variable", "EnvVariable", "Include", "FormatStrVariable", "SingleObj
 
 class Variable(Node):
 
+
     def __init__(self, name, value, parent=None):
+        """Initializes a Variable object.
+
+        Args:
+            name (str): The name of the variable
+            value (str | int | float): The value of the variable
+            parent (Node, optional): The parent node. Defaults to None.
+        """
         super(Variable, self).__init__(name, value, parent)
 
-    def _xpipe_construct(self, name, value):
-        self.name = name
-        self.value = value
 
-    def set_name(self, name):
-        self.name = name
+    @property
+    def value(self):
+        return object.__getattribute__(self, "_xpipe_config_dict")
     
-    def set_parent(self, parent):
-        self._xpipe_parent = parent
-    
+
+    @property
+    def name(self):
+        return object.__getattribute__(self, "_xpipe_name")
+
+
+    def _xpipe_construct(self, name, value):
+        return
+
+
     def __call__(self):
         return self.value
+
 
     def _xpipe_to_yaml(self, n_indents=0):
         return self.value
     
+
     def _xpipe_to_dict(self):
         return str(self())
+
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, Variable): 
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
         return self.value == o.value
     
+
     def __str__(self) -> str:
         return self.__repr__()
         
+
     def __repr__(self) -> str:
         return f"{self.name} = Variable({self.value})"
     
+
     def __hash__(self) -> int:
         return hash(id(self))
 
@@ -65,20 +84,23 @@ class EnvVariable(Variable):
             value = os.environ[value]
         else:
             raise EnvironmentError(f"Environment variable '{value}' is not defined.")
-        self.value = value
         super(EnvVariable, self).__init__("", value)
     
+
     @classmethod
     def from_yaml(cls, loader, node):
         return EnvVariable(node.value)
+
 
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
 
+
     def __repr__(self) -> str:
         return f"EnvVariable(var={self.var_name}, value={self.value})"
     
+
 @Tags.register
 class ReferenceVariable(Variable):
     yaml_tag = u"!ref"
@@ -90,6 +112,7 @@ class ReferenceVariable(Variable):
         if not isinstance(value, str):
             raise ValueError("Reference variable name must be a string.")
         self.var_path = value
+
 
     @property
     def value(self):
@@ -108,16 +131,20 @@ class ReferenceVariable(Variable):
             return node()
         return node
 
+
     @classmethod
     def from_yaml(cls, loader, node):
         return ReferenceVariable(node.value)
+
 
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
 
+
     def __repr__(self) -> str:
         return f"ReferenceVariable(var={self.var_path}, value={self.value})"
+
 
 @Tags.register
 class Include(Variable):
@@ -137,6 +164,7 @@ class Include(Variable):
             raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in include statement.")
         self.path = path
     
+
     def load(self, base_path):
         path = os.path.expanduser(self.path)
         if not os.path.isabs(path):
@@ -145,21 +173,26 @@ class Include(Variable):
         with open(path, "r") as f:
             return yaml.safe_load(f)
     
+
     @classmethod
     def from_yaml(cls, loader, node):
         return Include(node.value)
 
+
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
+
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, Include): 
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
         return self.original_path == o.original_path
 
+
     def __repr__(self) -> str:
         return f"Include(path={self.path})"
+
 
 @Tags.register 
 class FromTag(Variable):
@@ -174,20 +207,25 @@ class FromTag(Variable):
     def __init__(self):
         pass
 
+
     @classmethod
     def from_yaml(cls, loader, node):
         return FromTag()
+
 
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
     
+
     def __repr__(self) -> str:
         return f"From()"
+
 
     def __hash__(self) -> int:
         return hash(id(self))
         
+
 @Tags.register
 class FormatStrVariable(Variable):
     yaml_tag = u"!f"
@@ -204,18 +242,22 @@ class FormatStrVariable(Variable):
         self.str = value
         super().__init__("", value)
     
+    
     @classmethod
     def from_yaml(cls, loader, node):
         return FormatStrVariable(node.value)
+
 
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
 
+
     def __eq__(self, o) -> bool:
         if not isinstance(o, FormatStrVariable): 
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
         return self.original_str == o.original_str
+
 
     def __repr__(self) -> str:
         return f"FormatStrVariable(original={self.original_str}, output={self.value})"
@@ -232,16 +274,20 @@ class SingleObjectTag(Variable):
     def __init__(self, class_name):
         self.class_name = class_name
     
+
     @classmethod
     def from_yaml(cls, loader, node):
         return SingleObjectTag(node.value)
+
 
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
 
+
     def __hash__(self) -> int:
         return hash(id(self))
+
 
     def __repr__(self) -> str:
         return f"SingleObjectTag(class_name={self.class_name})"
@@ -258,24 +304,30 @@ class ClassTag(Variable):
         value = load_class(class_path)
         super().__init__("", value)
     
+
     @classmethod
     def from_yaml(cls, loader, node):
         return ClassTag(node.value)
+
 
     @classmethod
     def to_yaml(cls, dumper, data):
         return dumper.represent_scalar(data)
 
+
     def _xpipe_to_yaml(self, n_indents=0):
         return f"{self.yaml_tag} {self.class_path}"
 
+
     def _xpipe_to_dict(self):
         return f"{self.yaml_tag} {self.class_path}"
+
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, ClassTag): 
             raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
         return self.class_path == o.class_path
+
 
     def __repr__(self) -> str:
         return f"ClassTag(class_name={self.class_path})"

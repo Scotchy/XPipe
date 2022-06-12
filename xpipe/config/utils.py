@@ -33,29 +33,60 @@ def is_object(name, config_dict):
 
 
 def is_var(name, config_dict):
-    """Checks if the given configuration defines a variable
+    """Checks if the given configuration defines a Variable
 
     Args:
         config_dict (any): A configuration
 
     Returns:
-        bool: True if 'config_dict' defines a variable
+        bool: True if 'config_dict' defines a Variable
     """  
     return isinstance(config_dict, int) or isinstance(config_dict, float) or isinstance(config_dict, str)
 
 
 def is_list(name, config_dict):
+    """Check if the given configuration is an objects.List.
+
+    Args:
+        name (str): Name of the variable
+        config_dict (dict): A configuration
+
+    Returns:
+        bool: True if 'config_dict' is an objects.List.
+    """    
     return not is_objects_list(name, config_dict) and isinstance(config_dict, list)
 
+
 def is_config(name, config_dict):
+    """Check if the given configuration is a objects.Config.
+
+    Args:
+        name (str): Name of the variable
+        config_dict (dict): A configuration
+
+    Returns:
+        bool: True if 'config_dict' is a objects.Config
+    """
     return isinstance(config_dict, dict)
 
+
 def is_from(name, config_dict):
+    """Check if the given configuration is an objects.From (which is an object that includes another configuration into the current configuration).
+
+    Args:
+        name (str): Name of the variable
+        config_dict (dict): A configuration
+
+    Returns:
+        bool: True if 'config_dict' is an objects.From
+    """    
     from .variables import FromTag
     return isinstance(name, FromTag)
 
+
 def valid_var_name(name : str):
     """Raise an error if 'name' is not a valid Variable name.
+    A valid variable name is a string that starts with a letter or an underscore and is followed by letters, numbers, or underscores.
 
     Args:
         name (str): Name of the variable
@@ -65,7 +96,7 @@ def valid_var_name(name : str):
         ValueError: If name begin with a number
     """
     if name == "":
-        return 
+        return
     stripped_name = name.replace("_", "")
     if stripped_name == "":
         raise ValueError(f"Variable '{name}' cannot contain only underscores.")
@@ -73,3 +104,5 @@ def valid_var_name(name : str):
         raise ValueError(f"Variable '{name}' must contain alphabetical or numerical caracters or underscores.")
     if not name[0].isalpha() or name[0] == "_":
         raise ValueError(f"Variable '{name}' must begin with an alphabetical caracter or an underscore.")
+    
+    return True

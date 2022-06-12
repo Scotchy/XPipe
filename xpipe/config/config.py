@@ -192,3 +192,25 @@ def get_base(node):
         return aux(node._xpipe_parent, children)
     return aux(node)
         
+
+def set_parent(node, parent):
+    """Sets the parent of a node.
+
+    Args:
+        node (Node): The node to set the parent of
+        parent (Node): The parent node
+    """
+    object.__setattr__(node, "_xpipe_parent", parent)
+    return node
+
+
+def set_name(node, name):
+    """Sets the name of a node.
+
+    Args:
+        node (Node): The node to set the name of
+        name (str): The name of the node
+    """
+    object.__setattr__(node, "_xpipe_name", name)
+    return node
+    
