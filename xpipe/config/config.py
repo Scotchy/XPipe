@@ -4,6 +4,9 @@ from .tags import Tags
 import yaml
 import copy
 
+"""
+This module exposes the main functions of the xpipe library.
+"""
 
 def load_yaml(config_file : str):
     """Loads a configuration file and return a dictionary. This loader is able to load custom tags.
@@ -20,7 +23,7 @@ def load_yaml(config_file : str):
     return yaml_dict
 
 
-def load_config(config_file : str, template=None):
+def load_config(config_file : str):
     """Loads a configuration file and return a Config Object which can instantiate the wanted objects.
 
     Args:
@@ -170,7 +173,15 @@ def get_node(config, path, delimiter="/", parent="..", attribute="."):
 
 
 def get_base(node):
+    """Return the root node of the given node (highest level node). 
+    If the node is in an included configuration, the base node is the root node of the included configuration.
 
+    Errors:
+        ValueError: In case there is a circular reference
+
+    Args:
+        node (Node): The node to get the base node from
+    """
     def aux(node, children=None):
         children = children or set()
         if node in children:
