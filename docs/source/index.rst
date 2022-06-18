@@ -10,7 +10,6 @@
    Welcome to XPipe's documentation !
    install
    xpipe.config
-   xpipe.client
    build
 
 Indices and tables
