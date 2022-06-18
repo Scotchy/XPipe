@@ -1,9 +1,18 @@
 #define numpy np
+
 !from :
   - !include "/home/jules/dev/XPipe/tests/resources/include.yaml"
   
 a: 
 - !include /home/jules/dev/XPipe/tests/resources/include.yaml
+
+include: !include /home/jules/dev/XPipe/tests/resources/include.yaml
+
+obj_test: 
+  !obj numpy.array: {object: [1, 2]}
+
+obj_include: 
+  !obj numpy.array: !include /home/jules/dev/XPipe/tests/resources/include_param.yaml
 
 training:
   batch_size: 10
@@ -17,14 +26,6 @@ data:
     - !obj numpy.array : {"object": [2, 3]}
     - !obj numpy.array : {"object": [1, 2]}
     - !obj numpy.array : {"object": [1, 2]}
-
-include: !include /home/jules/dev/XPipe/tests/resources/include.yaml
-
-obj_test: 
-  !obj numpy.array: {object: [1, 2]}
-
-obj_include: 
-  !obj numpy.array: !include /home/jules/dev/XPipe/tests/resources/include_param.yaml
     
 obj_config: 
   !obj test_obj.ObjTest: 
