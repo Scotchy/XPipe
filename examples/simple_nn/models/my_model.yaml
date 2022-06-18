@@ -1,0 +1,4 @@
+
+definition: 
+  !obj models.Model1 :
+    n_hidden: 100

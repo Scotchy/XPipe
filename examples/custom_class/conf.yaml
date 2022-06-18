@@ -1,0 +1,4 @@
+
+my_classes: 
+  - !obj my_classes.Class1: {a: 1}
+  - !obj my_classes.Class1: {a: 2}
