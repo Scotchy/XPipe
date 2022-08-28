@@ -6,16 +6,12 @@ class Node(object):
     
     
     def __init__(self):
-        """Initializes a Node object. Every object of a configuration is a Node.
-
-        Args:
-            name (str): The name of the node
-            config_dict (dict): The configuration of the node
-            parent (Node, optional): The parent node. Defaults to None.
         """
-        object.__setattr__(self, "_xpipe_name", None)
-        object.__setattr__(self, "_xpipe_config_dict", None)
-        object.__setattr__(self, "_xpipe_parent", None)
+        Initializes a Node object. Every object of a configuration is a Node.
+        """
+        object.__setattr__(self, "_xpipe_name", None) # The name of the node
+        object.__setattr__(self, "_xpipe_config_dict", None) # The configuration of the node
+        object.__setattr__(self, "_xpipe_parent", None) # The parent node
 
 
     def _xpipe_construct(self, name, config_dict):
@@ -50,6 +46,18 @@ class Node(object):
 
     @classmethod
     def _xpipe_instantiate(cls, arg):
+        """Function that returns an instance of the current object with minimal configuration. 
+        It is called when the object is loaded from a yaml tag to instantiate an 'empty shell' of the object before it is fully loaded thanks to _xpipe_construct.
+
+        Args:
+            arg (Any): Argument coming from yaml (example: !tag arg)
+
+        Raises:
+            NotImplementedError: This function must be implemented by the child class
+
+        Returns:
+            Node: Instance of the current object
+        """
         raise NotImplementedError("This function has to be implemented. It must return an instance of the node with proper configuration.")
 
 
