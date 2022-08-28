@@ -1,6 +1,8 @@
+from distutils.command.config import config
+from email.mime import base
 from . import objects as objects
 import yaml
-from .tags import Tags
+from . import tag
 import yaml
 import copy
 
@@ -17,7 +19,7 @@ def load_yaml(config_file : str):
     Returns:
         dict: A dictionary containing a representation of the configuration.
     """
-    Tags.save_tags(yaml) # Set tags constructors and representers
+    tag.save_tags(yaml) # Set tags constructors and representers
     with open(config_file, "r") as stream:
         yaml_dict = yaml.safe_load(stream)
     return yaml_dict
@@ -33,25 +35,22 @@ def load_config(config_file : str):
         Config: A Config object
     """
     yaml_dict = load_yaml(config_file)
-    return objects.Config(
-        "__root__", 
-        yaml_dict, 
-        path=config_file
-    )
+    return objects.construct("__root__", yaml_dict, parent=None, path=config_file)
 
 
-def load_config_from_str(conf: str):
+def load_config_from_str(conf: str, base_path=None):
     """Loads a configuration from a string and return a Config Object which can instantiate the wanted objects.
 
     Args:
         conf (str): A configuration
+        base_path (str): Simulate that 'conf' comes from this given path. It will be used if your conf contains relative paths. 
     
     Returns:
         Config: A Config object
     """
-    Tags.save_tags(yaml) # Set tags constructors and representers
+    tag.save_tags(yaml) # Set tags constructors and representers
     yaml_dict = yaml.safe_load(conf)
-    return objects.Config("__root__", yaml_dict, path=None)
+    return objects.construct("__root__", yaml_dict, parent=None, path=base_path)
 
 
 def to_yaml(conf):
@@ -201,7 +200,6 @@ def set_parent(node, parent):
         parent (Node): The parent node
     """
     object.__setattr__(node, "_xpipe_parent", parent)
-    return node
 
 
 def set_name(node, name):
@@ -212,5 +210,13 @@ def set_name(node, name):
         name (str): The name of the node
     """
     object.__setattr__(node, "_xpipe_name", name)
-    return node
-    
+
+
+def set_config_dict(node, config_dict):
+    """Sets the node config dict
+
+    Args:
+        node (Node): Node
+        config_dict (dict): The config dict of the node
+    """
+    object.__setattr__(node, "_xpipe_config_dict", config_dict)

@@ -7,9 +7,6 @@ import os
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
-config_extra_requirements = ["pyyaml"]
-server_extra_requirements = ["numpy", "bokeh", "mongoengine", "Flask", "flask-cors", "pyyaml", "click", "gunicorn"]
-
 setup(
     name="XPipe",
     long_description=long_description,

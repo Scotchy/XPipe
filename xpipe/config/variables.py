@@ -1,18 +1,25 @@
 from .node import Node
-from .tags import Tags
+from . import tag
+from . import config
 
 import os
 import string
 import yaml
 from .loader import load_class
 
-__all__ = ["Variable", "EnvVariable", "Include", "FormatStrVariable", "SingleObjectTag"]
+__all__ = [
+    "Variable", 
+    "EnvVariable", 
+    "ReferenceVariable", 
+    "FormatStrVariable",
+    "ClassTag"
+]
 
 
 class Variable(Node):
 
 
-    def __init__(self, name, value, parent=None):
+    def __init__(self, value):
         """Initializes a Variable object.
 
         Args:
@@ -20,12 +27,22 @@ class Variable(Node):
             value (str | int | float): The value of the variable
             parent (Node, optional): The parent node. Defaults to None.
         """
-        super(Variable, self).__init__(name, value, parent)
+        object.__setattr__(self, "_xpipe_value", value)
+        super(Variable, self).__init__()
+
+
+    @classmethod
+    def _xpipe_instantiate(cls, args):
+        return cls(args)
+
+
+    def _xpipe_construct(self, name, config_dict):
+        pass
 
 
     @property
     def value(self):
-        return object.__getattribute__(self, "_xpipe_config_dict")
+        return object.__getattribute__(self, "_xpipe_value")
     
 
     @property
@@ -67,9 +84,22 @@ class Variable(Node):
         return hash(id(self))
 
 
-@Tags.register
+class SimpleVariable(Variable):
+
+    def __init__(self):
+        super().__init__(None)
+
+
+    def _xpipe_check_valid(self, name, config_dict):
+        return super()._xpipe_check_valid(name, config_dict)
+
+
+    def _xpipe_construct(self, name, config_dict):
+        object.__setattr__(self, "_xpipe_value", config_dict)
+
+
+@tag.register("!env")
 class EnvVariable(Variable): 
-    yaml_tag = u"!env"
     """This class defines a yaml tag.
     It will load an environment variable.
     """
@@ -84,7 +114,7 @@ class EnvVariable(Variable):
             value = os.environ[value]
         else:
             raise EnvironmentError(f"Environment variable '{value}' is not defined.")
-        super(EnvVariable, self).__init__("", value)
+        super(EnvVariable, self).__init__(value=value)
     
 
     @classmethod
@@ -101,9 +131,8 @@ class EnvVariable(Variable):
         return f"EnvVariable(var={self.var_name}, value={self.value})"
     
 
-@Tags.register
+@tag.register("!ref")
 class ReferenceVariable(Variable):
-    yaml_tag = u"!ref"
     """This class defines a yaml tag.
     It is a reference to another node.
     """
@@ -112,7 +141,7 @@ class ReferenceVariable(Variable):
         if not isinstance(value, str):
             raise ValueError("Reference variable name must be a string.")
         self.var_path = value
-
+        super(ReferenceVariable, self).__init__(value=value)
 
     @property
     def value(self):
@@ -144,91 +173,10 @@ class ReferenceVariable(Variable):
 
     def __repr__(self) -> str:
         return f"ReferenceVariable(var={self.var_path}, value={self.value})"
-
-
-@Tags.register
-class Include(Variable):
-    yaml_tag = u"!include"
-    builder_class_name = "IncludedConfig"
-    
-    """
-    This class defines a yaml tag.
-    It will include another yaml into the current configuration.
-    """
-    
-    def __init__(self, path):
-        self.original_path = path
-        try:
-            path = string.Template(path).substitute(os.environ)
-        except KeyError as e:
-            raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in include statement.")
-        self.path = path
-    
-
-    def load(self, base_path):
-        path = os.path.expanduser(self.path)
-        if not os.path.isabs(path):
-            path = os.path.join(base_path, self.path)
-        
-        with open(path, "r") as f:
-            return yaml.safe_load(f)
-    
-
-    @classmethod
-    def from_yaml(cls, loader, node):
-        return Include(node.value)
-
-
-    @classmethod
-    def to_yaml(cls, dumper, data):
-        return dumper.represent_scalar(data)
-
-
-    def __eq__(self, o) -> bool:
-        if not isinstance(o, Include): 
-            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
-        return self.original_path == o.original_path
-
-
-    def __repr__(self) -> str:
-        return f"Include(path={self.path})"
-
-
-@Tags.register 
-class FromTag(Variable):
-    yaml_tag = u"!from"
-    builder_class_name = "FromIncludes"
-    
-    """This class defines a yaml tag.
-    It will include another yaml into the current configuration.
-    The difference between Include and From is that From can only be added at the beginning of the configuration.
-    """
-    
-    def __init__(self):
-        pass
-
-
-    @classmethod
-    def from_yaml(cls, loader, node):
-        return FromTag()
-
-
-    @classmethod
-    def to_yaml(cls, dumper, data):
-        return dumper.represent_scalar(data)
-    
-
-    def __repr__(self) -> str:
-        return f"From()"
-
-
-    def __hash__(self) -> int:
-        return hash(id(self))
         
 
-@Tags.register
+@tag.register("!f")
 class FormatStrVariable(Variable):
-    yaml_tag = u"!f"
     """This class defines a yaml tag. 
     The class will automatically replace substrings $ENV_VAR or ${ENV_VAR} with the corresponding environment variables.
     """
@@ -240,7 +188,7 @@ class FormatStrVariable(Variable):
         except KeyError as e:
             raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in formatted string.")
         self.str = value
-        super().__init__("", value)
+        super(FormatStrVariable, self).__init__(value=value)
     
     
     @classmethod
@@ -261,48 +209,17 @@ class FormatStrVariable(Variable):
 
     def __repr__(self) -> str:
         return f"FormatStrVariable(original={self.original_str}, output={self.value})"
-    
-
-@Tags.register
-class SingleObjectTag(Variable):
-    yaml_tag = u"!obj"
-    """
-    This class defines a yaml tag.
-    It will include another yaml into the current configuration.
-    """
-    
-    def __init__(self, class_name):
-        self.class_name = class_name
-    
-
-    @classmethod
-    def from_yaml(cls, loader, node):
-        return SingleObjectTag(node.value)
 
 
-    @classmethod
-    def to_yaml(cls, dumper, data):
-        return dumper.represent_scalar(data)
-
-
-    def __hash__(self) -> int:
-        return hash(id(self))
-
-
-    def __repr__(self) -> str:
-        return f"SingleObjectTag(class_name={self.class_name})"
-
-
-@Tags.register
+@tag.register("!class")
 class ClassTag(Variable):
-    yaml_tag = u"!class"
     """This class defines a yaml tag
     It store a class (not an instance)"""
 
     def __init__(self, class_path):
         self.class_path = class_path
         value = load_class(class_path)
-        super().__init__("", value)
+        super(ClassTag, self).__init__(value=value)
     
 
     @classmethod

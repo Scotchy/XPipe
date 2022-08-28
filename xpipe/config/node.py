@@ -5,7 +5,7 @@ import copy
 class Node(object):
     
     
-    def __init__(self, name, config_dict, parent=None):
+    def __init__(self):
         """Initializes a Node object. Every object of a configuration is a Node.
 
         Args:
@@ -13,10 +13,9 @@ class Node(object):
             config_dict (dict): The configuration of the node
             parent (Node, optional): The parent node. Defaults to None.
         """
-        object.__setattr__(self, "_xpipe_name", name)
-        object.__setattr__(self, "_xpipe_config_dict", config_dict)
-        object.__setattr__(self, "_xpipe_parent", parent)
-        self._xpipe_construct(name, config_dict)
+        object.__setattr__(self, "_xpipe_name", None)
+        object.__setattr__(self, "_xpipe_config_dict", None)
+        object.__setattr__(self, "_xpipe_parent", None)
 
 
     def _xpipe_construct(self, name, config_dict):
@@ -48,6 +47,21 @@ class Node(object):
             utils.valid_var_name(name)
         return True
     
+
+    @classmethod
+    def _xpipe_instantiate(cls, arg):
+        raise NotImplementedError("This function has to be implemented. It must return an instance of the node with proper configuration.")
+
+
+    @classmethod
+    def from_yaml(cls, loader, node):
+        return cls._xpipe_instantiate(node.value)
+
+
+    @classmethod
+    def to_yaml(cls, dumper, data):
+        return dumper.represent_scalar(data)
+
 
     def __str__(self) -> str:
         return self.__repr__()

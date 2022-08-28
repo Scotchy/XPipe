@@ -1,20 +1,25 @@
+from tkinter import N
+from tokenize import Single
+from turtle import pd
+from django import conf
+from numpy import isin
 from .node import Node
-import importlib
-from .utils import is_object, is_objects_list, is_var, is_list, is_config, is_from
+from .utils import is_objects_list, is_list, is_config, is_var
 from . import config as config
 from . import variables as variables
+from . import tag
+
+import importlib
+import yaml
+import string
 import copy
 import os
 
-__all__ = ["Config", "SingleObject", "ObjectsList", "Parameters"]
+
+__all__ = ["Config", "FromIncludes", "List", "SingleObject", "ObjectsList", "construct"]
 
 
 class Config(Node, dict):
-
-
-    def __init__(self, name, config_dict, parent=None, path=None):
-        object.__setattr__(self, "_xpipe_path", path)
-        Node.__init__(self, name, config_dict, parent)
 
 
     def _xpipe_check_valid(self, name, config_dict):
@@ -23,9 +28,12 @@ class Config(Node, dict):
         return True
 
 
-    def _xpipe_construct(self, name, sub_config):
-        from_node = None
+    def _xpipe_construct(self, name, sub_config, path=None):
 
+        object.__setattr__(self, "_xpipe_path", path)
+
+        from_node = None
+    
         for name, sub_config in sub_config.items():
             node = construct(name, sub_config, parent=self)
             
@@ -113,15 +121,43 @@ class Config(Node, dict):
         return hash(id(self))
 
 
+@tag.register("!include")
 class IncludedConfig(Config):
+    
+
+    @classmethod
+    def _xpipe_instantiate(cls, path):
+        included_config = IncludedConfig()
+        object.__setattr__(included_config, "_xpipe_path", path)
+        return included_config
 
 
-    def __init__(self, name, config_dict, parent=None, path=None):
+    def _xpipe_construct(self, name, sub_config):
+        
+        path = object.__getattribute__(self, "_xpipe_path")
+        
+        try:
+            path = string.Template(path).substitute(os.environ)
+        except KeyError as e:
+            raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in include statement.")
+        object.__setattr__(self, "_xpipe_path", path)
+
+        conf = self.__load(path)
+        super(IncludedConfig, self)._xpipe_construct(name, conf, path=path)
+
+
+    def __load(self, path):
+        parent = object.__getattribute__(self, "_xpipe_parent")
         base_path = config.get_base(parent)._xpipe_path or "" if parent is not None else ""
         base_path = os.path.dirname(base_path)
-        conf = config_dict.load(base_path)
-        super(IncludedConfig, self).__init__(name, conf, parent, path=path)
-    
+
+        path = os.path.expanduser(path)
+        if not os.path.isabs(path):
+            path = os.path.join(base_path, path)
+        
+        with open(path, "r") as f:
+            return yaml.safe_load(f)
+
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, IncludedConfig): 
@@ -137,64 +173,15 @@ class IncludedConfig(Config):
         return f"IncludedConfig(len={len(self)}, path={self._xpipe_path})"
 
 
-class Parameters(Config):
-    """Create parameters of an object from a dict 'param_dict' of format 
-    { 
-    object_param_name: {class_name: obj_param_dict},
-    variable_param_name: value,
-    objects_list_param_name: [class_name: obj_param_dict, ...]
-    }
-
-    Args:
-        param_dict (dict): Dictionary of the parameters
-    """
-
-    def __init__(self, class_name, param_dict, parent=None):
-        super(Parameters, self).__init__(class_name, param_dict, parent)
-        
-
-    def _xpipe_construct(self, class_name, params_dict):
-        super(Parameters, self)._xpipe_construct(class_name, params_dict)
-
-
-    def _xpipe_check_valid(self, class_name, param_dict):
-        return True
-
-
-    def __repr__(self) -> str:
-        return f"Parameters({len(self)})"
-
-
-    def unwarp(self):
-        return {param_name: (param_value() if not isinstance(param_value, Config) else param_value) for param_name, param_value in self.items()}
-
-
-class IncludedParameters(Parameters):
-
-
-    def __init__(self, class_name, param_dict, parent=None):
-        base_path = config.get_base(parent)._xpipe_path or "" if parent is not None else ""
-        base_path = os.path.dirname(base_path)
-        conf = param_dict.load(base_path)
-        super(IncludedParameters, self).__init__(class_name, conf, parent)
-    
-
-    def __eq__(self, o: object) -> bool:
-        if not isinstance(o, IncludedParameters): 
-            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
-        return self._xpipe_path == o._xpipe_path
-    
-
-    def __hash__(self) -> int:
-        return hash(id(self))
-
-
+@tag.register("!from")
 class FromIncludes(Node):
-
-
-    def __init__(self, name, config_dict, parent=None):
-        super(FromIncludes, self).__init__(name, config_dict, parent)
     
+
+    @classmethod
+    def _xpipe_instantiate(cls, arg):
+        from_includes = FromIncludes()
+        return from_includes
+
 
     def _xpipe_check_valid(self, name, config_dict):
         
@@ -213,11 +200,11 @@ class FromIncludes(Node):
 
 
 class List(Node, list):
-
-
-    def __init__(self, name, config_dict, parent=None):
-        super(List, self).__init__(name, config_dict, parent)
     
+    def __init__(self):
+        Node.__init__(self)
+        list.__init__(self)
+
 
     def _xpipe_construct(self, name, config_dict):
         for i, element in enumerate(config_dict):
@@ -274,6 +261,7 @@ class List(Node, list):
         return f"[{', '.join(map(lambda x: str(x), self))}]"
     
 
+@tag.register("!obj")
 class SingleObject(Node):
     """Allow the instantiation of an object defined in a yaml configuration file.
 
@@ -282,43 +270,50 @@ class SingleObject(Node):
         config_dict (dict): A dictionary defining the object (class name and parameters).
     """
 
-    def __init__(self, name, config_dict, parent=None):
-        super(SingleObject, self).__init__(name, config_dict, parent)
+
+    @classmethod
+    def _xpipe_instantiate(cls, class_path):
+        single_object = SingleObject()
+        single_object._class_path = class_path
+        split_index = len(class_path) - class_path[::-1].index(".") # Get index of the last point
+        single_object._module, single_object._class_name = class_path[:split_index-1], class_path[split_index:]
+        return single_object
 
 
     def _xpipe_check_valid(self, name, config_dict):
         return True
 
 
-    def _xpipe_construct(self, name, config_dict):
-        obj, self._params = list(config_dict.items())[0]
-        self._class_name = obj.class_name
-        split_index = len(self._class_name) - self._class_name[::-1].index(".") # Get index of the last point
-        self._module, self._class_name = self._class_name[:split_index-1], self._class_name[split_index:]
-        if not isinstance(self._params, variables.Include):
-            self._params = Parameters(self._class_name, self._params, parent=self)
-        else:
-            self._params = IncludedParameters(self._class_name, self._params, parent=self)
+    def _xpipe_construct(self, name, params_dict):
+        
+        self._params = construct(name, params_dict, parent=self)
+
+        config.set_name(self._params, self._class_name)
+        config.set_parent(self._params, self)
+        self._params._xpipe_construct(self._class_name, params_dict)
+        
 
 
     def _xpipe_to_yaml(self, n_indents=0):
         indents = "  " * (n_indents)
-        r = f"{indents}{variables.SingleObjectTag.yaml_tag} {self._module}.{self._class_name}:\n"
+        r = f"{indents}{self.yaml_tag} {self._module}.{self._class_name}:\n"
         r += self._params._xpipe_to_yaml(n_indents=n_indents + 1)
         return r
 
 
     def _xpipe_to_dict(self):
         return {
-            f"{variables.SingleObjectTag.yaml_tag} {self._module}.{self._class_name}": self._params._xpipe_to_dict()
+            f"{self.yaml_tag} {self._module}.{self._class_name}": self._params._xpipe_to_dict()
         }
         
 
     def __call__(self, **args):
         module = importlib.import_module(self._module)
         class_object = getattr(module, self._class_name)
-        params = self._params.unwarp()
-        return class_object(**params, **args)
+        return class_object(
+            **config.to_dict(self._params), 
+            **args
+        )
 
 
     def __eq__(self, o: object) -> bool:
@@ -342,9 +337,6 @@ class ObjectsList(List):
         name (str): Name of the list of objects
         config_dict (list<dict>): A list of dictionaries which defines the objects list.
     """
-    
-    def __init__(self, name, config_dict, parent=None):
-        super(ObjectsList, self).__init__(name, config_dict, parent)
 
 
     def _xpipe_check_valid(self, name, config_dict): 
@@ -364,26 +356,21 @@ def get_node_type(name, conf):
     Returns:
         Node | Variable: The object type
     """
-    if isinstance(conf, variables.Variable):
-        # Return the builder class defined by the variable or None if none is needed
-        builder_name = getattr(conf.__class__, "builder_class_name", None)
-        return globals()[builder_name] if builder_name is not None else None
 
     builder_checkers = [
-        (FromIncludes, is_from),
-        (SingleObject, is_object),
         (ObjectsList, is_objects_list),
         (List, is_list), 
-        (variables.Variable, is_var),
-        (Config, is_config)
+        (Config, is_config),
+        (variables.SimpleVariable, is_var)
     ]
     for node_type, can_build in builder_checkers:
         if can_build(name, conf):
             return node_type
-    raise Exception(f"Configuration cannot be parsed: {conf}")
+        
+    return None
 
 
-def construct(name, config_dict, parent=None):
+def construct(name, config_dict, parent=None, **kwargs):
     """Build a tree from a dictionary
 
     Args:
@@ -393,15 +380,43 @@ def construct(name, config_dict, parent=None):
     Returns:
         Node | Variable: The build tree element
     """
+    if isinstance(config_dict, Node):
+        # It's something already loaded which has no parameters (like IncludedConfig)
+        node = config_dict
+        config.set_name(node, name)
+        config.set_parent(node, parent)
+        config.set_config_dict(node, {})
+        node._xpipe_construct(name, config_dict, **kwargs)
+        return node 
+
+    if isinstance(name, Node):
+        # It's something already loaded (like a FromIncludes)
+        node = name
+        config.set_name(node, "")
+        config.set_parent(node, parent)
+        config.set_config_dict(node, config_dict)
+        node._xpipe_construct(name, config_dict, **kwargs)
+        return node 
+
+    if not isinstance(config_dict, Node) and isinstance(config_dict, dict) and len(config_dict) == 1:
+        # It's something already loaded which has parameters (like a SingleObject)
+        node_dict, sub_config_dict = list(config_dict.items())[0]
+        if isinstance(node_dict, Node):
+            config.set_name(node_dict, name)
+            config.set_parent(node_dict, parent)
+            config.set_config_dict(node_dict, sub_config_dict)
+            node_dict._xpipe_construct(name, sub_config_dict, **kwargs)
+            return node_dict
+    
+    # It is something that has not been loaded by a yaml tag
     NodeType = get_node_type(name, config_dict)
-    try:
-        if NodeType is not None: 
-            node = NodeType(name, config_dict, parent)
-        else: 
-            # Node is already built by a yaml tag
-            node = config_dict
-            config.set_parent(node, parent)
-            config.set_name(node, name)
-    except Exception as e:
-        raise ValueError(f"Error while building {name}, {NodeType}") from e
-    return node
+    if NodeType is not None: 
+        node = NodeType()
+        config.set_name(node, name)
+        config.set_parent(node, parent)
+        config.set_config_dict(node, config_dict)
+        node._xpipe_construct(name, config_dict, **kwargs)
+        return node
+
+    # No case works, node cannot be built
+    raise Exception(f"Cannot build node {name}")

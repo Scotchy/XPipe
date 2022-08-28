@@ -1,4 +1,7 @@
 
+from numpy import isin
+
+
 def is_objects_list(name, config_dict):
     """Check if the given configuration is an objects list.
 
@@ -8,28 +11,21 @@ def is_objects_list(name, config_dict):
     Returns:
         bool: True if 'config_dict' is a dictionary that defines an objects list
     """
+    from . import objects
+    
     if not isinstance(config_dict, list) or len(config_dict) == 0:
         return False
+
     for obj in config_dict:
-        if not is_object("", obj):
+        
+        if not isinstance(obj, dict) or len(obj) <= 0:
             return False
+        
+        obj, params = list(obj.items())[0]
+        if not isinstance(obj, objects.SingleObject):
+            return False
+
     return True
-
-
-def is_object(name, config_dict):
-    """Checks if the given configuration defines an object.
-
-    Args:
-        config_dict (any): A configuration
-
-    Returns:
-        bool: True if 'config_dict' is a dictionary that defines an object
-    """
-    from .variables import SingleObjectTag
-    if not isinstance(config_dict, dict):
-        return False
-    keys = list(config_dict.keys())
-    return len(keys) == 1 and isinstance(keys[0], SingleObjectTag)
 
 
 def is_var(name, config_dict):
@@ -68,20 +64,6 @@ def is_config(name, config_dict):
         bool: True if 'config_dict' is a objects.Config
     """
     return isinstance(config_dict, dict)
-
-
-def is_from(name, config_dict):
-    """Check if the given configuration is an objects.From (which is an object that includes another configuration into the current configuration).
-
-    Args:
-        name (str): Name of the variable
-        config_dict (dict): A configuration
-
-    Returns:
-        bool: True if 'config_dict' is an objects.From
-    """    
-    from .variables import FromTag
-    return isinstance(name, FromTag)
 
 
 def valid_var_name(name : str):

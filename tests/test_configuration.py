@@ -129,3 +129,10 @@ class TestConfiguration(TestCase):
         conf = load_config_from_str(y)
         d2 = to_dict(conf)
         self.assertEqual(d["training"], d2)
+
+    # ----------- Test !from -----------
+
+    def test_from_relative_ref(self):
+        ref = self.conf.ref
+        user = self.conf.user
+        self.assertEqual(ref, user)
