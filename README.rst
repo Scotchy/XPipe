@@ -33,18 +33,18 @@ Here is a simple example of how to use yaml configuration files to seamlessly lo
 .. code-block:: yaml
 
   training:
-  gpu: !env CUDA_VISIBLE_DEVICES # Get the value of env variable CUDA_VISIBLE_DEVICES
-  epochs: 18
-  batch_size: 100
+    gpu: !env CUDA_VISIBLE_DEVICES # Get the value of env variable CUDA_VISIBLE_DEVICES
+    epochs: 18
+    batch_size: 100
 
-  optimizer:
-    !obj torch.optim.SGD : {lr : 0.001}
+    optimizer:
+      !obj torch.optim.SGD : {lr : 0.001}
 
-  scheduler:
-    !obj torch.optim.lr_scheduler.MultiStepLR : {milestones: [2, 6, 10, 14]}
+    scheduler:
+      !obj torch.optim.lr_scheduler.MultiStepLR : {milestones: [2, 6, 10, 14]}
 
-  loss:
-    !obj torch.nn.BCELoss : {}
+    loss:
+      !obj torch.nn.BCELoss : {}
 
   model: !include "./models/my_model.yaml"
 
