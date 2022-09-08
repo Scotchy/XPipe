@@ -15,7 +15,9 @@ __all__ = ["Config", "FromIncludes", "List", "SingleObject", "ObjectsList", "con
 
 
 class Config(Node, dict):
-
+    """
+    A configuration is like a dictionary containing elements like SingleObject, Config and so on.
+    """
 
     def _xpipe_check_valid(self, name, config_dict):
         if not isinstance(name, str) or name != "__root__":
@@ -119,7 +121,6 @@ class Config(Node, dict):
 @tag.register("!include")
 class IncludedConfig(Config):
     
-
     @classmethod
     def _xpipe_instantiate(cls, path):
         included_config = IncludedConfig()
@@ -171,7 +172,6 @@ class IncludedConfig(Config):
 @tag.register("!from")
 class FromIncludes(Node):
     
-
     @classmethod
     def _xpipe_instantiate(cls, arg):
         from_includes = FromIncludes()
@@ -258,13 +258,9 @@ class List(Node, list):
 
 @tag.register("!obj")
 class SingleObject(Node):
-    """Allow the instantiation of an object defined in a yaml configuration file.
-
-    Args:
-        name (str): Name of the object
-        config_dict (dict): A dictionary defining the object (class name and parameters).
     """
-
+    Allow the instantiation of an object defined in a yaml configuration file.
+    """
 
     @classmethod
     def _xpipe_instantiate(cls, class_path):
@@ -287,7 +283,6 @@ class SingleObject(Node):
         config.set_parent(self._params, self)
         self._params._xpipe_construct(self._class_name, params_dict)
         
-
 
     def _xpipe_to_yaml(self, n_indents=0):
         indents = "  " * (n_indents)
@@ -326,11 +321,8 @@ class SingleObject(Node):
 
 
 class ObjectsList(List):
-    """Create a list of SingleObject from a yaml configuration file.
-
-    Args:
-        name (str): Name of the list of objects
-        config_dict (list<dict>): A list of dictionaries which defines the objects list.
+    """
+    Create a list of SingleObject from a yaml configuration file.
     """
 
 
@@ -343,13 +335,13 @@ class ObjectsList(List):
 
 
 def get_node_type(name, conf):
-    """Detect the object that can build the tree
+    """Detects the object that can build the tree
 
     Args:
         conf (dict): The configuration dictionary
 
     Returns:
-        Node | Variable: The object type
+        Node | Variable | None : The object type
     """
 
     builder_checkers = [
@@ -371,6 +363,8 @@ def construct(name, config_dict, parent=None, **kwargs):
     Args:
         name (str): Name of the node
         config_dict (dict): The dictionary
+        parent (Node): Parent node
+        **kwargs: Complementary arguments to pass to _xpipe_construct method of the node being built.
 
     Returns:
         Node | Variable: The build tree element

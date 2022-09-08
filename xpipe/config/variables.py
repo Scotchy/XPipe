@@ -9,6 +9,7 @@ from .loader import load_class
 
 __all__ = [
     "Variable", 
+    "SimpleVariable",
     "EnvVariable", 
     "ReferenceVariable", 
     "FormatStrVariable",
@@ -18,14 +19,11 @@ __all__ = [
 
 class Variable(Node):
 
-
     def __init__(self, value):
         """Initializes a Variable object.
 
         Args:
-            name (str): The name of the variable
             value (str | int | float): The value of the variable
-            parent (Node, optional): The parent node. Defaults to None.
         """
         object.__setattr__(self, "_xpipe_value", value)
         super(Variable, self).__init__()
@@ -85,6 +83,9 @@ class Variable(Node):
 
 
 class SimpleVariable(Variable):
+    """
+    A basic variable with no additional functionality.
+    """
 
     def __init__(self):
         super().__init__(None)
