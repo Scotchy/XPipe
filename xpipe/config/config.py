@@ -1,7 +1,4 @@
-from distutils.command.config import config
-from email.mime import base
-from . import objects as objects
-import yaml
+from . import objects
 from . import tag
 import yaml
 import copy
@@ -114,9 +111,12 @@ def merge(*confs, inplace=False):
     if len(confs) == 1:
         return confs[0]
     
+    if not inplace:
+        confs = (objects.Config(),) + confs
+
     merged_conf = None
     for conf in confs[1:]:
-        merged_conf = _merge_aux(confs[0], conf, inplace=inplace)
+        merged_conf = _merge_aux(confs[0], conf, inplace=True)
     
     return merged_conf
 

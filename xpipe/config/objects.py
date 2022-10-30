@@ -26,7 +26,6 @@ class Config(Node, dict):
 
 
     def _xpipe_construct(self, name, sub_config, path=None):
-
         object.__setattr__(self, "_xpipe_path", path)
 
         from_node = None
@@ -102,13 +101,15 @@ class Config(Node, dict):
         # copy attributes
         for name in attributes_name:
             attr_value = object.__getattribute__(self, name)
-            copied_attr_value = copy.deepcopy(attr_value, memo)
+            attr_value_id = id(attr_value)
+            copied_attr_value = memo.get(attr_value_id, None) or copy.deepcopy(attr_value, memo)
             object.__setattr__(copy_instance, name, copied_attr_value)
 
         # copy dict
         for name in dict_values:
             dict_value = dict.__getitem__(self, name)
-            copied_dict_value = copy.deepcopy(dict_value, memo)
+            dict_value_id = id(dict_value)
+            copied_dict_value = memo.get(dict_value_id, None) or copy.deepcopy(dict_value, memo)
             dict.__setitem__(copy_instance, name, copied_dict_value)
 
         return copy_instance
@@ -131,33 +132,40 @@ class IncludedConfig(Config):
     def _xpipe_construct(self, name, sub_config):
         
         path = object.__getattribute__(self, "_xpipe_path")
-        
+        path = self.__compute_full_path(path)
+        conf = self.__load(path)
+        object.__setattr__(self, "_xpipe_path", path)
+        super(IncludedConfig, self)._xpipe_construct(name, conf, path=path)
+
+
+    def __compute_full_path(self, path):
         try:
             path = string.Template(path).substitute(os.environ)
         except KeyError as e:
             raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in include statement.")
-        object.__setattr__(self, "_xpipe_path", path)
 
-        conf = self.__load(path)
-        super(IncludedConfig, self)._xpipe_construct(name, conf, path=path)
-
-
-    def __load(self, path):
         parent = object.__getattribute__(self, "_xpipe_parent")
         base_path = config.get_base(parent)._xpipe_path or "" if parent is not None else ""
+
         base_path = os.path.dirname(base_path)
 
         path = os.path.expanduser(path)
+        base_path = os.path.expanduser(base_path)
+
         if not os.path.isabs(path):
             path = os.path.join(base_path, path)
         
+        return path 
+
+
+    def __load(self, path):
         with open(path, "r") as f:
             return yaml.safe_load(f)
 
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, IncludedConfig): 
-            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+            raise Exception(f"Cannot compare {self} and {o}")
         return self._xpipe_path == o._xpipe_path
 
 
@@ -256,6 +264,20 @@ class List(Node, list):
         return f"[{', '.join(map(lambda x: str(x), self))}]"
     
 
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        copy_instance = cls.__new__(cls)
+        memo[id(self)] = copy_instance # Add the object to memo to avoid infinite recursion (the object is referenced by its children)
+        
+        for i in range(len(self)):
+            el = list.__getitem__(self, i)
+            el_id = id(el)
+            copied_el = copy.deepcopy(el, memo)
+            copy_instance.append(copied_el)
+
+        return copy_instance
+
+
 @tag.register("!obj")
 class SingleObject(Node):
     """
@@ -308,7 +330,7 @@ class SingleObject(Node):
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, SingleObject): 
-            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+            raise Exception(f"Cannot compare {self} and {o}")
         return self._class_name == o._class_name and self._params == o._params
 
 

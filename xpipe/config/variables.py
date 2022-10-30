@@ -66,7 +66,7 @@ class Variable(Node):
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, Variable): 
-            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+            raise Exception(f"Cannot compare {self} and {o}")
         return self.value == o.value
     
 
@@ -75,7 +75,7 @@ class Variable(Node):
         
 
     def __repr__(self) -> str:
-        return f"{self.name} = Variable({self.value})"
+        return f"Variable(name='{self.name}', value={self.value})"
     
 
     def __hash__(self) -> int:
@@ -204,7 +204,7 @@ class FormatStrVariable(Variable):
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, FormatStrVariable): 
-            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+            raise Exception(f"Cannot compare {self} and {o}")
         return self.original_str == o.original_str
 
 
@@ -243,7 +243,7 @@ class ClassTag(Variable):
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, ClassTag): 
-            raise Exception(f"Cannot compare {self.__class__} and {o.__class__}")
+            raise Exception(f"Cannot compare {self} and {o}")
         return self.class_path == o.class_path
 
 

@@ -4,6 +4,7 @@ from os.path import dirname, realpath, join
 from xpipe.config import load_config, to_yaml, to_dict, load_config_from_str
 import numpy as np
 import yaml
+import copy
 
 class TestConfiguration(TestCase):
 
@@ -136,3 +137,14 @@ class TestConfiguration(TestCase):
         ref = self.conf.ref
         user = self.conf.user
         self.assertEqual(ref, user)
+    
+    def test_double_from(self):
+        self.assertEqual(self.conf.new_var(), 1)
+    
+    def test_triple_from(self):
+        self.assertEqual(self.conf.new_new_var(), 1)
+    
+    # ----------- Test deepcopy -----------
+    def test_deep_copy(self):
+        c = copy.deepcopy(self.conf)
+        self.assertEqual(c, self.conf)
