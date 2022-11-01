@@ -12,12 +12,13 @@ setup(
     long_description=long_description,
     long_description_content_type='text/x-rst',
     packages=find_packages(),
-    version = "1.1.0",
+    version = "1.1.1",
     description="Standardize your ML projects",
     author="Jules Tevissen",
     license="MIT",
     install_requires=[
-        "pyyaml"
+        "pyyaml",
+        "jinja2"
     ],
     python_requires=">=3.6",
     classifiers=[
