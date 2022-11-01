@@ -1,6 +1,6 @@
 
 from numpy import isin
-
+from typing import Optional
 
 def is_objects_list(name, config_dict):
     """Check if the given configuration is an objects list.
@@ -88,3 +88,19 @@ def valid_var_name(name : str):
         raise ValueError(f"Variable '{name}' must begin with an alphabetical caracter or an underscore.")
     
     return True
+
+
+def apply_jinja_templating(text : str, args : Optional[dict] = None):
+    """Apply jinja templating on 'text'
+
+    Args:
+        text (str): A jinja template to render
+        args (Optional[dict], optional): All needed arguments to render the template. Defaults to None.
+
+    Returns:
+        str: Rendered template
+    """
+    from jinja2 import Template
+    template = Template(text)
+    rendered_template = template.render(**(args or {}))
+    return rendered_template

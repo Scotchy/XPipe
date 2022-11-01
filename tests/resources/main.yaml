@@ -1,18 +1,15 @@
 #define numpy np
 
 !from :
-  - !include "/home/jules/dev/XPipe/tests/resources/include.yaml"
-  
-a: 
-- !include /home/jules/dev/XPipe/tests/resources/include.yaml
+  - !include simple_from.yaml
 
-include: !include /home/jules/dev/XPipe/tests/resources/include.yaml
+include: !include include.yaml
 
 obj_test: 
   !obj numpy.array: {object: [1, 2]}
 
 obj_include: 
-  !obj numpy.array: !include /home/jules/dev/XPipe/tests/resources/include_param.yaml
+  !obj numpy.array: !include include_param.yaml
 
 training:
   batch_size: 10
@@ -34,21 +31,18 @@ obj_config:
       b: 2
   
 user: !env USER
+
 str_fmt: !f "$USER home dir is $HOME"
-
-inc: !include "/home/jules/dev/XPipe/tests/resources/include.yaml"
-
-relative_inc: !include "./include.yaml"
-
-user_relative_inc: !include "~/dev/XPipe/tests/resources/include.yaml"
 
 np_array: !class numpy.array
 
 test_ref: !ref /training/batch_size
+
 ref_relative:
   value: 1
   ref_relative1:
     ref_relative2:
       value: !ref "../../value"
+
 ref_attr:
   conf_a: !ref /obj_config._params/conf/a

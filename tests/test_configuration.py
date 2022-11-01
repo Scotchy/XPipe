@@ -10,7 +10,13 @@ class TestConfiguration(TestCase):
 
     def setUp(self):
         dir_path = dirname(realpath(__file__))
-        self.conf = load_config(join(dir_path, "./resources/template.yaml"))
+        self.conf = load_config(join(dir_path, "./resources/main.yaml"))
+        self.conf_jinja = load_config(
+            join(dir_path, "./resources/jinja.yaml"), 
+            args = dict(
+                value = "value"
+            )
+        )
 
 
     def test_eq(self):
@@ -55,10 +61,10 @@ class TestConfiguration(TestCase):
     # ---------- Test includes ----------
 
     def test_include(self):
-        a = self.conf.inc.a()
+        a = self.conf.include.a()
         self.assertEqual(a, 1)
-        self.assertTrue(len(self.conf.inc.user()))
-        self.assertListEqual(self.conf.inc.inc.object(), [1,2,3,4])
+        self.assertTrue(len(self.conf.include.user()))
+        self.assertListEqual(self.conf.include.inc.object(), [1,2,3,4])
         
     
     def test_include_obj(self):
@@ -148,3 +154,7 @@ class TestConfiguration(TestCase):
     def test_deep_copy(self):
         c = copy.deepcopy(self.conf)
         self.assertEqual(c, self.conf)
+    
+    # ----------- Test Jinja -----------
+    def test_jinja(self):
+        self.assertEqual(self.conf_jinja.param(), "value")
