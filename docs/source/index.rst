@@ -7,6 +7,7 @@
    :maxdepth: 4
    :hidden: 
    
+   tags
    xpipe.config
    build_documentation
 
