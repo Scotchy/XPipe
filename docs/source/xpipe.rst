@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    xpipe.config
+   xpipe.template
 
 Module contents
 ---------------

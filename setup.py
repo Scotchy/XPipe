@@ -1,8 +1,5 @@
 from setuptools import find_packages, setup
-import os 
-
-# Source : MLflow repository https://github.com/mlflow/mlflow/blob/master/setup.py
-# Get a list of all files in the JS directory to include in our module
+import os
 
 with open("README.rst", "r") as fh:
     long_description = fh.read()

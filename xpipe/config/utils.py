@@ -1,5 +1,3 @@
-
-from numpy import isin
 from typing import Optional
 
 def is_objects_list(name, config_dict):

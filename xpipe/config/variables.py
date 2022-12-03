@@ -1,10 +1,8 @@
 from .node import Node
 from . import tag
-from . import config
 
 import os
 import string
-import yaml
 from .loader import load_class
 
 __all__ = [
