@@ -259,6 +259,6 @@ Use it in python
     batch_size = conf.experiment.absolute_ref_to_batch_size() # is equal to 100 
     batch_size = conf.experiment.relative_ref_to_cpu() # is equal to 2
 
- 
+
     
 

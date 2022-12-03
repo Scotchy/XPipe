@@ -1,17 +1,12 @@
-Welcome to XPipe's documentation !
-##################################
-
 .. image:: https://img.shields.io/badge/python-%3E%3D%203.5-blue
   
 Introduction
 ************
 
 XPipe is a library that I started developping in December 2020 for my personal use.
-As it might be useful for other people, I decided to publish the code as an open source project.
 
-**Configuration files** are a big concern in data science field. 
 XPipe facilitates your work by automatically loading python objects from a yaml configuration. 
-You can also easily include other yaml files into another.
+You can also easily include yaml files into another one.
 
 It is an interesting tool to improve your workflow, make it reproducible and make your configurations more readable.
 
@@ -23,13 +18,14 @@ Getting started
   pip install xpipe
 
 
-Documentation (work in progress): https://x-pipe.readthedocs.io/en/latest/#
+Documentation: https://x-pipe.readthedocs.io/en/latest/
 
 Configuration files
 *******************
 
-Here is a simple example of how to use yaml configuration files to seamlessly load needed objects to run your experiments.
-  
+XPipe leverages yaml tag power to seamlessly load needed objects and more.
+Here is a simple example:
+
 .. code-block:: yaml
 
   training:
@@ -81,4 +77,6 @@ Then you can load the configuration file:
   scheduler = conf.training.scheduler(optimizer=optimizer)
 
 
-Try by yourself the exemples in the `examples` folder.
+See a description of all tags `here <https://x-pipe.readthedocs.io/en/latest/tags.html>`_
+
+Try by yourself the examples in the `examples` folder.
