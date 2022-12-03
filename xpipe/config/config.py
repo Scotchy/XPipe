@@ -1,44 +1,45 @@
-from distutils.command.config import config
-from email.mime import base
-from . import objects as objects
-import yaml
-from . import tag
+from . import objects, tag, utils
 import yaml
 import copy
+from typing import Optional
 
 """
 This module exposes the main functions of the xpipe library.
 """
 
-def load_yaml(config_file : str):
+def load_yaml(config_file : str, args : Optional[dict] = None):
     """Loads a configuration file and return a dictionary. This loader is able to load custom tags.
 
     Args:
         config_file (str): The path of the yaml config file
+        args (dict): Dictionary of arguments that will be passed to jinja
     
     Returns:
         dict: A dictionary containing a representation of the configuration.
     """
     tag.save_tags(yaml) # Set tags constructors and representers
     with open(config_file, "r") as stream:
-        yaml_dict = yaml.safe_load(stream)
+        rendered_template_conf = utils.apply_jinja_templating(stream.read(), args)
+
+    yaml_dict = yaml.safe_load(rendered_template_conf)
     return yaml_dict
 
 
-def load_config(config_file : str):
+def load_config(config_file : str, args : Optional[dict] = None):
     """Loads a configuration file and return a Config Object which can instantiate the wanted objects.
 
     Args:
         config_file (str): The path of the yaml config file
+        args (dict): Dictionary of arguments that will be passed to jinja
     
     Returns:
         Config: A Config object
     """
-    yaml_dict = load_yaml(config_file)
+    yaml_dict = load_yaml(config_file, args)
     return objects.construct("__root__", yaml_dict, parent=None, path=config_file)
 
 
-def load_config_from_str(conf: str, base_path=None):
+def load_config_from_str(conf: str, args : Optional[dict] = None, base_path : Optional[str] = None):
     """Loads a configuration from a string and return a Config Object which can instantiate the wanted objects.
 
     Args:
@@ -49,7 +50,8 @@ def load_config_from_str(conf: str, base_path=None):
         Config: A Config object
     """
     tag.save_tags(yaml) # Set tags constructors and representers
-    yaml_dict = yaml.safe_load(conf)
+    rendered_template_conf = utils.apply_jinja_templating(conf, args)
+    yaml_dict = yaml.safe_load(rendered_template_conf)
     return objects.construct("__root__", yaml_dict, parent=None, path=base_path)
 
 
@@ -114,9 +116,12 @@ def merge(*confs, inplace=False):
     if len(confs) == 1:
         return confs[0]
     
+    if not inplace:
+        confs = (objects.Config(),) + confs
+
     merged_conf = None
     for conf in confs[1:]:
-        merged_conf = _merge_aux(confs[0], conf, inplace=inplace)
+        merged_conf = _merge_aux(confs[0], conf, inplace=True)
     
     return merged_conf
 

@@ -22,7 +22,7 @@ copyright = '2021, Jules Tevissen'
 author = 'Jules Tevissen'
 
 # The full version, including alpha/beta/rc tags
-release = "1.0.0"
+release = "1.1.1"
 autodoc_member_order = 'bysource' # Display function doc in the same order as in source code
 
 # -- General configuration ---------------------------------------------------

@@ -1,0 +1,4 @@
+!from :
+  - !include "triple_from.yaml"
+  
+new_var: 1
