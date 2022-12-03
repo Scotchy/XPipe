@@ -4,9 +4,9 @@ import importlib
 def parse_path(class_path, aliases=None):
     """Get the path of a class from a given path using importlib library. If the path first part is an alias, the path is replaced with the real path.
     exemple:
-        class_path = "my_alias.Class"
-        aliases = {"my_alias": "package.module"}
-        return "package.module.Class"
+    class_path = "my_alias.Class"
+    aliases = {"my_alias": "package.module"}
+    return "package.module.Class"
 
     Args:
         class_path (str): Class path (e.g. "package.module.Class")

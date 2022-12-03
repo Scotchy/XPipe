@@ -116,16 +116,6 @@ class EnvVariable(Variable):
         else:
             raise EnvironmentError(f"Environment variable '{value}' is not defined.")
         super(EnvVariable, self).__init__(value=value)
-    
-
-    @classmethod
-    def from_yaml(cls, loader, node):
-        return EnvVariable(node.value)
-
-
-    @classmethod
-    def to_yaml(cls, dumper, data):
-        return dumper.represent_scalar(data)
 
 
     def __repr__(self) -> str:
@@ -144,6 +134,7 @@ class ReferenceVariable(Variable):
         self.var_path = value
         super(ReferenceVariable, self).__init__(value=value)
 
+
     @property
     def value(self):
         from .config import get_base, get_node
@@ -160,16 +151,6 @@ class ReferenceVariable(Variable):
         if isinstance(node, Variable):
             return node()
         return node
-
-
-    @classmethod
-    def from_yaml(cls, loader, node):
-        return ReferenceVariable(node.value)
-
-
-    @classmethod
-    def to_yaml(cls, dumper, data):
-        return dumper.represent_scalar(data)
 
 
     def __repr__(self) -> str:
@@ -190,16 +171,6 @@ class FormatStrVariable(Variable):
             raise EnvironmentError(f"Environment variable '{str(e)}' is not defined in formatted string.")
         self.str = value
         super(FormatStrVariable, self).__init__(value=value)
-    
-    
-    @classmethod
-    def from_yaml(cls, loader, node):
-        return FormatStrVariable(node.value)
-
-
-    @classmethod
-    def to_yaml(cls, dumper, data):
-        return dumper.represent_scalar(data)
 
 
     def __eq__(self, o) -> bool:
@@ -221,16 +192,6 @@ class ClassTag(Variable):
         self.class_path = class_path
         value = load_class(class_path)
         super(ClassTag, self).__init__(value=value)
-    
-
-    @classmethod
-    def from_yaml(cls, loader, node):
-        return ClassTag(node.value)
-
-
-    @classmethod
-    def to_yaml(cls, dumper, data):
-        return dumper.represent_scalar(data)
 
 
     def _xpipe_to_yaml(self, n_indents=0):

@@ -7,10 +7,10 @@
    :maxdepth: 4
    :hidden: 
 
-   Welcome to XPipe's documentation !
    install
+   xpipe
    xpipe.config
-   build
+   build_documentation
 
 Indices and tables
 ==================
@@ -18,5 +18,8 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+Welcome to XPipe's documentation !
+----------------------------------
 
 .. include:: ../../README.rst
