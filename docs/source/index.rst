@@ -6,9 +6,7 @@
 .. toctree::
    :maxdepth: 4
    :hidden: 
-
-   install
-   xpipe
+   
    xpipe.config
    build_documentation
 
