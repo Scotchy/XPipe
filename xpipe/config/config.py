@@ -1,4 +1,4 @@
-from . import objects, tag, utils
+from . import objects, tag, utils, variables
 import yaml
 import copy
 from typing import Optional
@@ -74,9 +74,38 @@ def to_dict(conf):
         conf (Config): A Config object
 
     Returns:
-        dict: A multi-level dictionary containing a representation ogf the configuration.
+        dict: A multi-level dictionary containing a representation of the configuration.
     """
     return conf._xpipe_to_dict()
+
+
+def to_objects(conf):
+    """Converts a Config object to a dictionary of real python objects.
+
+    Args:
+        conf (Config): A Config object
+
+    Returns:
+        dict: A multi-level dictionary containing a representation of the configuration.
+    """
+
+    if isinstance(conf, objects.Config):
+
+        result = {}
+        for key, value in conf.items():
+            result[key] = to_objects(value)
+
+    elif isinstance(conf, list):
+        result = []
+        for v in conf:
+            result.append(to_objects(v))
+    else:
+        if isinstance(conf, variables.Variable):
+            result = conf()
+        else:
+            result = conf
+
+    return result
 
 
 def _merge_aux(default_config, overwrite_config, inplace=False):

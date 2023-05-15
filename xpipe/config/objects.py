@@ -323,7 +323,7 @@ class SingleObject(Node):
         module = importlib.import_module(self._module)
         class_object = getattr(module, self._class_name)
         return class_object(
-            **config.to_dict(self._params), 
+            **config.to_objects(self._params),  
             **args
         )
 
